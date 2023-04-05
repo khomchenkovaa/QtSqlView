@@ -136,7 +136,7 @@ void MainWindow::on_action_About_triggered()
 
 void MainWindow::on_action_VisitWebsite_triggered()
 {
-    QUrl url("http://sniip.ru");
+    QUrl url("https://github.com/khomchenkovaa/QtSqlView");
 
 #ifdef Q_WS_WIN
     QT_WA({ ShellExecute(0, 0, (TCHAR*)QString(url.toEncoded()).utf16(), 0, 0, SW_SHOWNORMAL); },
