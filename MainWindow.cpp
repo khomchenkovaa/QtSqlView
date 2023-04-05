@@ -3,6 +3,7 @@
 
 #include "sqlhighlighter.h"
 #include "ConnectionDlg.h"
+#include "xcsvmodel.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -253,6 +254,13 @@ void MainWindow::on_action_AddRow_triggered()
 
 /******************************************************************/
 
+void MainWindow::on_addRowButton_clicked()
+{
+    on_action_AddRow_triggered();
+}
+
+/******************************************************************/
+
 void MainWindow::on_action_DelRow_triggered()
 {
     if (!datatablemodel) return;
@@ -266,10 +274,41 @@ void MainWindow::on_action_DelRow_triggered()
 
 /******************************************************************/
 
+void MainWindow::on_delRowButton_clicked()
+{
+    on_action_DelRow_triggered();
+}
+
+/******************************************************************/
+
+void MainWindow::on_copyDataButton_clicked()
+{
+    if (!datatablemodel) return;
+
+    QItemSelectionModel *selmodel = ui->dataTable->selectionModel();
+    saveToClipboard(datatablemodel->query(), selmodel->selection(), QClipboard::Clipboard);
+}
+
+/******************************************************************/
+
+void MainWindow::on_toCsvDataButton_clicked()
+{
+    exportToCsv(datatablemodel);
+}
+
+/******************************************************************/
+
 void MainWindow::on_action_RefreshData_triggered()
 {
     if (!datatablemodel) return;
     datatablemodel->select();
+}
+
+/******************************************************************/
+
+void MainWindow::on_refreshDataButton_clicked()
+{
+    on_action_RefreshData_triggered();
 }
 
 /******************************************************************/
@@ -282,38 +321,17 @@ void MainWindow::on_action_SaveData_triggered()
 
 /******************************************************************/
 
+void MainWindow::on_saveDataButton_clicked()
+{
+    on_action_SaveData_triggered();
+}
+
+/******************************************************************/
+
 void MainWindow::on_action_RevertData_triggered()
 {
     if (!datatablemodel) return;
     datatablemodel->revertAll();
-}
-
-/******************************************************************/
-
-void MainWindow::on_addRowButton_clicked()
-{
-    on_action_AddRow_triggered();
-}
-
-/******************************************************************/
-
-void MainWindow::on_delRowButton_clicked()
-{
-    on_action_DelRow_triggered();
-}
-
-/******************************************************************/
-
-void MainWindow::on_refreshDataButton_clicked()
-{
-    on_action_RefreshData_triggered();
-}
-
-/******************************************************************/
-
-void MainWindow::on_saveDataButton_clicked()
-{
-    on_action_SaveData_triggered();
 }
 
 /******************************************************************/
@@ -339,16 +357,6 @@ void MainWindow::slot_dataTable_horizontalHeader_sectionDoubleClicked(int logica
     }
 
     datatablemodel->sort(logicalIndex, order);
-}
-
-/******************************************************************/
-
-void MainWindow::on_copyDataButton_clicked()
-{
-    if (!datatablemodel) return;
-
-    QItemSelectionModel *selmodel = ui->dataTable->selectionModel();
-    saveToClipboard(datatablemodel->query(), selmodel->selection(), QClipboard::Clipboard);
 }
 
 /******************************************************************/
@@ -408,6 +416,13 @@ void MainWindow::on_copyQueryDataButton_clicked()
 {
     QItemSelectionModel *selmodel = ui->queryTable->selectionModel();
     saveToClipboard(userquerymodel.query(), selmodel->selection(), QClipboard::Clipboard);
+}
+
+/******************************************************************/
+
+void MainWindow::on_toScvQueryButton_clicked()
+{
+    exportToCsv(&userquerymodel);
 }
 
 /******************************************************************/
@@ -494,6 +509,22 @@ void MainWindow::saveToClipboard(QSqlQuery query, const QItemSelection &sellist,
 bool MainWindow::launch(const QUrl &url, const QString &client)
 {
     return (QProcess::startDetached(client + " " + url.toEncoded()));
+}
+
+/******************************************************************/
+
+void MainWindow::exportToCsv(QAbstractItemModel *model)
+{
+    QString filters("CSV files (*.csv);;All files (*.*)");
+    QString defaultFilter("CSV files (*.csv)");
+    QString fileName = QFileDialog::getSaveFileName(Q_NULLPTR, tr("Export to CSV-file"),
+                                                    QCoreApplication::applicationDirPath(),
+                                                    filters, &defaultFilter);
+    if (fileName.isEmpty()) return;
+
+    XCsvModel csvModel;
+    csvModel.importFromModel(model);
+    csvModel.toCSV(fileName, true);
 }
 
 /******************************************************************/

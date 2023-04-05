@@ -31,7 +31,7 @@ public:
 
     virtual void closeEvent(QCloseEvent *);
 
-public slots:
+private slots:
     // *** Menu Actions ***
     void on_action_AddConnection_triggered();
     void on_action_EditConnection_triggered();
@@ -51,30 +51,31 @@ public slots:
     // *** Data Table Tab ***
     void show_dataTable_contextMenu(const QPoint &position);
     void on_action_AddRow_triggered();
-    void on_action_DelRow_triggered();
-    void on_action_RefreshData_triggered();
-    void on_action_SaveData_triggered();
-    void on_action_RevertData_triggered();
     void on_addRowButton_clicked();
+    void on_action_DelRow_triggered();
     void on_delRowButton_clicked();
+    void on_copyDataButton_clicked();
+    void on_toCsvDataButton_clicked();
+    void on_action_RefreshData_triggered();
     void on_refreshDataButton_clicked();
+    void on_action_SaveData_triggered();
     void on_saveDataButton_clicked();
+    void on_action_RevertData_triggered();
     void on_revertDataButton_clicked();
     void slot_dataTable_horizontalHeader_sectionDoubleClicked(int logicalIndex);
-    void on_copyDataButton_clicked();
 
     // *** Query Tab ***
     void on_goQueryButton_clicked();
     void on_copyQueryDataButton_clicked();
+    void on_toScvQueryButton_clicked();
     void on_clearQueryButton_clicked();
     void on_loadQueryButton_clicked();
     void on_saveQueryButton_clicked();
 
-public:
-    static void saveToClipboard(QSqlQuery query, const QItemSelection &sellist, QClipboard::Mode mode);
-
 private:
+    static void saveToClipboard(QSqlQuery query, const QItemSelection &sellist, QClipboard::Mode mode);
     static bool launch(const QUrl &url, const QString &client);
+    static void exportToCsv(QAbstractItemModel *model);
 
 public:
     DbListModel	    dblist;

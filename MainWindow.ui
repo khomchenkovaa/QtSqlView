@@ -56,7 +56,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tab1">
         <attribute name="icon">
@@ -118,8 +118,8 @@
               <string>Add Row</string>
              </property>
              <property name="icon">
-              <iconset resource="QtSqlView.qrc">
-               <normaloff>:/img/addrow.png</normaloff>:/img/addrow.png</iconset>
+              <iconset theme="list-add">
+               <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>
            </item>
@@ -132,8 +132,8 @@
               <string>Delete Row</string>
              </property>
              <property name="icon">
-              <iconset resource="QtSqlView.qrc">
-               <normaloff>:/img/delrow.png</normaloff>:/img/delrow.png</iconset>
+              <iconset theme="list-remove">
+               <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>
            </item>
@@ -146,8 +146,22 @@
               <string>Copy Selected Cells</string>
              </property>
              <property name="icon">
-              <iconset resource="QtSqlView.qrc">
-               <normaloff>:/img/copyedit.png</normaloff>:/img/copyedit.png</iconset>
+              <iconset theme="edit-copy">
+               <normaloff>.</normaloff>.</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toCsvDataButton">
+             <property name="toolTip">
+              <string>Export to CSV</string>
+             </property>
+             <property name="text">
+              <string>Export to CSV</string>
+             </property>
+             <property name="icon">
+              <iconset theme="x-office-spreadsheet">
+               <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>
            </item>
@@ -173,8 +187,8 @@
               <string>Refresh</string>
              </property>
              <property name="icon">
-              <iconset resource="QtSqlView.qrc">
-               <normaloff>:/img/refresh.png</normaloff>:/img/refresh.png</iconset>
+              <iconset theme="view-refresh">
+               <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>
            </item>
@@ -187,8 +201,8 @@
               <string>Save Changes</string>
              </property>
              <property name="icon">
-              <iconset resource="QtSqlView.qrc">
-               <normaloff>:/img/edit.png</normaloff>:/img/edit.png</iconset>
+              <iconset theme="document-save">
+               <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>
            </item>
@@ -201,8 +215,8 @@
               <string>Revert Changes</string>
              </property>
              <property name="icon">
-              <iconset resource="QtSqlView.qrc">
-               <normaloff>:/img/trash.png</normaloff>:/img/trash.png</iconset>
+              <iconset theme="document-revert">
+               <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>
            </item>
@@ -342,8 +356,22 @@
                   <string>Copy Selected Cells</string>
                  </property>
                  <property name="icon">
-                  <iconset resource="QtSqlView.qrc">
-                   <normaloff>:/img/copyedit.png</normaloff>:/img/copyedit.png</iconset>
+                  <iconset theme="edit-copy">
+                   <normaloff>.</normaloff>.</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="toScvQueryButton">
+                 <property name="toolTip">
+                  <string>Export to CSV</string>
+                 </property>
+                 <property name="text">
+                  <string>Export to CSV</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="x-office-spreadsheet">
+                   <normaloff>.</normaloff>.</iconset>
                  </property>
                 </widget>
                </item>
@@ -369,8 +397,8 @@
                   <string>Clear Query</string>
                  </property>
                  <property name="icon">
-                  <iconset resource="QtSqlView.qrc">
-                   <normaloff>:/img/trash.png</normaloff>:/img/trash.png</iconset>
+                  <iconset theme="edit-clear">
+                   <normaloff>.</normaloff>.</iconset>
                  </property>
                 </widget>
                </item>
@@ -383,8 +411,8 @@
                   <string>Load Query</string>
                  </property>
                  <property name="icon">
-                  <iconset resource="QtSqlView.qrc">
-                   <normaloff>:/img/fileload.png</normaloff>:/img/fileload.png</iconset>
+                  <iconset theme="document-open">
+                   <normaloff>.</normaloff>.</iconset>
                  </property>
                 </widget>
                </item>
@@ -397,8 +425,8 @@
                   <string>Save Query to Text File</string>
                  </property>
                  <property name="icon">
-                  <iconset resource="QtSqlView.qrc">
-                   <normaloff>:/img/filesave.png</normaloff>:/img/filesave.png</iconset>
+                  <iconset theme="document-save">
+                   <normaloff>.</normaloff>.</iconset>
                  </property>
                 </widget>
                </item>
@@ -530,13 +558,13 @@
      <normaloff>:/img/conn.png</normaloff>:/img/conn.png</iconset>
    </property>
    <property name="text">
-    <string>Edit Connection</string>
+    <string>Edit &amp;Connection</string>
    </property>
   </action>
   <action name="action_AddRow">
    <property name="icon">
-    <iconset resource="QtSqlView.qrc">
-     <normaloff>:/img/addrow.png</normaloff>:/img/addrow.png</iconset>
+    <iconset theme="list-add">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Add Row</string>
@@ -544,8 +572,8 @@
   </action>
   <action name="action_DelRow">
    <property name="icon">
-    <iconset resource="QtSqlView.qrc">
-     <normaloff>:/img/delrow.png</normaloff>:/img/delrow.png</iconset>
+    <iconset theme="list-remove">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Delete Row</string>
@@ -553,8 +581,8 @@
   </action>
   <action name="action_RevertData">
    <property name="icon">
-    <iconset resource="QtSqlView.qrc">
-     <normaloff>:/img/trash.png</normaloff>:/img/trash.png</iconset>
+    <iconset theme="document-revert">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Revert Changes</string>
@@ -562,8 +590,8 @@
   </action>
   <action name="action_SaveData">
    <property name="icon">
-    <iconset resource="QtSqlView.qrc">
-     <normaloff>:/img/edit.png</normaloff>:/img/edit.png</iconset>
+    <iconset theme="document-save">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Save Changes</string>
@@ -576,8 +604,8 @@
   </action>
   <action name="action_RefreshData">
    <property name="icon">
-    <iconset resource="QtSqlView.qrc">
-     <normaloff>:/img/refresh.png</normaloff>:/img/refresh.png</iconset>
+    <iconset theme="view-refresh">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Refresh Data</string>
@@ -589,12 +617,12 @@
      <normaloff>:/img/refresh.png</normaloff>:/img/refresh.png</iconset>
    </property>
    <property name="text">
-    <string>Refresh Table List</string>
+    <string>Refresh &amp;Table List</string>
    </property>
   </action>
   <action name="action_AboutQt">
    <property name="text">
-    <string>About Qt</string>
+    <string>About &amp;Qt</string>
    </property>
   </action>
   <action name="action_VisitWebsite">
@@ -603,7 +631,7 @@
      <normaloff>:/img/world.png</normaloff>:/img/world.png</iconset>
    </property>
    <property name="text">
-    <string>Visit Website</string>
+    <string>&amp;Visit Website</string>
    </property>
   </action>
  </widget>
