@@ -76,6 +76,8 @@ private:
     static void saveToClipboard(QSqlQuery query, const QItemSelection &sellist, QClipboard::Mode mode);
     static bool launch(const QUrl &url, const QString &client);
     static void exportToCsv(QAbstractItemModel *model);
+    static QStringList findBindings(const QString &sql);
+    static QVariantMap setBindValues(const QStringList &params);
 
 public:
     DbListModel	    dblist;

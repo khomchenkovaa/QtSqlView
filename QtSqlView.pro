@@ -24,11 +24,13 @@ include("syntax/syntax.pri")
 SOURCES += \
     ConnectionDlg.cpp \
     MainWindow.cpp \
+    QueryParamDlg.cpp \
     main.cpp
 
 HEADERS += \
     ConnectionDlg.h \
-    MainWindow.h
+    MainWindow.h \
+    QueryParamDlg.h
 
 FORMS += \
     ConnectionDlg.ui \

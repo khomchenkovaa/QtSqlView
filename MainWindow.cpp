@@ -2,8 +2,10 @@
 #include "ui_MainWindow.h"
 
 #include "sqlhighlighter.h"
-#include "ConnectionDlg.h"
 #include "xcsvmodel.h"
+
+#include "ConnectionDlg.h"
+#include "QueryParamDlg.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -363,6 +365,11 @@ void MainWindow::slot_dataTable_horizontalHeader_sectionDoubleClicked(int logica
 
 void MainWindow::on_goQueryButton_clicked()
 {
+    // clear all
+    userquerymodel.clear();
+    ui->queryResultText->clear();
+
+    // check connections
     DbConnection *dbc = dblist.getDbConnection( ui->treeDbList->currentIndex() );
 
     if (!dbc) {
@@ -383,19 +390,22 @@ void MainWindow::on_goQueryButton_clicked()
         }
     }
 
-    // initialize new sql query object
-    userquerymodel.setQuery(ui->editQuery->toPlainText(), dbc->db);
+    // prepare for bindings
+    QString sqlText = ui->editQuery->toPlainText();
+    QStringList params = findBindings(sqlText);
+    QVariantMap bindings = setBindValues(params);
 
-    if (userquerymodel.lastError().isValid()) {
-        ui->queryTable->hide();
-        ui->queryResultText->show();
-        ui->queryResultText->setPlainText(QString("%1\n%2")
-                                      .arg(userquerymodel.lastError().driverText(),
-                                           userquerymodel.lastError().databaseText()));
-    } else {
-        // query was successful
-
-        if (userquerymodel.query().isSelect()) {
+    // initialize new sql query object   
+    QSqlQuery query(dbc->db);
+    query.prepare(sqlText);
+    QMapIterator<QString, QVariant> i(bindings);
+    while (i.hasNext()) {
+        i.next();
+        query.bindValue(i.key(), i.value());
+    }
+    if (query.exec()) {
+        if (query.isSelect()) {
+            userquerymodel.setQuery(query);
             ui->queryResultText->hide();
             ui->queryTable->show();
             ui->queryTable->resizeColumnsToContents();
@@ -405,8 +415,14 @@ void MainWindow::on_goQueryButton_clicked()
             ui->queryResultText->show();
 
             ui->queryResultText->setPlainText(QString("%1 rows affected.")
-                                          .arg( userquerymodel.query().numRowsAffected() ));
+                                          .arg( query.numRowsAffected() ));
         }
+    } else {
+        ui->queryTable->hide();
+        ui->queryResultText->show();
+        ui->queryResultText->setPlainText(QString("%1\n%2")
+                                      .arg(query.lastError().driverText(),
+                                           query.lastError().databaseText()));
     }
 }
 
@@ -525,6 +541,39 @@ void MainWindow::exportToCsv(QAbstractItemModel *model)
     XCsvModel csvModel;
     csvModel.importFromModel(model);
     csvModel.toCSV(fileName, true);
+}
+
+/******************************************************************/
+
+QStringList MainWindow::findBindings(const QString &sql)
+{
+    QStringList result;
+    QRegularExpression re(":[\\d\\w]+");
+    QRegularExpressionMatchIterator i = re.globalMatch(sql);
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        QString word = match.captured(0);
+        if (!result.contains(word)) {
+            result << word;
+        }
+    }
+    return result;
+}
+
+/******************************************************************/
+
+QVariantMap MainWindow::setBindValues(const QStringList &params)
+{
+    if (params.isEmpty()) {
+        return QVariantMap();
+    }
+
+    QueryParamDlg dlg(params);
+    if (dlg.exec()) {
+        return dlg.bindings();
+    }
+
+    return QVariantMap();
 }
 
 /******************************************************************/
