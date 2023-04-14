@@ -376,6 +376,16 @@
                 </widget>
                </item>
                <item>
+                <widget class="QToolButton" name="setHeadersButton">
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="insert-text"/>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <spacer>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>

@@ -25,12 +25,14 @@ SOURCES += \
     ConnectionDlg.cpp \
     MainWindow.cpp \
     QueryParamDlg.cpp \
+    TableHeadersDlg.cpp \
     main.cpp
 
 HEADERS += \
     ConnectionDlg.h \
     MainWindow.h \
-    QueryParamDlg.h
+    QueryParamDlg.h \
+    TableHeadersDlg.h
 
 FORMS += \
     ConnectionDlg.ui \

@@ -54,12 +54,11 @@ void QueryParamDlg::setupUI()
     setWindowTitle(tr("Enter binds"));
 
     ui_Grid = new QGridLayout();
-    int row = 0;
-    ui_Grid->addWidget(new QLabel(tr("Name"), this), row, NameColumn);
-    ui_Grid->addWidget(new QLabel(tr("Type"), this), row, TypeColumn);
-    ui_Grid->addWidget(new QLabel(tr("Value"), this), row, ValueColumn);
+    ui_Grid->addWidget(new QLabel(tr("Name"), this), 0, NameColumn);
+    ui_Grid->addWidget(new QLabel(tr("Type"), this), 0, TypeColumn);
+    ui_Grid->addWidget(new QLabel(tr("Value"), this), 0, ValueColumn);
     for (QString param : m_Params) {
-        row++;
+        const int row = ui_Grid->rowCount();
         ui_Grid->addWidget(new QLabel(param, this), row, NameColumn);
         QComboBox *cmbType = createCmb(param, row, this);
         ui_Grid->addWidget(cmbType, row, TypeColumn);

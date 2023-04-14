@@ -6,11 +6,15 @@
 
 #include "ConnectionDlg.h"
 #include "QueryParamDlg.h"
+#include "TableHeadersDlg.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTextStream>
 #include <QProcess>
+
+#include <QSqlRecord>
+#include <QSqlField>
 
 #include <QDebug>
 
@@ -439,6 +443,32 @@ void MainWindow::on_copyQueryDataButton_clicked()
 void MainWindow::on_toScvQueryButton_clicked()
 {
     exportToCsv(&userquerymodel);
+}
+
+/******************************************************************/
+
+void MainWindow::on_setHeadersButton_clicked()
+{
+    QSqlRecord rec = userquerymodel.record();
+    if (rec.isEmpty()) {
+        return;
+    }
+    QStringList fields;
+    for (int i=0; i < rec.count(); ++i) {
+        fields << rec.field(i).name();
+    }
+    QStringList headers;
+    for (int i=0; i < userquerymodel.columnCount(); ++i) {
+        headers << userquerymodel.headerData(i, Qt::Horizontal).toString();
+    }
+    TableHeadersDlg dlg(fields);
+    dlg.setHeaders(headers);
+    if (dlg.exec() == QDialog::Accepted) {
+        headers = dlg.headers();
+        for (int i=0; i < headers.size(); ++i) {
+            userquerymodel.setHeaderData(i, Qt::Horizontal, headers.at(i));
+        }
+    }
 }
 
 /******************************************************************/

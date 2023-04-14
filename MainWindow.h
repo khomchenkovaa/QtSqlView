@@ -68,6 +68,7 @@ private slots:
     void on_goQueryButton_clicked();
     void on_copyQueryDataButton_clicked();
     void on_toScvQueryButton_clicked();
+    void on_setHeadersButton_clicked();
     void on_clearQueryButton_clicked();
     void on_loadQueryButton_clicked();
     void on_saveQueryButton_clicked();
