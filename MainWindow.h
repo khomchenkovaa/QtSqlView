@@ -17,6 +17,10 @@
 #include <intshcut.h>
 #endif
 
+QT_BEGIN_NAMESPACE
+class QTextCursor;
+QT_END_NAMESPACE
+
 namespace Ui {
 class MainWindow;
 }
@@ -69,6 +73,7 @@ private slots:
     void on_copyQueryDataButton_clicked();
     void on_toScvQueryButton_clicked();
     void on_setHeadersButton_clicked();
+    void on_printButton_clicked();
     void on_clearQueryButton_clicked();
     void on_loadQueryButton_clicked();
     void on_saveQueryButton_clicked();
@@ -79,6 +84,7 @@ private:
     static void exportToCsv(QAbstractItemModel *model);
     static QStringList findBindings(const QString &sql);
     static QVariantMap setBindValues(const QStringList &params);
+    static void printTable(QTextCursor *cursor, QAbstractItemModel *model);
 
 public:
     DbListModel	    dblist;

@@ -381,7 +381,18 @@
                   <string>...</string>
                  </property>
                  <property name="icon">
-                  <iconset theme="insert-text"/>
+                  <iconset theme="insert-text">
+                   <normaloff>.</normaloff>.</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="printButton">
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="printer"/>
                  </property>
                 </widget>
                </item>

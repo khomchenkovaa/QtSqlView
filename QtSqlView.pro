@@ -26,17 +26,20 @@ SOURCES += \
     MainWindow.cpp \
     QueryParamDlg.cpp \
     TableHeadersDlg.cpp \
-    main.cpp
+    main.cpp \
+    printtemplatedlg.cpp
 
 HEADERS += \
     ConnectionDlg.h \
     MainWindow.h \
     QueryParamDlg.h \
-    TableHeadersDlg.h
+    TableHeadersDlg.h \
+    printtemplatedlg.h
 
 FORMS += \
     ConnectionDlg.ui \
-    MainWindow.ui
+    MainWindow.ui \
+    printtemplatedlg.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

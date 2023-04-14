@@ -7,6 +7,7 @@
 #include "ConnectionDlg.h"
 #include "QueryParamDlg.h"
 #include "TableHeadersDlg.h"
+#include "printtemplatedlg.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -15,6 +16,13 @@
 
 #include <QSqlRecord>
 #include <QSqlField>
+
+#include <QTextTable>
+#include <QTextDocument>
+
+#include <QtPrintSupport/QPrinter>
+#include <QtPrintSupport/QPrintDialog>
+#include <QtPrintSupport/QPrintPreviewDialog>
 
 #include <QDebug>
 
@@ -473,6 +481,46 @@ void MainWindow::on_setHeadersButton_clicked()
 
 /******************************************************************/
 
+void MainWindow::on_printButton_clicked()
+{
+    PrintTemplateDlg dlg;
+    if (dlg.exec() == QDialog::Rejected) {
+        return;
+    }
+    const QString title = dlg.title();
+    const QString header = dlg.header();
+    const QString footer = dlg.footer();
+
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setFullPage( true );
+    QPrintPreviewDialog preview(&printer, this);
+    preview.setWindowFlags ( Qt::Window );
+    connect(&preview, &QPrintPreviewDialog::paintRequested,
+            this, [this, title, header, footer](QPrinter *printer){
+        QScopedPointer<QTextDocument> document(new QTextDocument());
+        QTextCursor cursor(document.data());
+        if (!title.isEmpty()) {
+            cursor.insertHtml("<h1 align=\"center\">" + title + "</h1>");
+            cursor.insertBlock();
+        }
+        if (!header.isEmpty()) {
+            cursor.insertHtml(header);
+            cursor.insertBlock();
+        }
+        printTable(&cursor, &userquerymodel);
+        if (!footer.isEmpty()) {
+            cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+            cursor.insertBlock();
+            cursor.insertHtml(footer);
+            cursor.insertBlock();
+        }
+        document->print(printer);
+    });
+    preview.exec();
+}
+
+/******************************************************************/
+
 void MainWindow::on_clearQueryButton_clicked()
 {
     ui->editQuery->clear();
@@ -604,6 +652,33 @@ QVariantMap MainWindow::setBindValues(const QStringList &params)
     }
 
     return QVariantMap();
+}
+
+/******************************************************************/
+
+void MainWindow::printTable(QTextCursor *cursor, QAbstractItemModel *model) {
+    cursor->clearSelection();
+    cursor->movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+
+    const int rows = model->rowCount();
+    const int cols = model->columnCount();
+
+    QTextTable* table = cursor->insertTable(rows+1, cols);
+    // print header
+    for (int j=0; j<cols; ++j) {
+        auto pos = table->cellAt(0, j).firstCursorPosition();
+        pos.insertHtml("<p align=\"center\"><b>" +
+                       model->headerData(j, Qt::Horizontal).toString() +
+                       "</b>");
+    }
+    // print data
+    for (int i=0; i<rows; ++i) {
+        for (int j=0; j<cols; ++j) {
+            auto pos = table->cellAt(i+1, j).firstCursorPosition();
+            QModelIndex idx = model->index(i, j);
+            pos.insertHtml(model->data(idx).toString());
+        }
+    }
 }
 
 /******************************************************************/
