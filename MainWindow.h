@@ -7,6 +7,7 @@
 #include <QMainWindow>
 #include <QClipboard>
 #include <QItemSelection>
+#include <QTextDocument>
 
 #include <QSqlTableModel>
 #include <QSqlQuery>
@@ -71,9 +72,10 @@ private slots:
     // *** Query Tab ***
     void on_goQueryButton_clicked();
     void on_copyQueryDataButton_clicked();
-    void on_toScvQueryButton_clicked();
+    void on_toScvButton_clicked();
     void on_setHeadersButton_clicked();
     void on_printButton_clicked();
+    void on_toPdfButton_clicked();
     void on_clearQueryButton_clicked();
     void on_loadQueryButton_clicked();
     void on_saveQueryButton_clicked();
@@ -84,6 +86,7 @@ private:
     static void exportToCsv(QAbstractItemModel *model);
     static QStringList findBindings(const QString &sql);
     static QVariantMap setBindValues(const QStringList &params);
+    static QSharedPointer<QTextDocument> createSimpleReport(const QString &title, const QString &header, const QString &footer, QAbstractItemModel *model);
     static void printTable(QTextCursor *cursor, QAbstractItemModel *model);
 
 public:

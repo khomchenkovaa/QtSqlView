@@ -38,8 +38,7 @@ HEADERS += \
 
 FORMS += \
     ConnectionDlg.ui \
-    MainWindow.ui \
-    printtemplatedlg.ui
+    MainWindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

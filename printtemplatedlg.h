@@ -3,9 +3,11 @@
 
 #include <QDialog>
 
-namespace Ui {
-class PrintTemplateDlg;
-}
+QT_BEGIN_NAMESPACE
+class QLineEdit;
+QT_END_NAMESPACE
+
+class XTextEdit;
 
 class PrintTemplateDlg : public QDialog
 {
@@ -13,14 +15,18 @@ class PrintTemplateDlg : public QDialog
 
 public:
     explicit PrintTemplateDlg(QWidget *parent = nullptr);
-    ~PrintTemplateDlg();
 
     QString title() const;
     QString header() const;
     QString footer() const;
 
 private:
-    Ui::PrintTemplateDlg *ui;
+    void setupUI();
+
+private:
+    QLineEdit *editTitle;
+    XTextEdit *textHeader;
+    XTextEdit *textFooter;
 };
 
 #endif // PRINTTEMPLATEDLG_H

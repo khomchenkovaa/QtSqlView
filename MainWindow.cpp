@@ -448,7 +448,7 @@ void MainWindow::on_copyQueryDataButton_clicked()
 
 /******************************************************************/
 
-void MainWindow::on_toScvQueryButton_clicked()
+void MainWindow::on_toScvButton_clicked()
 {
     exportToCsv(&userquerymodel);
 }
@@ -497,26 +497,37 @@ void MainWindow::on_printButton_clicked()
     preview.setWindowFlags ( Qt::Window );
     connect(&preview, &QPrintPreviewDialog::paintRequested,
             this, [this, title, header, footer](QPrinter *printer){
-        QScopedPointer<QTextDocument> document(new QTextDocument());
-        QTextCursor cursor(document.data());
-        if (!title.isEmpty()) {
-            cursor.insertHtml("<h1 align=\"center\">" + title + "</h1>");
-            cursor.insertBlock();
-        }
-        if (!header.isEmpty()) {
-            cursor.insertHtml(header);
-            cursor.insertBlock();
-        }
-        printTable(&cursor, &userquerymodel);
-        if (!footer.isEmpty()) {
-            cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-            cursor.insertBlock();
-            cursor.insertHtml(footer);
-            cursor.insertBlock();
-        }
+        auto document = createSimpleReport(title, header, footer, &userquerymodel);
         document->print(printer);
     });
     preview.exec();
+}
+
+/******************************************************************/
+
+void MainWindow::on_toPdfButton_clicked()
+{
+    PrintTemplateDlg dlg;
+    if (dlg.exec() == QDialog::Rejected) {
+        return;
+    }
+    const QString title = dlg.title();
+    const QString header = dlg.header();
+    const QString footer = dlg.footer();
+
+    QFileDialog fileDialog(this, tr("Export PDF"));
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
+    fileDialog.setDefaultSuffix("pdf");
+    if (fileDialog.exec() != QDialog::Accepted)
+        return;
+
+    QString fileName = fileDialog.selectedFiles().first();
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName(fileName);
+    auto document = createSimpleReport(title, header, footer, &userquerymodel);
+    document->print(&printer);
 }
 
 /******************************************************************/
@@ -652,6 +663,30 @@ QVariantMap MainWindow::setBindValues(const QStringList &params)
     }
 
     return QVariantMap();
+}
+
+/******************************************************************/
+
+QSharedPointer<QTextDocument> MainWindow::createSimpleReport(const QString &title, const QString &header, const QString &footer, QAbstractItemModel *model)
+{
+    QSharedPointer<QTextDocument> document(new QTextDocument());
+    QTextCursor cursor(document.data());
+    if (!title.isEmpty()) {
+        cursor.insertHtml("<h1 align=\"center\">" + title + "</h1>");
+        cursor.insertBlock();
+    }
+    if (!header.isEmpty()) {
+        cursor.insertHtml(header);
+        cursor.insertBlock();
+    }
+    printTable(&cursor, model);
+    if (!footer.isEmpty()) {
+        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+        cursor.insertBlock();
+        cursor.insertHtml(footer);
+        cursor.insertBlock();
+    }
+    return document;
 }
 
 /******************************************************************/

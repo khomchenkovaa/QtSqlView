@@ -362,7 +362,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QToolButton" name="toScvQueryButton">
+                <widget class="QToolButton" name="toScvButton">
                  <property name="toolTip">
                   <string>Export to CSV</string>
                  </property>
@@ -392,7 +392,15 @@
                   <string>...</string>
                  </property>
                  <property name="icon">
-                  <iconset theme="printer"/>
+                  <iconset theme="printer">
+                   <normaloff>.</normaloff>.</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="toPdfButton">
+                 <property name="text">
+                  <string>pdf</string>
                  </property>
                 </widget>
                </item>
