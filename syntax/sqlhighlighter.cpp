@@ -7,11 +7,11 @@
 SQLHighlighter::SQLHighlighter(class QTextDocument *parent)
     : QSyntaxHighlighter(parent)
 {
-    setupComments();
     setupQuotedStrings();
     setupPrimaryKeywords();
     setupTypeKeywords();
     setupExoticKeywords();
+    setupComments();
 }
 
 /******************************************************************/
