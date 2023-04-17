@@ -1,8 +1,11 @@
-QT += core gui sql printsupport
+QT += core gui sql xml printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
+
+# Use KD Reports library
+DEFINES += KD_REPORTS
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -42,6 +45,15 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+contains(DEFINES, KD_REPORTS) {
+    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../KDReports-2.2.1/lib/release/ -lkdreports
+    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../KDReports-2.2.1/lib/debug/ -lkdreports
+    else:unix: LIBS += -L/usr/local/KDAB/KDReports-2.2.1/lib/ -lkdreports
+
+    INCLUDEPATH += /usr/local/KDAB/KDReports-2.2.1/include/KDReports
+    DEPENDPATH += /usr/local/KDAB/KDReports-2.2.1/include/KDReports
+}
 
 RESOURCES += \
     QtSqlView.qrc

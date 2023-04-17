@@ -24,6 +24,10 @@
 #include <QtPrintSupport/QPrintDialog>
 #include <QtPrintSupport/QPrintPreviewDialog>
 
+#ifdef KD_REPORTS
+#include <KDReports>
+#endif
+
 #include <QDebug>
 
 enum {
@@ -517,6 +521,38 @@ void MainWindow::on_printReportButton_clicked()
         footer = textSrFooter->text();
     }
 
+#ifdef KD_REPORTS
+    KDReports::Report report;
+
+
+    if (!title.isEmpty()) {
+        // Add a text element for the title
+        KDReports::TextElement titleElement(title);
+        titleElement.setPointSize(18);
+        report.addElement(titleElement, Qt::AlignHCenter);
+    }
+    if (!header.isEmpty()) {
+        // add 20 mm of vertical space:
+        report.addVerticalSpacing(20);
+        // add some more text
+        KDReports::HtmlElement textElement(header);
+        report.addElement(textElement);
+    }
+    KDReports::AutoTableElement tableElement(&userquerymodel);
+    tableElement.setVerticalHeaderVisible(false);
+    report.addElement(tableElement);
+
+    if (!footer.isEmpty()) {
+        // add 20 mm of vertical space:
+        report.addVerticalSpacing(20);
+        // add some more text
+        KDReports::HtmlElement textElement(footer);
+        report.addElement(textElement);        \
+    }
+
+    KDReports::PreviewDialog preview(&report);
+    preview.exec();
+#else
     QPrinter printer(QPrinter::HighResolution);
     printer.setFullPage( true );
     QPrintPreviewDialog preview(&printer, this);
@@ -527,6 +563,7 @@ void MainWindow::on_printReportButton_clicked()
         document->print(printer);
     });
     preview.exec();
+#endif
 }
 
 /******************************************************************/
@@ -600,6 +637,14 @@ void MainWindow::setupUI()
     ui->tabWidget->setTabEnabled(SimpleReportTab, false);
     ui->querySrTable->setModel(&userquerymodel);
 
+    // configure query editor
+    QFont font("Courier", 10);
+    font.setFixedPitch(true);
+    ui->editQuery->setFont(font);
+
+    new SQLHighlighter(ui->editQuery->document());
+
+    // configure simple report tab
     ui->formSimpleReport->removeRow(2);
     ui->formSimpleReport->removeRow(1);
 
@@ -611,12 +656,9 @@ void MainWindow::setupUI()
     textSrFooter->setObjectName("textSrFooter");
     ui->formSimpleReport->addRow(tr("Footer"), textSrFooter);
 
-    // configure query editor
-    QFont font("Courier", 10);
-    font.setFixedPitch(true);
-    ui->editQuery->setFont(font);
-
-    new SQLHighlighter(ui->editQuery->document());
+#ifdef KD_REPORTS
+    ui->exportToPdfButton->setHidden(true);
+#endif
 }
 
 /******************************************************************/
@@ -743,6 +785,7 @@ QSharedPointer<QTextDocument> MainWindow::createSimpleReport(const QString &titl
         cursor.insertBlock();
     }
     if (!header.isEmpty()) {
+        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
         cursor.insertHtml(header);
         cursor.insertBlock();
     }
