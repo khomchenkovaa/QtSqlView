@@ -387,6 +387,16 @@
                 </widget>
                </item>
                <item>
+                <widget class="QToolButton" name="setReportPropertiesButton">
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="document-properties"/>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <widget class="QToolButton" name="printButton">
                  <property name="text">
                   <string>...</string>

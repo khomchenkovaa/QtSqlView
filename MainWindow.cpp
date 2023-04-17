@@ -7,7 +7,7 @@
 #include "ConnectionDlg.h"
 #include "QueryParamDlg.h"
 #include "TableHeadersDlg.h"
-#include "printtemplatedlg.h"
+#include "ReportTemplateDlg.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -481,23 +481,28 @@ void MainWindow::on_setHeadersButton_clicked()
 
 /******************************************************************/
 
+void MainWindow::on_setReportPropertiesButton_clicked()
+{
+
+}
+
+/******************************************************************/
+
 void MainWindow::on_printButton_clicked()
 {
-    PrintTemplateDlg dlg;
+    ReportTemplateDlg dlg;
     if (dlg.exec() == QDialog::Rejected) {
         return;
     }
-    const QString title = dlg.title();
-    const QString header = dlg.header();
-    const QString footer = dlg.footer();
+    auto tpl = dlg.reportTemplate();
 
     QPrinter printer(QPrinter::HighResolution);
     printer.setFullPage( true );
     QPrintPreviewDialog preview(&printer, this);
     preview.setWindowFlags ( Qt::Window );
     connect(&preview, &QPrintPreviewDialog::paintRequested,
-            this, [this, title, header, footer](QPrinter *printer){
-        auto document = createSimpleReport(title, header, footer, &userquerymodel);
+            this, [this, tpl](QPrinter *printer){
+        auto document = createSimpleReport(tpl.title, tpl.header, tpl.footer, &userquerymodel);
         document->print(printer);
     });
     preview.exec();
@@ -507,13 +512,11 @@ void MainWindow::on_printButton_clicked()
 
 void MainWindow::on_toPdfButton_clicked()
 {
-    PrintTemplateDlg dlg;
+    ReportTemplateDlg dlg;
     if (dlg.exec() == QDialog::Rejected) {
         return;
     }
-    const QString title = dlg.title();
-    const QString header = dlg.header();
-    const QString footer = dlg.footer();
+    auto tpl = dlg.reportTemplate();
 
     QFileDialog fileDialog(this, tr("Export PDF"));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
@@ -526,7 +529,7 @@ void MainWindow::on_toPdfButton_clicked()
     QPrinter printer(QPrinter::HighResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(fileName);
-    auto document = createSimpleReport(title, header, footer, &userquerymodel);
+    auto document = createSimpleReport(tpl.title, tpl.header, tpl.footer, &userquerymodel);
     document->print(&printer);
 }
 

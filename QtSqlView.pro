@@ -25,16 +25,16 @@ SOURCES += \
     ConnectionDlg.cpp \
     MainWindow.cpp \
     QueryParamDlg.cpp \
+    ReportTemplateDlg.cpp \
     TableHeadersDlg.cpp \
-    main.cpp \
-    printtemplatedlg.cpp
+    main.cpp
 
 HEADERS += \
     ConnectionDlg.h \
     MainWindow.h \
     QueryParamDlg.h \
-    TableHeadersDlg.h \
-    printtemplatedlg.h
+    ReportTemplateDlg.h \
+    TableHeadersDlg.h
 
 FORMS += \
     ConnectionDlg.ui \

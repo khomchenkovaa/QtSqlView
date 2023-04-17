@@ -74,6 +74,7 @@ private slots:
     void on_copyQueryDataButton_clicked();
     void on_toScvButton_clicked();
     void on_setHeadersButton_clicked();
+    void on_setReportPropertiesButton_clicked();
     void on_printButton_clicked();
     void on_toPdfButton_clicked();
     void on_clearQueryButton_clicked();

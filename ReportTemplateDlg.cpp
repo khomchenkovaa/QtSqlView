@@ -1,4 +1,4 @@
-#include "printtemplatedlg.h"
+#include "ReportTemplateDlg.h"
 
 #include "xtextedit.h"
 
@@ -9,7 +9,7 @@
 
 /******************************************************************/
 
-PrintTemplateDlg::PrintTemplateDlg(QWidget *parent) :
+ReportTemplateDlg::ReportTemplateDlg(QWidget *parent) :
     QDialog(parent)
 {
     setupUI();
@@ -17,28 +17,27 @@ PrintTemplateDlg::PrintTemplateDlg(QWidget *parent) :
 
 /******************************************************************/
 
-QString PrintTemplateDlg::title() const
+void ReportTemplateDlg::setReportTemplate(const ReportTemplate &tpl)
 {
-    return editTitle->text();
+    editTitle->setText(tpl.title);
+    textHeader->setText(tpl.header);
+    textFooter->setText(tpl.footer);
 }
 
 /******************************************************************/
 
-QString PrintTemplateDlg::header() const
+ReportTemplate ReportTemplateDlg::reportTemplate() const
 {
-    return textHeader->text();
+    ReportTemplate tpl;
+    tpl.title = editTitle->text();
+    tpl.header = textHeader->text();
+    tpl.footer = textFooter->text();
+    return tpl;
 }
 
 /******************************************************************/
 
-QString PrintTemplateDlg::footer() const
-{
-    return textFooter->text();
-}
-
-/******************************************************************/
-
-void PrintTemplateDlg::setupUI()
+void ReportTemplateDlg::setupUI()
 {
     editTitle = new QLineEdit(this);
     textHeader = new XTextEdit(this);
