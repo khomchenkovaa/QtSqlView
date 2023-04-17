@@ -21,6 +21,7 @@ public:
 
     void setText(const QString &str);
     QString text() const;
+    void clear();
 
 private slots:
     void textBold();

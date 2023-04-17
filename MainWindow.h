@@ -74,20 +74,27 @@ private slots:
     void on_copyQueryDataButton_clicked();
     void on_toScvButton_clicked();
     void on_setHeadersButton_clicked();
-    void on_setReportPropertiesButton_clicked();
-    void on_printButton_clicked();
-    void on_toPdfButton_clicked();
     void on_clearQueryButton_clicked();
     void on_loadQueryButton_clicked();
     void on_saveQueryButton_clicked();
 
+    // *** Simple Report Tab ***
+    void on_setTblHeadersButton_clicked();
+    void on_printReportButton_clicked();
+    void on_exportToPdfButton_clicked();
+    void on_clearSrPropertiesButton_clicked();
+
 private:
+    void setupUI();
+    void setTableHeaders();
+
+private: // static
     static void saveToClipboard(QSqlQuery query, const QItemSelection &sellist, QClipboard::Mode mode);
     static bool launch(const QUrl &url, const QString &client);
     static void exportToCsv(QAbstractItemModel *model);
     static QStringList findBindings(const QString &sql);
     static QVariantMap setBindValues(const QStringList &params);
-    static QSharedPointer<QTextDocument> createSimpleReport(QAbstractItemModel *model);
+    static QSharedPointer<QTextDocument> createSimpleReport(const QString &title, const QString &header, const QString &footer, QAbstractItemModel *model);
     static void printTable(QTextCursor *cursor, QAbstractItemModel *model);
 
 public:

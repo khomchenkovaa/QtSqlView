@@ -25,7 +25,6 @@ SOURCES += \
     ConnectionDlg.cpp \
     MainWindow.cpp \
     QueryParamDlg.cpp \
-    ReportTemplateDlg.cpp \
     TableHeadersDlg.cpp \
     main.cpp
 
@@ -33,7 +32,6 @@ HEADERS += \
     ConnectionDlg.h \
     MainWindow.h \
     QueryParamDlg.h \
-    ReportTemplateDlg.h \
     TableHeadersDlg.h
 
 FORMS += \

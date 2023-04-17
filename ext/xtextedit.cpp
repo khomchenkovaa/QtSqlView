@@ -46,6 +46,13 @@ QString XTextEdit::text() const
 
 /******************************************************************/
 
+void XTextEdit::clear()
+{
+    textEdit->clear();
+}
+
+/******************************************************************/
+
 void XTextEdit::textBold()
 {
     QTextCharFormat fmt;

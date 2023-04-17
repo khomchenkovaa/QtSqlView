@@ -3,11 +3,11 @@
 
 #include "sqlhighlighter.h"
 #include "xcsvmodel.h"
+#include "xtextedit.h"
 
 #include "ConnectionDlg.h"
 #include "QueryParamDlg.h"
 #include "TableHeadersDlg.h"
-#include "ReportTemplateDlg.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -26,6 +26,13 @@
 
 #include <QDebug>
 
+enum {
+    DataTab,
+    SchemaTab,
+    QueryTab,
+    SimpleReportTab
+};
+
 /******************************************************************/
 
 MainWindow::MainWindow()
@@ -34,35 +41,7 @@ MainWindow::MainWindow()
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    statusBar()->hide();
-
-    dblist.loadFromSettings();
-
-    ui->treeDbList->setModel(&dblist);
-
-    ui->treeDbList->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->treeDbList, SIGNAL(customContextMenuRequested(const QPoint&)),
-            this, SLOT(show_treeDbList_contextMenu(const QPoint &)));
-
-    ui->dataTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->dataTable, SIGNAL(customContextMenuRequested(const QPoint&)),
-            this, SLOT(show_dataTable_contextMenu(const QPoint &)));
-
-    connect(ui->dataTable->horizontalHeader(), SIGNAL(sectionDoubleClicked(int)),
-            this, SLOT(slot_dataTable_horizontalHeader_sectionDoubleClicked(int)));
-
-    ui->schemaTable->setModel(&schemamodel);
-    ui->schemaTable->verticalHeader()->hide();
-
-    ui->queryTable->hide();
-    ui->queryTable->setModel(&userquerymodel);
-
-    // configure query editor
-    QFont font("Courier", 10);
-    font.setFixedPitch(true);
-    ui->editQuery->setFont(font);
-
-    new SQLHighlighter(ui->editQuery->document());
+    setupUI();
 }
 
 /******************************************************************/
@@ -422,8 +401,12 @@ void MainWindow::on_goQueryButton_clicked()
             ui->queryTable->show();
             ui->queryTable->resizeColumnsToContents();
             ui->queryTable->resizeRowsToContents();
+            ui->tabWidget->setTabEnabled(SimpleReportTab, true);
+            ui->querySrTable->resizeColumnsToContents();
+            ui->querySrTable->resizeRowsToContents();
         } else {
             ui->queryTable->hide();
+            ui->tabWidget->setTabEnabled(SimpleReportTab, false);
             ui->queryResultText->show();
 
             ui->queryResultText->setPlainText(QString("%1 rows affected.")
@@ -431,6 +414,7 @@ void MainWindow::on_goQueryButton_clicked()
         }
     } else {
         ui->queryTable->hide();
+        ui->tabWidget->setTabEnabled(SimpleReportTab, false);
         ui->queryResultText->show();
         ui->queryResultText->setPlainText(QString("%1\n%2")
                                       .arg(query.lastError().driverText(),
@@ -450,6 +434,8 @@ void MainWindow::on_copyQueryDataButton_clicked()
 
 void MainWindow::on_toScvButton_clicked()
 {
+    if (ui->queryTable->isHidden()) return;
+
     exportToCsv(&userquerymodel);
 }
 
@@ -457,76 +443,7 @@ void MainWindow::on_toScvButton_clicked()
 
 void MainWindow::on_setHeadersButton_clicked()
 {
-    QSqlRecord rec = userquerymodel.record();
-    if (rec.isEmpty()) {
-        return;
-    }
-    QStringList fields;
-    for (int i=0; i < rec.count(); ++i) {
-        fields << rec.field(i).name();
-    }
-    QStringList headers;
-    for (int i=0; i < userquerymodel.columnCount(); ++i) {
-        headers << userquerymodel.headerData(i, Qt::Horizontal).toString();
-    }
-    TableHeadersDlg dlg(fields);
-    dlg.setHeaders(headers);
-    if (dlg.exec() == QDialog::Accepted) {
-        headers = dlg.headers();
-        for (int i=0; i < headers.size(); ++i) {
-            userquerymodel.setHeaderData(i, Qt::Horizontal, headers.at(i));
-        }
-    }
-}
-
-/******************************************************************/
-
-void MainWindow::on_setReportPropertiesButton_clicked()
-{
-    ReportTemplate tpl;
-    tpl.load(&userquerymodel);
-
-    ReportTemplateDlg dlg;
-    dlg.setReportTemplate(tpl);
-    if (dlg.exec() == QDialog::Accepted) {
-        tpl = dlg.reportTemplate();
-        tpl.save(&userquerymodel);
-    }
-}
-
-/******************************************************************/
-
-void MainWindow::on_printButton_clicked()
-{
-    QPrinter printer(QPrinter::HighResolution);
-    printer.setFullPage( true );
-    QPrintPreviewDialog preview(&printer, this);
-    preview.setWindowFlags ( Qt::Window );
-    connect(&preview, &QPrintPreviewDialog::paintRequested,
-            this, [this](QPrinter *printer){
-        auto document = createSimpleReport(&userquerymodel);
-        document->print(printer);
-    });
-    preview.exec();
-}
-
-/******************************************************************/
-
-void MainWindow::on_toPdfButton_clicked()
-{
-    QFileDialog fileDialog(this, tr("Export PDF"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
-    fileDialog.setDefaultSuffix("pdf");
-    if (fileDialog.exec() != QDialog::Accepted)
-        return;
-
-    QString fileName = fileDialog.selectedFiles().first();
-    QPrinter printer(QPrinter::HighResolution);
-    printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName(fileName);
-    auto document = createSimpleReport(&userquerymodel);
-    document->print(&printer);
+    setTableHeaders();
 }
 
 /******************************************************************/
@@ -575,6 +492,157 @@ void MainWindow::on_saveQueryButton_clicked()
 
     QTextStream out(&file);
     out << ui->editQuery->toPlainText();
+}
+
+/******************************************************************/
+
+void MainWindow::on_setTblHeadersButton_clicked()
+{
+    setTableHeaders();
+}
+
+/******************************************************************/
+
+void MainWindow::on_printReportButton_clicked()
+{
+    QString title = ui->editSrTitle->text();
+    QString header;
+    QString footer;
+    auto textSrHeader = ui->tabSimpleReport->findChild<XTextEdit*>("textSrHeader");
+    if (textSrHeader) {
+        header = textSrHeader->text();
+    }
+    auto textSrFooter = ui->tabSimpleReport->findChild<XTextEdit*>("textSrFooter");
+    if (textSrFooter) {
+        footer = textSrFooter->text();
+    }
+
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setFullPage( true );
+    QPrintPreviewDialog preview(&printer, this);
+    preview.setWindowFlags ( Qt::Window );
+    connect(&preview, &QPrintPreviewDialog::paintRequested,
+            this, [this, title, header, footer](QPrinter *printer){
+        auto document = createSimpleReport(title, header, footer, &userquerymodel);
+        document->print(printer);
+    });
+    preview.exec();
+}
+
+/******************************************************************/
+
+void MainWindow::on_exportToPdfButton_clicked()
+{
+    QString title = ui->editSrTitle->text();
+    QString header;
+    QString footer;
+    auto textSrHeader = ui->tabSimpleReport->findChild<XTextEdit*>("textSrHeader");
+    if (textSrHeader) {
+        header = textSrHeader->text();
+    }
+    auto textSrFooter = ui->tabSimpleReport->findChild<XTextEdit*>("textSrFooter");
+    if (textSrFooter) {
+        footer = textSrFooter->text();
+    }
+
+    QFileDialog fileDialog(this, tr("Export PDF"));
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
+    fileDialog.setDefaultSuffix("pdf");
+    if (fileDialog.exec() != QDialog::Accepted)
+        return;
+
+    QString fileName = fileDialog.selectedFiles().first();
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName(fileName);
+    auto document = createSimpleReport(title, header, footer, &userquerymodel);
+    document->print(&printer);
+}
+
+/******************************************************************/
+
+void MainWindow::on_clearSrPropertiesButton_clicked()
+{
+    ui->editSrTitle->clear();
+    for (auto widget : ui->tabSimpleReport->findChildren<XTextEdit*>()) {
+        widget->clear();
+    }
+}
+
+/******************************************************************/
+
+void MainWindow::setupUI()
+{
+    statusBar()->hide();
+
+    dblist.loadFromSettings();
+
+    ui->treeDbList->setModel(&dblist);
+
+    ui->treeDbList->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->treeDbList, SIGNAL(customContextMenuRequested(const QPoint&)),
+            this, SLOT(show_treeDbList_contextMenu(const QPoint &)));
+
+    ui->dataTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->dataTable, SIGNAL(customContextMenuRequested(const QPoint&)),
+            this, SLOT(show_dataTable_contextMenu(const QPoint &)));
+
+    connect(ui->dataTable->horizontalHeader(), SIGNAL(sectionDoubleClicked(int)),
+            this, SLOT(slot_dataTable_horizontalHeader_sectionDoubleClicked(int)));
+
+    ui->schemaTable->setModel(&schemamodel);
+    ui->schemaTable->verticalHeader()->hide();
+
+    ui->queryTable->hide();
+    ui->queryTable->setModel(&userquerymodel);
+
+    ui->tabWidget->setTabEnabled(SimpleReportTab, false);
+    ui->querySrTable->setModel(&userquerymodel);
+
+    ui->formSimpleReport->removeRow(2);
+    ui->formSimpleReport->removeRow(1);
+
+    auto textSrHeader = new XTextEdit(this);
+    textSrHeader->setObjectName("textSrHeader");
+    ui->formSimpleReport->addRow(tr("Header"), textSrHeader);
+
+    auto textSrFooter = new XTextEdit(this);
+    textSrFooter->setObjectName("textSrFooter");
+    ui->formSimpleReport->addRow(tr("Footer"), textSrFooter);
+
+    // configure query editor
+    QFont font("Courier", 10);
+    font.setFixedPitch(true);
+    ui->editQuery->setFont(font);
+
+    new SQLHighlighter(ui->editQuery->document());
+}
+
+/******************************************************************/
+
+void MainWindow::setTableHeaders()
+{
+    QSqlRecord rec = userquerymodel.record();
+    if (rec.isEmpty()) {
+        return;
+    }
+    QStringList fields;
+    for (int i=0; i < rec.count(); ++i) {
+        fields << rec.field(i).name();
+    }
+    QStringList headers;
+    for (int i=0; i < userquerymodel.columnCount(); ++i) {
+        headers << userquerymodel.headerData(i, Qt::Horizontal).toString();
+    }
+    TableHeadersDlg dlg(fields);
+    dlg.setHeaders(headers);
+    if (dlg.exec() == QDialog::Accepted) {
+        headers = dlg.headers();
+        for (int i=0; i < headers.size(); ++i) {
+            userquerymodel.setHeaderData(i, Qt::Horizontal, headers.at(i));
+        }
+    }
 }
 
 /******************************************************************/
@@ -666,26 +734,23 @@ QVariantMap MainWindow::setBindValues(const QStringList &params)
 
 /******************************************************************/
 
-QSharedPointer<QTextDocument> MainWindow::createSimpleReport(QAbstractItemModel *model)
+QSharedPointer<QTextDocument> MainWindow::createSimpleReport(const QString &title, const QString &header, const QString &footer, QAbstractItemModel *model)
 {
-    ReportTemplate tpl;
-    tpl.load(model);
-
     QSharedPointer<QTextDocument> document(new QTextDocument());
     QTextCursor cursor(document.data());
-    if (!tpl.title.isEmpty()) {
-        cursor.insertHtml("<h1 align=\"center\">" + tpl.title + "</h1>");
+    if (!title.isEmpty()) {
+        cursor.insertHtml("<h1 align=\"center\">" + title + "</h1>");
         cursor.insertBlock();
     }
-    if (!tpl.header.isEmpty()) {
-        cursor.insertHtml(tpl.header);
+    if (!header.isEmpty()) {
+        cursor.insertHtml(header);
         cursor.insertBlock();
     }
     printTable(&cursor, model);
-    if (!tpl.footer.isEmpty()) {
+    if (!footer.isEmpty()) {
         cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
         cursor.insertBlock();
-        cursor.insertHtml(tpl.footer);
+        cursor.insertHtml(footer);
         cursor.insertBlock();
     }
     return document;
@@ -719,3 +784,5 @@ void MainWindow::printTable(QTextCursor *cursor, QAbstractItemModel *model) {
 }
 
 /******************************************************************/
+
+
