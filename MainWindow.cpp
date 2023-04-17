@@ -483,26 +483,28 @@ void MainWindow::on_setHeadersButton_clicked()
 
 void MainWindow::on_setReportPropertiesButton_clicked()
 {
+    ReportTemplate tpl;
+    tpl.load(&userquerymodel);
 
+    ReportTemplateDlg dlg;
+    dlg.setReportTemplate(tpl);
+    if (dlg.exec() == QDialog::Accepted) {
+        tpl = dlg.reportTemplate();
+        tpl.save(&userquerymodel);
+    }
 }
 
 /******************************************************************/
 
 void MainWindow::on_printButton_clicked()
 {
-    ReportTemplateDlg dlg;
-    if (dlg.exec() == QDialog::Rejected) {
-        return;
-    }
-    auto tpl = dlg.reportTemplate();
-
     QPrinter printer(QPrinter::HighResolution);
     printer.setFullPage( true );
     QPrintPreviewDialog preview(&printer, this);
     preview.setWindowFlags ( Qt::Window );
     connect(&preview, &QPrintPreviewDialog::paintRequested,
-            this, [this, tpl](QPrinter *printer){
-        auto document = createSimpleReport(tpl.title, tpl.header, tpl.footer, &userquerymodel);
+            this, [this](QPrinter *printer){
+        auto document = createSimpleReport(&userquerymodel);
         document->print(printer);
     });
     preview.exec();
@@ -512,12 +514,6 @@ void MainWindow::on_printButton_clicked()
 
 void MainWindow::on_toPdfButton_clicked()
 {
-    ReportTemplateDlg dlg;
-    if (dlg.exec() == QDialog::Rejected) {
-        return;
-    }
-    auto tpl = dlg.reportTemplate();
-
     QFileDialog fileDialog(this, tr("Export PDF"));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
@@ -529,7 +525,7 @@ void MainWindow::on_toPdfButton_clicked()
     QPrinter printer(QPrinter::HighResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(fileName);
-    auto document = createSimpleReport(tpl.title, tpl.header, tpl.footer, &userquerymodel);
+    auto document = createSimpleReport(&userquerymodel);
     document->print(&printer);
 }
 
@@ -670,23 +666,26 @@ QVariantMap MainWindow::setBindValues(const QStringList &params)
 
 /******************************************************************/
 
-QSharedPointer<QTextDocument> MainWindow::createSimpleReport(const QString &title, const QString &header, const QString &footer, QAbstractItemModel *model)
+QSharedPointer<QTextDocument> MainWindow::createSimpleReport(QAbstractItemModel *model)
 {
+    ReportTemplate tpl;
+    tpl.load(model);
+
     QSharedPointer<QTextDocument> document(new QTextDocument());
     QTextCursor cursor(document.data());
-    if (!title.isEmpty()) {
-        cursor.insertHtml("<h1 align=\"center\">" + title + "</h1>");
+    if (!tpl.title.isEmpty()) {
+        cursor.insertHtml("<h1 align=\"center\">" + tpl.title + "</h1>");
         cursor.insertBlock();
     }
-    if (!header.isEmpty()) {
-        cursor.insertHtml(header);
+    if (!tpl.header.isEmpty()) {
+        cursor.insertHtml(tpl.header);
         cursor.insertBlock();
     }
     printTable(&cursor, model);
-    if (!footer.isEmpty()) {
+    if (!tpl.footer.isEmpty()) {
         cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
         cursor.insertBlock();
-        cursor.insertHtml(footer);
+        cursor.insertHtml(tpl.footer);
         cursor.insertBlock();
     }
     return document;

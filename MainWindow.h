@@ -87,7 +87,7 @@ private:
     static void exportToCsv(QAbstractItemModel *model);
     static QStringList findBindings(const QString &sql);
     static QVariantMap setBindValues(const QStringList &params);
-    static QSharedPointer<QTextDocument> createSimpleReport(const QString &title, const QString &header, const QString &footer, QAbstractItemModel *model);
+    static QSharedPointer<QTextDocument> createSimpleReport(QAbstractItemModel *model);
     static void printTable(QTextCursor *cursor, QAbstractItemModel *model);
 
 public:
