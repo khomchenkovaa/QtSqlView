@@ -624,6 +624,7 @@ void MainWindow::on_setKdHeadersButton_clicked()
 
 void MainWindow::on_printKdReportButton_clicked()
 {
+#ifdef KD_REPORTS
     QDomDocument xml;
     QString errorMsg;
     int errorLine, errorColumn;
@@ -648,6 +649,7 @@ void MainWindow::on_printKdReportButton_clicked()
 
     KDReports::PreviewDialog preview(&report);
     preview.exec();
+#endif
 }
 
 /******************************************************************/
