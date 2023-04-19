@@ -84,6 +84,13 @@ private slots:
     void on_exportToPdfButton_clicked();
     void on_clearSrPropertiesButton_clicked();
 
+    // *** KD Report Tab ***
+    void on_setKdHeadersButton_clicked();
+    void on_printKdReportButton_clicked();
+    void on_clearXmlButton_clicked();
+    void on_loadXmlButton_clicked();
+    void on_saveXmlButton_clicked();
+
 private:
     void setupUI();
     void setTableHeaders();

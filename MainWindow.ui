@@ -18,22 +18,7 @@
     <normaloff>:/img/table.png</normaloff>:/img/table.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <property name="spacing">
-     <number>6</number>
-    </property>
-    <property name="leftMargin">
-     <number>9</number>
-    </property>
-    <property name="topMargin">
-     <number>9</number>
-    </property>
-    <property name="rightMargin">
-     <number>9</number>
-    </property>
-    <property name="bottomMargin">
-     <number>9</number>
-    </property>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -55,7 +40,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="tabData">
         <attribute name="icon">
@@ -554,10 +539,11 @@
                   <string>Set Table Headers</string>
                  </property>
                  <property name="text">
-                  <string>...</string>
+                  <string>Rename Columns</string>
                  </property>
                  <property name="icon">
-                  <iconset theme="insert-text"/>
+                  <iconset theme="insert-text">
+                   <normaloff>.</normaloff>.</iconset>
                  </property>
                 </widget>
                </item>
@@ -567,7 +553,7 @@
                   <string>Print Report</string>
                  </property>
                  <property name="text">
-                  <string>...</string>
+                  <string>Print Report</string>
                  </property>
                  <property name="icon">
                   <iconset theme="printer">
@@ -601,10 +587,10 @@
                <item>
                 <widget class="QToolButton" name="clearSrPropertiesButton">
                  <property name="toolTip">
-                  <string>Clear Query</string>
+                  <string>Clear Report Fields</string>
                  </property>
                  <property name="text">
-                  <string>Clear Query</string>
+                  <string>Clear Fields</string>
                  </property>
                  <property name="icon">
                   <iconset theme="edit-clear">
@@ -624,6 +610,107 @@
              <enum>QAbstractItemView::ContiguousSelection</enum>
             </property>
            </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabKdReport">
+        <attribute name="icon">
+         <iconset theme="document-print"/>
+        </attribute>
+        <attribute name="title">
+         <string>KD Report</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QSplitter" name="splitter_4">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <widget class="QWidget" name="">
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="QTextEdit" name="editXml"/>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QToolButton" name="setKdHeadersButton">
+                 <property name="text">
+                  <string>Rename Columns</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="insert-text"/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="printKdReportButton">
+                 <property name="text">
+                  <string>Print</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="printer"/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QToolButton" name="clearXmlButton">
+                 <property name="toolTip">
+                  <string>Clear Report description</string>
+                 </property>
+                 <property name="text">
+                  <string>Clear XML</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="edit-clear"/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="loadXmlButton">
+                 <property name="toolTip">
+                  <string>Load Report description</string>
+                 </property>
+                 <property name="text">
+                  <string>Load XML</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="document-open"/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="saveXmlButton">
+                 <property name="toolTip">
+                  <string>Save Report description</string>
+                 </property>
+                 <property name="text">
+                  <string>Save XML</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="document-save"/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QTableView" name="queryKdTable"/>
           </widget>
          </item>
         </layout>

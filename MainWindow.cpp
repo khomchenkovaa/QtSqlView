@@ -2,6 +2,7 @@
 #include "ui_MainWindow.h"
 
 #include "sqlhighlighter.h"
+#include "xmlhighlighter.h"
 #include "xcsvmodel.h"
 #include "xtextedit.h"
 
@@ -34,7 +35,8 @@ enum {
     DataTab,
     SchemaTab,
     QueryTab,
-    SimpleReportTab
+    SimpleReportTab,
+    KdReportTab
 };
 
 /******************************************************************/
@@ -408,9 +410,13 @@ void MainWindow::on_goQueryButton_clicked()
             ui->tabWidget->setTabEnabled(SimpleReportTab, true);
             ui->querySrTable->resizeColumnsToContents();
             ui->querySrTable->resizeRowsToContents();
+            ui->tabWidget->setTabEnabled(KdReportTab, true);
+            ui->queryKdTable->resizeColumnsToContents();
+            ui->queryKdTable->resizeRowsToContents();
         } else {
             ui->queryTable->hide();
             ui->tabWidget->setTabEnabled(SimpleReportTab, false);
+            ui->tabWidget->setTabEnabled(KdReportTab, false);
             ui->queryResultText->show();
 
             ui->queryResultText->setPlainText(QString("%1 rows affected.")
@@ -419,6 +425,7 @@ void MainWindow::on_goQueryButton_clicked()
     } else {
         ui->queryTable->hide();
         ui->tabWidget->setTabEnabled(SimpleReportTab, false);
+        ui->tabWidget->setTabEnabled(KdReportTab, false);
         ui->queryResultText->show();
         ui->queryResultText->setPlainText(QString("%1\n%2")
                                       .arg(query.lastError().driverText(),
@@ -524,7 +531,6 @@ void MainWindow::on_printReportButton_clicked()
 #ifdef KD_REPORTS
     KDReports::Report report;
 
-
     if (!title.isEmpty()) {
         // Add a text element for the title
         KDReports::TextElement titleElement(title);
@@ -609,6 +615,91 @@ void MainWindow::on_clearSrPropertiesButton_clicked()
 
 /******************************************************************/
 
+void MainWindow::on_setKdHeadersButton_clicked()
+{
+    setTableHeaders();
+}
+
+/******************************************************************/
+
+void MainWindow::on_printKdReportButton_clicked()
+{
+    QDomDocument xml;
+    QString errorMsg;
+    int errorLine, errorColumn;
+    if (!xml.setContent(ui->editXml->toPlainText(), true, &errorMsg, &errorLine, &errorColumn)) {
+        QMessageBox::critical(this, "QtSqlView",
+                              tr("Could not parse XML\n%1\n in line %2, column %3")
+                              .arg(errorMsg)
+                              .arg(errorLine)
+                              .arg(errorColumn));
+        return;
+    }
+
+    KDReports::Report report;
+    report.associateModel("TableModel", &userquerymodel);
+    KDReports::ErrorDetails details;
+    if (!report.loadFromXML(xml, &details)) {
+        QMessageBox::warning(this, "QtSqlView",
+                             tr("Could not parse report description:\n%1")
+                             .arg(details.message()));
+        return;
+    }
+
+    KDReports::PreviewDialog preview(&report);
+    preview.exec();
+}
+
+/******************************************************************/
+
+void MainWindow::on_clearXmlButton_clicked()
+{
+    ui->editXml->clear();
+}
+
+/******************************************************************/
+
+void MainWindow::on_loadXmlButton_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Choose a XML file"),
+                                                    QString(),
+                                                    "XML files (*.xml);;All Files (*.*)");
+
+    if (filename.isEmpty()) return;
+
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "QtSqlView",
+                              tr("Could not load XML file"));
+        return;
+    }
+
+    ui->editXml->setPlainText( file.readAll() );
+}
+
+/******************************************************************/
+
+void MainWindow::on_saveXmlButton_clicked()
+{
+    QString filename = QFileDialog::getSaveFileName(this, tr("Choose a XML file"),
+                                                    QString(),
+                                                    "XML files (*.xml);;All Files (*.*)");
+
+    if (filename.isEmpty()) return;
+
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "QtSqlView",
+                              tr("Could not save XML file"));
+        return;
+    }
+
+    QTextStream out(&file);
+    out << ui->editXml->toPlainText();
+}
+
+/******************************************************************/
+
 void MainWindow::setupUI()
 {
     statusBar()->hide();
@@ -631,20 +722,20 @@ void MainWindow::setupUI()
     ui->schemaTable->setModel(&schemamodel);
     ui->schemaTable->verticalHeader()->hide();
 
-    ui->queryTable->hide();
-    ui->queryTable->setModel(&userquerymodel);
-
-    ui->tabWidget->setTabEnabled(SimpleReportTab, false);
-    ui->querySrTable->setModel(&userquerymodel);
-
-    // configure query editor
+    // configure query tab
     QFont font("Courier", 10);
     font.setFixedPitch(true);
     ui->editQuery->setFont(font);
 
     new SQLHighlighter(ui->editQuery->document());
 
+    ui->queryTable->hide();
+    ui->queryTable->setModel(&userquerymodel);
+
     // configure simple report tab
+    ui->tabWidget->setTabEnabled(SimpleReportTab, false);
+    ui->querySrTable->setModel(&userquerymodel);
+
     ui->formSimpleReport->removeRow(2);
     ui->formSimpleReport->removeRow(1);
 
@@ -658,6 +749,26 @@ void MainWindow::setupUI()
 
 #ifdef KD_REPORTS
     ui->exportToPdfButton->setHidden(true);
+#endif
+
+    // configure KD report tab
+    ui->tabWidget->setTabEnabled(KdReportTab, false);
+
+    ui->editXml->setFont(font);
+
+    new XMLHighlighter(ui->editXml->document());
+
+    QString defaultXml =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<report xmlns=\"https://www.kdab.com/kdreports\">\n"
+            "  <table model=\"TableModel\" verticalHeaderVisible=\"false\"/>\n"
+            "</report>";
+    ui->editXml->setPlainText(defaultXml);
+
+    ui->queryKdTable->setModel(&userquerymodel);
+
+#ifndef KD_REPORTS
+    ui->printKdReportButton->setHidden(true);
 #endif
 }
 
@@ -827,5 +938,3 @@ void MainWindow::printTable(QTextCursor *cursor, QAbstractItemModel *model) {
 }
 
 /******************************************************************/
-
-
