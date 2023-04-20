@@ -14,4 +14,9 @@ QtSqlView boasts the following features:
  * Copy selected cells as tab-separated text to the clipboard.
  * View table schema including primary key.
  * Execute custom SQL queries on the database connect and view results.
+ * Parameters dialog for SQL queries with named parameters
  * SQL syntax highlighting in query editor.
+ * Export query result to CSV-file (comma sepatated)
+ * Build simple report on query result (rename columns, add title, header and footer)
+
+

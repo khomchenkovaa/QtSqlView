@@ -164,12 +164,14 @@ void MainWindow::on_action_AboutQt_triggered()
 
 void MainWindow::on_treeDbList_clicked(const QModelIndex &index)
 {
+    const QSignalBlocker blocker(ui->treeDbList);
+
     DbTable* dbt = dblist.getDbTable(index);
 
     if (!dbt) return;
 
     if (datatablemodel) {
-        delete datatablemodel;
+        datatablemodel->deleteLater();
     }
 
     datatablemodel = new QSqlTableModel(this, dbt->dbconn->db);
