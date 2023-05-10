@@ -1,37 +1,33 @@
-#ifndef XMLHIGHLIGHTER_H
-#define XMLHIGHLIGHTER_H
+#ifndef XMLSYNTAXHIGHLIGHTER_H
+#define XMLSYNTAXHIGHLIGHTER_H
+
+#include "highlightingrule.h"
 
 #include <QSyntaxHighlighter>
 
-class XMLHighlighter : public QSyntaxHighlighter
+class XmlHighlighter : public QSyntaxHighlighter
 {
     Q_OBJECT
 
 public:
-    XMLHighlighter(class QTextDocument *parent = NULL);
+    explicit XmlHighlighter(QTextDocument *parent = nullptr);
 
 protected:
-    virtual void highlightBlock(const QString & text);
+    virtual void highlightBlock(const QString &text);
 
 private:
-    void highlightByRegex(const QTextCharFormat & format,
-                          const QRegExp & regex, const QString & text);
-
-    void setRegexes();
-    void setFormats();
+    void setupComments();
+    void setupTagFormat();
+    void setupAttributeFormat();
+    void setupAttributeContentFormat();
 
 private:
-    QTextCharFormat     m_xmlKeywordFormat;
-    QTextCharFormat     m_xmlElementFormat;
-    QTextCharFormat     m_xmlAttributeFormat;
-    QTextCharFormat     m_xmlValueFormat;
-    QTextCharFormat     m_xmlCommentFormat;
+    QList<HighlightingRule> highlightingRules;
 
-    QList<QRegExp>      m_xmlKeywordRegexes;
-    QRegExp             m_xmlElementRegex;
-    QRegExp             m_xmlAttributeRegex;
-    QRegExp             m_xmlValueRegex;
-    QRegExp             m_xmlCommentRegex;
+    QRegExp commentStartExpression;
+    QRegExp commentEndExpression;
+
+    QTextCharFormat commentFormat;
 };
 
-#endif // XMLHIGHTLIGHTER_H
+#endif

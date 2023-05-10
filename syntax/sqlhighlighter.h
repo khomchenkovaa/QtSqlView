@@ -1,11 +1,9 @@
-#ifndef SQLHIGHLIGHTER_H
-#define SQLHIGHLIGHTER_H
+#ifndef SQLSYNTAXHIGHLIGHTER_H
+#define SQLSYNTAXHIGHLIGHTER_H
 
-#include <QList>
-#include <QRegExp>
+#include "highlightingrule.h"
 
 #include <QSyntaxHighlighter>
-#include <QTextCharFormat>
 
 class SQLHighlighter : public QSyntaxHighlighter
 {
@@ -25,25 +23,12 @@ private:
     void setupExoticKeywords();
 
 private:
-    struct Rule
-    {
-        QRegExp 	    pattern;
-        QTextCharFormat format;
+    QList<HighlightingRule> highlightingRules;
 
-        inline Rule()
-        { }
-
-        inline Rule(QString p, QTextCharFormat f)
-            : pattern(p, Qt::CaseInsensitive), format(f)
-        { }
-    };
-
-    QList<Rule> 	rules;
-
-    QRegExp 		commentStartExpression;
-    QRegExp 		commentEndExpression;
+    QRegExp commentStartExpression;
+    QRegExp commentEndExpression;
 
     QTextCharFormat commentFormat;
 };
 
-#endif // SQLHIGHLIGHTER_H
+#endif // SQLSYNTAXHIGHLIGHTER_H

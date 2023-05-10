@@ -760,9 +760,9 @@ void MainWindow::setupUI()
 
     ui->editXml->setFont(font);
 
-    new XMLHighlighter(ui->editXml->document());
+    new XmlHighlighter(ui->editXml->document());
 
-    QString defaultXml =
+    const QString defaultXml =
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<report xmlns=\"https://www.kdab.com/kdreports\">\n"
             "  <table model=\"TableModel\" verticalHeaderVisible=\"false\"/>\n"
