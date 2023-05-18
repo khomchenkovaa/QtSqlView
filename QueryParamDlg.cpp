@@ -86,6 +86,7 @@ void QueryParamDlg::setupUI()
 QComboBox *QueryParamDlg::createCmb(const QString &param, int row, QWidget *parent)
 {
     static QStringList items = QStringList()
+            << tr("Null")
             << tr("String")
             << tr("Integer")
             << tr("Real")
@@ -127,6 +128,9 @@ QWidget *QueryParamDlg::createValueEditor(const QString &param, Type type, QWidg
     sizePolicy.setVerticalStretch(0);
 
     switch (type) {
+    case Type::Null:
+        result = new QLabel("NULL", parent);
+        break;
     case Type::String:
         result = new QLineEdit(parent);
         break;

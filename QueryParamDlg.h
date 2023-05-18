@@ -13,7 +13,7 @@ class QueryParamDlg : public QDialog
     Q_OBJECT
 
     enum Type {
-        String, Integer, Real, Date, DateTime
+        Null, String, Integer, Real, Date, DateTime
     };
 
 public:
