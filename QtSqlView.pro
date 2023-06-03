@@ -21,6 +21,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 TARGET = QtSqlView
 
 include("database/database.pri")
+include("report/report.pri")
 include("ext/ext.pri")
 include("syntax/syntax.pri")
 

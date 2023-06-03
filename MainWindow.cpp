@@ -3,8 +3,9 @@
 
 #include "sqlhighlighter.h"
 #include "xmlhighlighter.h"
-#include "xcsvmodel.h"
 #include "xtextedit.h"
+
+#include "simplereport.h"
 
 #include "ConnectionDlg.h"
 #include "QueryParamDlg.h"
@@ -294,7 +295,7 @@ void MainWindow::on_copyDataButton_clicked()
 
 void MainWindow::on_toCsvDataButton_clicked()
 {
-    exportToCsv(datatablemodel);
+    ListReport::exportToCsv(datatablemodel);
 }
 
 /******************************************************************/
@@ -449,7 +450,7 @@ void MainWindow::on_toScvButton_clicked()
 {
     if (ui->queryTable->isHidden()) return;
 
-    exportToCsv(&userquerymodel);
+    ListReport::exportToCsv(&userquerymodel);
 }
 
 /******************************************************************/
@@ -561,16 +562,12 @@ void MainWindow::on_printReportButton_clicked()
     KDReports::PreviewDialog preview(&report);
     preview.exec();
 #else
-    QPrinter printer(QPrinter::HighResolution);
-    printer.setFullPage( true );
-    QPrintPreviewDialog preview(&printer, this);
-    preview.setWindowFlags ( Qt::Window );
-    connect(&preview, &QPrintPreviewDialog::paintRequested,
-            this, [this, title, header, footer](QPrinter *printer){
-        auto document = createSimpleReport(title, header, footer, &userquerymodel);
-        document->print(printer);
-    });
-    preview.exec();
+    SimpleReport report;
+    report.setTitle(title);
+    report.setHeader(header);
+    report.setModel(&userquerymodel);
+    report.setFooter(footer);
+    report.toPreview();
 #endif
 }
 
@@ -596,13 +593,14 @@ void MainWindow::on_exportToPdfButton_clicked()
     fileDialog.setDefaultSuffix("pdf");
     if (fileDialog.exec() != QDialog::Accepted)
         return;
-
     QString fileName = fileDialog.selectedFiles().first();
-    QPrinter printer(QPrinter::HighResolution);
-    printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName(fileName);
-    auto document = createSimpleReport(title, header, footer, &userquerymodel);
-    document->print(&printer);
+
+    SimpleReport report;
+    report.setTitle(title);
+    report.setHeader(header);
+    report.setModel(&userquerymodel);
+    report.setFooter(footer);
+    report.toPdf(fileName);
 }
 
 /******************************************************************/
@@ -842,22 +840,6 @@ bool MainWindow::launch(const QUrl &url, const QString &client)
 
 /******************************************************************/
 
-void MainWindow::exportToCsv(QAbstractItemModel *model)
-{
-    QString filters("CSV files (*.csv);;All files (*.*)");
-    QString defaultFilter("CSV files (*.csv)");
-    QString fileName = QFileDialog::getSaveFileName(Q_NULLPTR, tr("Export to CSV-file"),
-                                                    QCoreApplication::applicationDirPath(),
-                                                    filters, &defaultFilter);
-    if (fileName.isEmpty()) return;
-
-    XCsvModel csvModel;
-    csvModel.importFromModel(model);
-    csvModel.toCSV(fileName, true);
-}
-
-/******************************************************************/
-
 QStringList MainWindow::findBindings(const QString &sql)
 {
     QStringList result;
@@ -887,58 +869,6 @@ QVariantMap MainWindow::setBindValues(const QStringList &params)
     }
 
     return QVariantMap();
-}
-
-/******************************************************************/
-
-QSharedPointer<QTextDocument> MainWindow::createSimpleReport(const QString &title, const QString &header, const QString &footer, QAbstractItemModel *model)
-{
-    QSharedPointer<QTextDocument> document(new QTextDocument());
-    QTextCursor cursor(document.data());
-    if (!title.isEmpty()) {
-        cursor.insertHtml("<h1 align=\"center\">" + title + "</h1>");
-        cursor.insertBlock();
-    }
-    if (!header.isEmpty()) {
-        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-        cursor.insertHtml(header);
-        cursor.insertBlock();
-    }
-    printTable(&cursor, model);
-    if (!footer.isEmpty()) {
-        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-        cursor.insertBlock();
-        cursor.insertHtml(footer);
-        cursor.insertBlock();
-    }
-    return document;
-}
-
-/******************************************************************/
-
-void MainWindow::printTable(QTextCursor *cursor, QAbstractItemModel *model) {
-    cursor->clearSelection();
-    cursor->movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
-
-    const int rows = model->rowCount();
-    const int cols = model->columnCount();
-
-    QTextTable* table = cursor->insertTable(rows+1, cols);
-    // print header
-    for (int j=0; j<cols; ++j) {
-        auto pos = table->cellAt(0, j).firstCursorPosition();
-        pos.insertHtml("<p align=\"center\"><b>" +
-                       model->headerData(j, Qt::Horizontal).toString() +
-                       "</b>");
-    }
-    // print data
-    for (int i=0; i<rows; ++i) {
-        for (int j=0; j<cols; ++j) {
-            auto pos = table->cellAt(i+1, j).firstCursorPosition();
-            QModelIndex idx = model->index(i, j);
-            pos.insertHtml(model->data(idx).toString());
-        }
-    }
 }
 
 /******************************************************************/
