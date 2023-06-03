@@ -5,8 +5,6 @@
 #include "xmlhighlighter.h"
 #include "xtextedit.h"
 
-#include "simplereport.h"
-
 #include "ConnectionDlg.h"
 #include "QueryParamDlg.h"
 #include "TableHeadersDlg.h"
@@ -26,8 +24,10 @@
 #include <QtPrintSupport/QPrintDialog>
 #include <QtPrintSupport/QPrintPreviewDialog>
 
+#include "simplereport.h"
 #ifdef KD_REPORTS
-#include <KDReports>
+#include "kdsimplereport.h"
+#include "kdxmlreport.h"
 #endif
 
 #include <QDebug>
@@ -532,43 +532,15 @@ void MainWindow::on_printReportButton_clicked()
     }
 
 #ifdef KD_REPORTS
-    KDReports::Report report;
-
-    if (!title.isEmpty()) {
-        // Add a text element for the title
-        KDReports::TextElement titleElement(title);
-        titleElement.setPointSize(18);
-        report.addElement(titleElement, Qt::AlignHCenter);
-    }
-    if (!header.isEmpty()) {
-        // add 20 mm of vertical space:
-        report.addVerticalSpacing(20);
-        // add some more text
-        KDReports::HtmlElement textElement(header);
-        report.addElement(textElement);
-    }
-    KDReports::AutoTableElement tableElement(&userquerymodel);
-    tableElement.setVerticalHeaderVisible(false);
-    report.addElement(tableElement);
-
-    if (!footer.isEmpty()) {
-        // add 20 mm of vertical space:
-        report.addVerticalSpacing(20);
-        // add some more text
-        KDReports::HtmlElement textElement(footer);
-        report.addElement(textElement);        \
-    }
-
-    KDReports::PreviewDialog preview(&report);
-    preview.exec();
+    KdSimpleReport report;
 #else
     SimpleReport report;
+#endif
     report.setTitle(title);
     report.setHeader(header);
     report.setModel(&userquerymodel);
     report.setFooter(footer);
     report.toPreview();
-#endif
 }
 
 /******************************************************************/
@@ -625,10 +597,10 @@ void MainWindow::on_setKdHeadersButton_clicked()
 void MainWindow::on_printKdReportButton_clicked()
 {
 #ifdef KD_REPORTS
-    QDomDocument xml;
+    KdXmlReport report;
     QString errorMsg;
     int errorLine, errorColumn;
-    if (!xml.setContent(ui->editXml->toPlainText(), true, &errorMsg, &errorLine, &errorColumn)) {
+    if (!report.setXml(ui->editXml->toPlainText(), &errorMsg, &errorLine, &errorColumn)) {
         QMessageBox::critical(this, "QtSqlView",
                               tr("Could not parse XML\n%1\n in line %2, column %3")
                               .arg(errorMsg)
@@ -637,18 +609,8 @@ void MainWindow::on_printKdReportButton_clicked()
         return;
     }
 
-    KDReports::Report report;
-    report.associateModel("TableModel", &userquerymodel);
-    KDReports::ErrorDetails details;
-    if (!report.loadFromXML(xml, &details)) {
-        QMessageBox::warning(this, "QtSqlView",
-                             tr("Could not parse report description:\n%1")
-                             .arg(details.message()));
-        return;
-    }
-
-    KDReports::PreviewDialog preview(&report);
-    preview.exec();
+    report.setModel(&userquerymodel);
+    report.toPreview();
 #endif
 }
 

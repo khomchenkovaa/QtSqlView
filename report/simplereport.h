@@ -15,7 +15,7 @@ public:
 
     void printTo(QTextCursor *cursor) const;
 
-private:
+protected:
     QString m_Title;
     QString m_Header;
     QString m_Footer;
