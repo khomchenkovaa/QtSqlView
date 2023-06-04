@@ -17,11 +17,13 @@ public:
     void setModel(QAbstractTableModel *model);
     void setWithHeaders(bool withHeaders);
 
-    virtual void toCsv(const QString& fileName) const;
-    virtual void printTo(QTextCursor *cursor) const;
-    virtual QSharedPointer<QTextDocument> toDocument() const;
-    virtual void toPreview() const;
-    virtual void toPdf(const QString& fileName) const;
+    virtual bool toCsvFile(const QString& fileName) const;
+    virtual void toTextCursor(QTextCursor *cursor) const;
+    virtual QSharedPointer<QTextDocument> toTextDocument() const;
+    virtual bool toPrinter() const;
+    virtual int  toPreviewDialog() const;
+    virtual bool toPdfFile(const QString& fileName) const;
+    virtual bool toHtmlFile(const QString& fileName) const;
 
 public:
     static void exportToCsv(QAbstractTableModel *model);

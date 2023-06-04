@@ -4,11 +4,13 @@
 
 #include <QCoreApplication>
 #include <QAbstractTableModel>
+#include <QTextStream>
 #include <QTextCursor>
 #include <QTextTable>
 #include <QFileDialog>
 
 #include <QPrinter>
+#include <QPrintDialog>
 #include <QPrintPreviewDialog>
 
 /******************************************************************/
@@ -36,18 +38,19 @@ void ListReport::setWithHeaders(bool withHeaders)
 
 /******************************************************************/
 
-void ListReport::toCsv(const QString& fileName) const
+bool ListReport::toCsvFile(const QString& fileName) const
 {
-    if (fileName.isEmpty() || m_Model == Q_NULLPTR) return;
+    if (fileName.isEmpty() || m_Model == Q_NULLPTR) return false;
 
     XCsvModel csvModel;
     csvModel.importFromModel(m_Model);
     csvModel.toCSV(fileName, b_WithHeaders);
+    return true;
 }
 
 /******************************************************************/
 
-void ListReport::printTo(QTextCursor *cursor) const
+void ListReport::toTextCursor(QTextCursor *cursor) const
 {
     cursor->clearSelection();
     cursor->movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
@@ -75,17 +78,33 @@ void ListReport::printTo(QTextCursor *cursor) const
 
 /******************************************************************/
 
-QSharedPointer<QTextDocument> ListReport::toDocument() const
+QSharedPointer<QTextDocument> ListReport::toTextDocument() const
 {
     QSharedPointer<QTextDocument> document(new QTextDocument());
     QTextCursor cursor(document.data());
-    printTo(&cursor);
+    toTextCursor(&cursor);
     return document;
 }
 
 /******************************************************************/
 
-void ListReport::toPreview() const
+bool ListReport::toPrinter() const
+{
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setFullPage( true );
+    QPrintDialog dlg(&printer);
+    dlg.setWindowFlags ( Qt::Window );
+    if (dlg.exec() == QDialog::Accepted) {
+        auto document = toTextDocument();
+        document->print(&printer);
+        return true;
+    }
+    return false;
+}
+
+/******************************************************************/
+
+int ListReport::toPreviewDialog() const
 {
     QPrinter printer(QPrinter::HighResolution);
     printer.setFullPage( true );
@@ -93,21 +112,41 @@ void ListReport::toPreview() const
     preview.setWindowFlags ( Qt::Window );
     connect(&preview, &QPrintPreviewDialog::paintRequested,
             this, [this](QPrinter *printer){
-        auto document = toDocument();
+        auto document = toTextDocument();
         document->print(printer);
     });
-    preview.exec();
+    return preview.exec();
 }
 
 /******************************************************************/
 
-void ListReport::toPdf(const QString &fileName) const
+bool ListReport::toPdfFile(const QString &fileName) const
 {
+    if (fileName.isEmpty()) return false;
+
     QPrinter printer(QPrinter::HighResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(fileName);
-    auto document = toDocument();
+    auto document = toTextDocument();
     document->print(&printer);
+    return true;
+}
+
+/******************************************************************/
+
+bool ListReport::toHtmlFile(const QString &fileName) const
+{
+    if (fileName.isEmpty()) return false;
+
+    QFile file(fileName);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        auto document = toTextDocument();
+        out << document->toHtml();
+        file.close();
+        return true;
+    }
+    return false;
 }
 
 /******************************************************************/
@@ -123,7 +162,7 @@ void ListReport::exportToCsv(QAbstractTableModel *model)
 
     ListReport report;
     report.setModel(model);
-    report.toCsv(fileName);
+    report.toCsvFile(fileName);
 }
 
 /******************************************************************/
@@ -132,7 +171,7 @@ void ListReport::printTable(QTextCursor *cursor, QAbstractTableModel *model)
 {
     ListReport report;
     report.setModel(model);
-    report.printTo(cursor);
+    report.toTextCursor(cursor);
 }
 
 /******************************************************************/

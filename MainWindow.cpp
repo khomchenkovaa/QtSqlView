@@ -540,7 +540,7 @@ void MainWindow::on_printReportButton_clicked()
     report.setHeader(header);
     report.setModel(&userquerymodel);
     report.setFooter(footer);
-    report.toPreview();
+    report.toPreviewDialog();
 }
 
 /******************************************************************/
@@ -572,7 +572,7 @@ void MainWindow::on_exportToPdfButton_clicked()
     report.setHeader(header);
     report.setModel(&userquerymodel);
     report.setFooter(footer);
-    report.toPdf(fileName);
+    report.toPdfFile(fileName);
 }
 
 /******************************************************************/
@@ -610,7 +610,7 @@ void MainWindow::on_printKdReportButton_clicked()
     }
 
     report.setModel(&userquerymodel);
-    report.toPreview();
+    report.toPreviewDialog();
 #endif
 }
 

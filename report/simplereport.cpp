@@ -33,7 +33,7 @@ void SimpleReport::setFooter(const QString &footer)
 
 /******************************************************************/
 
-void SimpleReport::printTo(QTextCursor *cursor) const
+void SimpleReport::toTextCursor(QTextCursor *cursor) const
 {
     if (!m_Title.isEmpty()) {
         cursor->insertHtml("<h1 align=\"center\">" + m_Title + "</h1>");
@@ -44,7 +44,7 @@ void SimpleReport::printTo(QTextCursor *cursor) const
         cursor->insertHtml(m_Header);
         cursor->insertBlock();
     }
-    ListReport::printTo(cursor);
+    ListReport::toTextCursor(cursor);
     if (!m_Footer.isEmpty()) {
         cursor->movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
         cursor->insertBlock();

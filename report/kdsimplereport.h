@@ -3,7 +3,7 @@
 
 #include "simplereport.h"
 
-#include <QDomDocument>
+#include <KDReports>
 
 class KdSimpleReport : public SimpleReport
 {
@@ -11,7 +11,13 @@ class KdSimpleReport : public SimpleReport
 public:
     explicit KdSimpleReport(QObject *parent = nullptr);
 
-    void toPreview() const;
+    bool toPrinter() const;
+    int  toPreviewDialog() const;
+    bool toPdfFile(const QString& fileName) const;
+    bool toHtmlFile(const QString& fileName) const;
+
+private:
+    void createReport(KDReports::Report* report) const;
 };
 
 #endif // KDSIMPLEREPORT_H
