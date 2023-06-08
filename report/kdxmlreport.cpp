@@ -16,9 +16,18 @@ KdXmlReport::KdXmlReport(QObject *parent)
 
 /******************************************************************/
 
-bool KdXmlReport::setXml(const QString &text, QString *errorMsg, int *errorLine, int *errorColumn)
+bool KdXmlReport::setXml(const QString &text, QString *err)
 {
-    return m_Xml.setContent(text, errorMsg, errorLine, errorColumn);
+    QString errorMsg;
+    int errorLine, errorColumn;
+    bool result = m_Xml.setContent(text, &errorMsg, &errorLine, &errorColumn);
+    if (!result && err) {
+        err->append(tr("Could not parse XML\n%1\n in line %2, column %3")
+                    .arg(errorMsg)
+                    .arg(errorLine)
+                    .arg(errorColumn));
+    }
+    return result;
 }
 
 /******************************************************************/

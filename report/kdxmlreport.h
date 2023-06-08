@@ -12,7 +12,7 @@ class KdXmlReport : public ListReport
 public:
     explicit KdXmlReport(QObject *parent = nullptr);
 
-    bool setXml(const QString& text, QString *errorMsg=nullptr, int *errorLine=nullptr, int *errorColumn=nullptr);
+    bool setXml(const QString& text, QString *err=nullptr);
 
     bool toPrinter() const;
     int toPreviewDialog() const;

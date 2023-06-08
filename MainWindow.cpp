@@ -599,13 +599,8 @@ void MainWindow::on_printKdReportButton_clicked()
 #ifdef KD_REPORTS
     KdXmlReport report;
     QString errorMsg;
-    int errorLine, errorColumn;
-    if (!report.setXml(ui->editXml->toPlainText(), &errorMsg, &errorLine, &errorColumn)) {
-        QMessageBox::critical(this, "QtSqlView",
-                              tr("Could not parse XML\n%1\n in line %2, column %3")
-                              .arg(errorMsg)
-                              .arg(errorLine)
-                              .arg(errorColumn));
+    if (!report.setXml(ui->editXml->toPlainText(), &errorMsg)) {
+        QMessageBox::critical(this, "QtSqlView", errorMsg);
         return;
     }
 
