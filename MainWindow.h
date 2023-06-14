@@ -99,7 +99,7 @@ private: // static
     static void saveToClipboard(QSqlQuery query, const QItemSelection &sellist, QClipboard::Mode mode);
     static bool launch(const QUrl &url, const QString &client);
     static QStringList findBindings(const QString &sql);
-    static QVariantMap setBindValues(const QStringList &params);
+    static QVariantMap setBindValues(const QStringList &params, DbConnection *dbc);
 
 public:
     DbListModel	    dblist;

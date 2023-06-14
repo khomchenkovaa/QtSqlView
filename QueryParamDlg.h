@@ -8,19 +8,24 @@ class QComboBox;
 class QGridLayout;
 QT_END_NAMESPACE
 
+class DbConnection;
+
 class QueryParamDlg : public QDialog
 {
     Q_OBJECT
 
     enum Type {
-        Null, String, Integer, Real, Date, DateTime
+        Null, String, Integer, Real, Date, DateTime, Ref
     };
 
 public:
-    explicit QueryParamDlg(const QStringList &params, QWidget *parent = nullptr);
+    explicit QueryParamDlg(const QStringList &params, DbConnection *dbc, QWidget *parent = nullptr);
     ~QueryParamDlg();
 
     QVariantMap bindings() const;
+
+private Q_SLOTS:
+    void fillReference(QComboBox *cmb);
 
 private:
     void setupUI();
@@ -33,6 +38,7 @@ private:
 private:
     QStringList m_Params;
     QGridLayout *ui_Grid;
+    DbConnection *m_Db;
 };
 
 #endif // QUERYPARAMDLG_H

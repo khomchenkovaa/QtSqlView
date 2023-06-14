@@ -1,17 +1,25 @@
 #include "QueryParamDlg.h"
 
+#include "dbconnection.h"
+
 #include <QVariant>
 
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QSpinBox>
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QDateEdit>
-#include <QtWidgets/QDateTimeEdit>
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QVBoxLayout>
+#include <QGridLayout>
+#include <QLabel>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
+#include <QDateEdit>
+#include <QDateTimeEdit>
+#include <QDialogButtonBox>
+#include <QVBoxLayout>
+
+#include <QInputDialog>
+#include <QMessageBox>
+
+#include <QSqlQuery>
+#include <QSqlError>
 
 enum {
     NameColumn,
@@ -21,10 +29,11 @@ enum {
 
 /******************************************************************/
 
-QueryParamDlg::QueryParamDlg(const QStringList &params, QWidget *parent) :
+QueryParamDlg::QueryParamDlg(const QStringList &params, DbConnection *dbc, QWidget *parent) :
     QDialog(parent)
 {
     m_Params = params;
+    m_Db = dbc;
     setupUI();
 }
 
@@ -45,6 +54,40 @@ QVariantMap QueryParamDlg::bindings() const
         result.insert(param, value);
     }
     return result;
+}
+
+/******************************************************************/
+
+void QueryParamDlg::fillReference(QComboBox *cmb)
+{
+    const QSignalBlocker blocker(cmb);
+    cmb->clear();
+
+    QString sql;
+    bool ok = false;
+    bool done = false;
+    while (!done) {
+        sql = QInputDialog::getMultiLineText(this, tr("Reference"), tr("SQL"), sql, &ok);
+        if (!ok) break; // canceled
+        if (sql.isEmpty()) {
+            QMessageBox::warning(this, tr("Reference"),
+                                 tr("Error in SQL\nSQL text is Empty"));
+
+        } else {
+            QSqlQuery query(sql, m_Db->db);
+            if (query.isSelect()) {
+                while (query.next()) {
+                    cmb->addItem(query.value(1).toString(), query.value(0));
+                }
+                done = true;
+            } else {
+                 if (query.lastError().type() != QSqlError::NoError) {
+                    QMessageBox::warning(this, tr("Reference"),
+                                         tr("Error in SQL\n%1").arg(query.lastError().text()));
+                }
+            }
+        }
+    }
 }
 
 /******************************************************************/
@@ -91,7 +134,8 @@ QComboBox *QueryParamDlg::createCmb(const QString &param, int row, QWidget *pare
             << tr("Integer")
             << tr("Real")
             << tr("Date")
-            << tr("Date and Time");
+            << tr("Date and Time")
+            << tr("Reference");
     QComboBox *result = new QComboBox(parent);
     result->addItems(items);
     result->setCurrentIndex(Type::String);
@@ -156,6 +200,12 @@ QWidget *QueryParamDlg::createValueEditor(const QString &param, Type type, QWidg
         sizePolicy.setHeightForWidth(result->sizePolicy().hasHeightForWidth());
         result->setSizePolicy(sizePolicy);
         break;
+    case Type::Ref:
+        result = new QComboBox(parent);
+        sizePolicy.setHeightForWidth(result->sizePolicy().hasHeightForWidth());
+        result->setSizePolicy(sizePolicy);
+        fillReference(qobject_cast<QComboBox*>(result));
+        break;
     default:
         result = new QWidget(parent);
     }
@@ -179,6 +229,11 @@ QVariant QueryParamDlg::getValue(const QString &param) const
     QString objName = editorName(param);
     QWidget *editor = findChild<QWidget *>(objName);
     if (!editor) return QVariant();
+
+    QComboBox *cmbRef = qobject_cast<QComboBox*>(editor);
+    if (cmbRef) {
+        return cmbRef->currentData();
+    }
 
     QLineEdit *stringEdit = qobject_cast<QLineEdit*>(editor);
     if (stringEdit) {

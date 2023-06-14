@@ -393,7 +393,7 @@ void MainWindow::on_goQueryButton_clicked()
     // prepare for bindings
     QString sqlText = ui->editQuery->toPlainText();
     QStringList params = findBindings(sqlText);
-    QVariantMap bindings = setBindValues(params);
+    QVariantMap bindings = setBindValues(params, dbc);
 
     // initialize new sql query object   
     QSqlQuery query(dbc->db);
@@ -814,13 +814,13 @@ QStringList MainWindow::findBindings(const QString &sql)
 
 /******************************************************************/
 
-QVariantMap MainWindow::setBindValues(const QStringList &params)
+QVariantMap MainWindow::setBindValues(const QStringList &params, DbConnection *dbc)
 {
     if (params.isEmpty()) {
         return QVariantMap();
     }
 
-    QueryParamDlg dlg(params);
+    QueryParamDlg dlg(params, dbc);
     if (dlg.exec()) {
         return dlg.bindings();
     }
