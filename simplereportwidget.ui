@@ -72,7 +72,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="printReportButton">
+          <widget class="QToolButton" name="printButton">
            <property name="toolTip">
             <string>Print Report</string>
            </property>
@@ -86,7 +86,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="exportToPdfButton">
+          <widget class="QToolButton" name="previewButton">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="exportButton">
            <property name="toolTip">
             <string>Export Report to PDF</string>
            </property>
