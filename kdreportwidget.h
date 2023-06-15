@@ -4,6 +4,7 @@
 #include "listreport.h"
 
 #include <QWidget>
+#include <QIcon>
 
 QT_BEGIN_NAMESPACE
 class QSqlQueryModel;
@@ -41,6 +42,9 @@ private:
     void setupUI();
     void setupActions();
     QSharedPointer<ListReport> createReport();
+
+public: // static
+    QIcon iconForMimeType(const QString& mime, const QIcon &fallback = QIcon());
 
 private:
     Ui::KdReportWidget *ui;

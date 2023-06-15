@@ -10,6 +10,9 @@
 #include <QFileDialog>
 #include <QTextStream>
 
+#include <QMimeDatabase>
+#include <QMimeType>
+
 #include <QSqlQueryModel>
 
 #ifdef KD_REPORTS
@@ -211,9 +214,9 @@ void KdReportWidget::setupActions()
     auto actPrint = new QAction(QIcon::fromTheme("printer"), tr("Print"), this);
     ui->printButton->setDefaultAction(actPrint);
 
-    auto actPdf = new QAction(QIcon::fromTheme("x-office-document"), tr("Export to PDF"), this);
-    auto actHtml = new QAction(QIcon::fromTheme("text-html"), tr("Export to HTML"), this);
-    auto actCsv = new QAction(QIcon::fromTheme("x-office-spreadsheet"), tr("Export to CSV"), this);
+    auto actPdf  = new QAction(iconForMimeType("application/pdf"), tr("Export to PDF"), this);
+    auto actHtml = new QAction(iconForMimeType("text/html"), tr("Export to HTML"), this);
+    auto actCsv  = new QAction(iconForMimeType("text/csv"), tr("Export to CSV"), this);
 
     auto menu = new QMenu(tr("Export"),this);
     menu->setIcon(QIcon::fromTheme("document-open"));
@@ -252,6 +255,21 @@ QSharedPointer<ListReport> KdReportWidget::createReport()
 #else
     return Q_NULLPTR;
 #endif
+}
+
+/******************************************************************/
+
+QIcon KdReportWidget::iconForMimeType(const QString &mime, const QIcon &fallback)
+{
+    QMimeDatabase db;
+    QMimeType t = db.mimeTypeForName(mime);
+    if (QIcon::hasThemeIcon(t.iconName())) {
+        return QIcon::fromTheme(t.iconName());
+    }
+    if (QIcon::hasThemeIcon(t.genericIconName())) {
+        return QIcon::fromTheme(t.genericIconName());
+    }
+    return fallback;
 }
 
 /******************************************************************/
