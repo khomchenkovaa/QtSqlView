@@ -30,17 +30,20 @@ SOURCES += \
     MainWindow.cpp \
     QueryParamDlg.cpp \
     TableHeadersDlg.cpp \
+    kdreportwidget.cpp \
     main.cpp
 
 HEADERS += \
     ConnectionDlg.h \
     MainWindow.h \
     QueryParamDlg.h \
-    TableHeadersDlg.h
+    TableHeadersDlg.h \
+    kdreportwidget.h
 
 FORMS += \
     ConnectionDlg.ui \
-    MainWindow.ui
+    MainWindow.ui \
+    kdreportwidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

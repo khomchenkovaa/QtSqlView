@@ -26,6 +26,8 @@ namespace Ui {
 class MainWindow;
 }
 
+class KdReportWidget;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -73,27 +75,19 @@ private slots:
     void on_goQueryButton_clicked();
     void on_copyQueryDataButton_clicked();
     void on_toScvButton_clicked();
-    void on_setHeadersButton_clicked();
     void on_clearQueryButton_clicked();
     void on_loadQueryButton_clicked();
     void on_saveQueryButton_clicked();
 
     // *** Simple Report Tab ***
-    void on_setTblHeadersButton_clicked();
     void on_printReportButton_clicked();
     void on_exportToPdfButton_clicked();
     void on_clearSrPropertiesButton_clicked();
 
-    // *** KD Report Tab ***
-    void on_setKdHeadersButton_clicked();
-    void on_printKdReportButton_clicked();
-    void on_clearXmlButton_clicked();
-    void on_loadXmlButton_clicked();
-    void on_saveXmlButton_clicked();
+    void setTableHeaders();
 
 private:
     void setupUI();
-    void setTableHeaders();
 
 private: // static
     static void saveToClipboard(QSqlQuery query, const QItemSelection &sellist, QClipboard::Mode mode);
@@ -107,6 +101,7 @@ public:
     int			    datatablemodel_lastsort;
     DbSchemaModel   schemamodel;
     QSqlQueryModel  userquerymodel;
+    KdReportWidget *kdReportTab;
 
 private:
     Ui::MainWindow *ui;

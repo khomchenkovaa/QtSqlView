@@ -5,6 +5,7 @@
 #include "xmlhighlighter.h"
 #include "xtextedit.h"
 
+#include "kdreportwidget.h"
 #include "ConnectionDlg.h"
 #include "QueryParamDlg.h"
 #include "TableHeadersDlg.h"
@@ -414,8 +415,9 @@ void MainWindow::on_goQueryButton_clicked()
             ui->querySrTable->resizeColumnsToContents();
             ui->querySrTable->resizeRowsToContents();
             ui->tabWidget->setTabEnabled(KdReportTab, true);
-            ui->queryKdTable->resizeColumnsToContents();
-            ui->queryKdTable->resizeRowsToContents();
+            if (kdReportTab) {
+                kdReportTab->updateView();
+            }
         } else {
             ui->queryTable->hide();
             ui->tabWidget->setTabEnabled(SimpleReportTab, false);
@@ -451,13 +453,6 @@ void MainWindow::on_toScvButton_clicked()
     if (ui->queryTable->isHidden()) return;
 
     ListReport::exportToCsv(&userquerymodel);
-}
-
-/******************************************************************/
-
-void MainWindow::on_setHeadersButton_clicked()
-{
-    setTableHeaders();
 }
 
 /******************************************************************/
@@ -506,13 +501,6 @@ void MainWindow::on_saveQueryButton_clicked()
 
     QTextStream out(&file);
     out << ui->editQuery->toPlainText();
-}
-
-/******************************************************************/
-
-void MainWindow::on_setTblHeadersButton_clicked()
-{
-    setTableHeaders();
 }
 
 /******************************************************************/
@@ -587,74 +575,28 @@ void MainWindow::on_clearSrPropertiesButton_clicked()
 
 /******************************************************************/
 
-void MainWindow::on_setKdHeadersButton_clicked()
+void MainWindow::setTableHeaders()
 {
-    setTableHeaders();
-}
-
-/******************************************************************/
-
-void MainWindow::on_printKdReportButton_clicked()
-{
-#ifdef KD_REPORTS
-    KdXmlReport report;
-    QString errorMsg;
-    if (!report.setXml(ui->editXml->toPlainText(), &errorMsg)) {
-        QMessageBox::critical(this, "QtSqlView", errorMsg);
+    QSqlRecord rec = userquerymodel.record();
+    if (rec.isEmpty()) {
         return;
     }
-
-    report.setModel(&userquerymodel);
-    report.toPreviewDialog();
-#endif
-}
-
-/******************************************************************/
-
-void MainWindow::on_clearXmlButton_clicked()
-{
-    ui->editXml->clear();
-}
-
-/******************************************************************/
-
-void MainWindow::on_loadXmlButton_clicked()
-{
-    QString filename = QFileDialog::getOpenFileName(this, tr("Choose a XML file"),
-                                                    QString(),
-                                                    "XML files (*.xml);;All Files (*.*)");
-
-    if (filename.isEmpty()) return;
-
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "QtSqlView",
-                              tr("Could not load XML file"));
-        return;
+    QStringList fields;
+    for (int i=0; i < rec.count(); ++i) {
+        fields << rec.field(i).name();
     }
-
-    ui->editXml->setPlainText( file.readAll() );
-}
-
-/******************************************************************/
-
-void MainWindow::on_saveXmlButton_clicked()
-{
-    QString filename = QFileDialog::getSaveFileName(this, tr("Choose a XML file"),
-                                                    QString(),
-                                                    "XML files (*.xml);;All Files (*.*)");
-
-    if (filename.isEmpty()) return;
-
-    QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "QtSqlView",
-                              tr("Could not save XML file"));
-        return;
+    QStringList headers;
+    for (int i=0; i < userquerymodel.columnCount(); ++i) {
+        headers << userquerymodel.headerData(i, Qt::Horizontal).toString();
     }
-
-    QTextStream out(&file);
-    out << ui->editXml->toPlainText();
+    TableHeadersDlg dlg(fields);
+    dlg.setHeaders(headers);
+    if (dlg.exec() == QDialog::Accepted) {
+        headers = dlg.headers();
+        for (int i=0; i < headers.size(); ++i) {
+            userquerymodel.setHeaderData(i, Qt::Horizontal, headers.at(i));
+        }
+    }
 }
 
 /******************************************************************/
@@ -691,6 +633,9 @@ void MainWindow::setupUI()
     ui->queryTable->hide();
     ui->queryTable->setModel(&userquerymodel);
 
+    connect(ui->setHeadersButton, &QToolButton::clicked,
+            this, &MainWindow::setTableHeaders);
+
     // configure simple report tab
     ui->tabWidget->setTabEnabled(SimpleReportTab, false);
     ui->querySrTable->setModel(&userquerymodel);
@@ -710,51 +655,17 @@ void MainWindow::setupUI()
     ui->exportToPdfButton->setHidden(true);
 #endif
 
+    connect(ui->setTblHeadersButton, &QToolButton::clicked,
+            this, &MainWindow::setTableHeaders);
+
     // configure KD report tab
+    kdReportTab = new KdReportWidget(this);
+    kdReportTab->setUserQueryModel(&userquerymodel);
+    ui->tabWidget->addTab(kdReportTab, QIcon::fromTheme("document-print"), tr("KD Report"));
     ui->tabWidget->setTabEnabled(KdReportTab, false);
 
-    ui->editXml->setFont(font);
-
-    new XmlHighlighter(ui->editXml->document());
-
-    const QString defaultXml =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            "<report xmlns=\"https://www.kdab.com/kdreports\">\n"
-            "  <table model=\"TableModel\" verticalHeaderVisible=\"false\"/>\n"
-            "</report>";
-    ui->editXml->setPlainText(defaultXml);
-
-    ui->queryKdTable->setModel(&userquerymodel);
-
-#ifndef KD_REPORTS
-    ui->printKdReportButton->setHidden(true);
-#endif
-}
-
-/******************************************************************/
-
-void MainWindow::setTableHeaders()
-{
-    QSqlRecord rec = userquerymodel.record();
-    if (rec.isEmpty()) {
-        return;
-    }
-    QStringList fields;
-    for (int i=0; i < rec.count(); ++i) {
-        fields << rec.field(i).name();
-    }
-    QStringList headers;
-    for (int i=0; i < userquerymodel.columnCount(); ++i) {
-        headers << userquerymodel.headerData(i, Qt::Horizontal).toString();
-    }
-    TableHeadersDlg dlg(fields);
-    dlg.setHeaders(headers);
-    if (dlg.exec() == QDialog::Accepted) {
-        headers = dlg.headers();
-        for (int i=0; i < headers.size(); ++i) {
-            userquerymodel.setHeaderData(i, Qt::Horizontal, headers.at(i));
-        }
-    }
+    connect(kdReportTab, &KdReportWidget::tableHeaders,
+            this, &MainWindow::setTableHeaders);
 }
 
 /******************************************************************/
