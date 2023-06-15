@@ -2,9 +2,8 @@
 #include "ui_MainWindow.h"
 
 #include "sqlhighlighter.h"
-#include "xmlhighlighter.h"
-#include "xtextedit.h"
 
+#include "simplereportwidget.h"
 #include "kdreportwidget.h"
 #include "ConnectionDlg.h"
 #include "QueryParamDlg.h"
@@ -25,11 +24,7 @@
 #include <QtPrintSupport/QPrintDialog>
 #include <QtPrintSupport/QPrintPreviewDialog>
 
-#include "simplereport.h"
-#ifdef KD_REPORTS
-#include "kdsimplereport.h"
-#include "kdxmlreport.h"
-#endif
+#include "listreport.h"
 
 #include <QDebug>
 
@@ -412,8 +407,9 @@ void MainWindow::on_goQueryButton_clicked()
             ui->queryTable->resizeColumnsToContents();
             ui->queryTable->resizeRowsToContents();
             ui->tabWidget->setTabEnabled(SimpleReportTab, true);
-            ui->querySrTable->resizeColumnsToContents();
-            ui->querySrTable->resizeRowsToContents();
+            if (simpleReportTab) {
+                simpleReportTab->updateView();
+            }
             ui->tabWidget->setTabEnabled(KdReportTab, true);
             if (kdReportTab) {
                 kdReportTab->updateView();
@@ -505,76 +501,6 @@ void MainWindow::on_saveQueryButton_clicked()
 
 /******************************************************************/
 
-void MainWindow::on_printReportButton_clicked()
-{
-    QString title = ui->editSrTitle->text();
-    QString header;
-    QString footer;
-    auto textSrHeader = ui->tabSimpleReport->findChild<XTextEdit*>("textSrHeader");
-    if (textSrHeader) {
-        header = textSrHeader->text();
-    }
-    auto textSrFooter = ui->tabSimpleReport->findChild<XTextEdit*>("textSrFooter");
-    if (textSrFooter) {
-        footer = textSrFooter->text();
-    }
-
-#ifdef KD_REPORTS
-    KdSimpleReport report;
-#else
-    SimpleReport report;
-#endif
-    report.setTitle(title);
-    report.setHeader(header);
-    report.setModel(&userquerymodel);
-    report.setFooter(footer);
-    report.toPreviewDialog();
-}
-
-/******************************************************************/
-
-void MainWindow::on_exportToPdfButton_clicked()
-{
-    QString title = ui->editSrTitle->text();
-    QString header;
-    QString footer;
-    auto textSrHeader = ui->tabSimpleReport->findChild<XTextEdit*>("textSrHeader");
-    if (textSrHeader) {
-        header = textSrHeader->text();
-    }
-    auto textSrFooter = ui->tabSimpleReport->findChild<XTextEdit*>("textSrFooter");
-    if (textSrFooter) {
-        footer = textSrFooter->text();
-    }
-
-    QFileDialog fileDialog(this, tr("Export PDF"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
-    fileDialog.setDefaultSuffix("pdf");
-    if (fileDialog.exec() != QDialog::Accepted)
-        return;
-    QString fileName = fileDialog.selectedFiles().first();
-
-    SimpleReport report;
-    report.setTitle(title);
-    report.setHeader(header);
-    report.setModel(&userquerymodel);
-    report.setFooter(footer);
-    report.toPdfFile(fileName);
-}
-
-/******************************************************************/
-
-void MainWindow::on_clearSrPropertiesButton_clicked()
-{
-    ui->editSrTitle->clear();
-    for (auto widget : ui->tabSimpleReport->findChildren<XTextEdit*>()) {
-        widget->clear();
-    }
-}
-
-/******************************************************************/
-
 void MainWindow::setTableHeaders()
 {
     QSqlRecord rec = userquerymodel.record();
@@ -637,25 +563,12 @@ void MainWindow::setupUI()
             this, &MainWindow::setTableHeaders);
 
     // configure simple report tab
+    simpleReportTab = new SimpleReportWidget(this);
+    simpleReportTab->setUserQueryModel(&userquerymodel);
+    ui->tabWidget->addTab(simpleReportTab, QIcon::fromTheme("printer"), tr("Simple Report"));
     ui->tabWidget->setTabEnabled(SimpleReportTab, false);
-    ui->querySrTable->setModel(&userquerymodel);
 
-    ui->formSimpleReport->removeRow(2);
-    ui->formSimpleReport->removeRow(1);
-
-    auto textSrHeader = new XTextEdit(this);
-    textSrHeader->setObjectName("textSrHeader");
-    ui->formSimpleReport->addRow(tr("Header"), textSrHeader);
-
-    auto textSrFooter = new XTextEdit(this);
-    textSrFooter->setObjectName("textSrFooter");
-    ui->formSimpleReport->addRow(tr("Footer"), textSrFooter);
-
-#ifdef KD_REPORTS
-    ui->exportToPdfButton->setHidden(true);
-#endif
-
-    connect(ui->setTblHeadersButton, &QToolButton::clicked,
+    connect(simpleReportTab, &SimpleReportWidget::tableHeaders,
             this, &MainWindow::setTableHeaders);
 
     // configure KD report tab

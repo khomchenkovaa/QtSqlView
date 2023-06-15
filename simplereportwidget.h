@@ -1,5 +1,5 @@
-#ifndef KDREPORTWIDGET_H
-#define KDREPORTWIDGET_H
+#ifndef SIMPLEREPORTWIDGET_H
+#define SIMPLEREPORTWIDGET_H
 
 #include <QWidget>
 
@@ -8,16 +8,16 @@ class QSqlQueryModel;
 QT_END_NAMESPACE
 
 namespace Ui {
-class KdReportWidget;
+class SimpleReportWidget;
 }
 
-class KdReportWidget : public QWidget
+class SimpleReportWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit KdReportWidget(QWidget *parent = nullptr);
-    ~KdReportWidget();
+    explicit SimpleReportWidget(QWidget *parent = nullptr);
+    ~SimpleReportWidget();
 
     void setUserQueryModel(QSqlQueryModel *model);
     void updateView();
@@ -27,16 +27,15 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void printReport();
-    void clearXml();
-    void loadXml();
-    void saveXml();
+    void exportToPdf();
+    void clearFields();
 
 private:
     void setupUI();
 
 private:
-    Ui::KdReportWidget *ui;
+    Ui::SimpleReportWidget *ui;
     QSqlQueryModel *m_Model;
 };
 
-#endif // KDREPORTWIDGET_H
+#endif // SIMPLEREPORTWIDGET_H

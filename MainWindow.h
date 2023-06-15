@@ -26,6 +26,7 @@ namespace Ui {
 class MainWindow;
 }
 
+class SimpleReportWidget;
 class KdReportWidget;
 
 class MainWindow : public QMainWindow
@@ -79,11 +80,6 @@ private slots:
     void on_loadQueryButton_clicked();
     void on_saveQueryButton_clicked();
 
-    // *** Simple Report Tab ***
-    void on_printReportButton_clicked();
-    void on_exportToPdfButton_clicked();
-    void on_clearSrPropertiesButton_clicked();
-
     void setTableHeaders();
 
 private:
@@ -101,7 +97,9 @@ public:
     int			    datatablemodel_lastsort;
     DbSchemaModel   schemamodel;
     QSqlQueryModel  userquerymodel;
-    KdReportWidget *kdReportTab;
+
+    SimpleReportWidget *simpleReportTab;
+    KdReportWidget     *kdReportTab;
 
 private:
     Ui::MainWindow *ui;

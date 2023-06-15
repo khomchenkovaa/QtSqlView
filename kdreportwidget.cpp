@@ -51,14 +51,7 @@ void KdReportWidget::updateView()
 
 /******************************************************************/
 
-void KdReportWidget::on_setKdHeadersButton_clicked()
-{
-    emit tableHeaders();
-}
-
-/******************************************************************/
-
-void KdReportWidget::on_printKdReportButton_clicked()
+void KdReportWidget::printReport()
 {
 #ifdef KD_REPORTS
     KdXmlReport report;
@@ -75,14 +68,14 @@ void KdReportWidget::on_printKdReportButton_clicked()
 
 /******************************************************************/
 
-void KdReportWidget::on_clearXmlButton_clicked()
+void KdReportWidget::clearXml()
 {
     ui->editXml->clear();
 }
 
 /******************************************************************/
 
-void KdReportWidget::on_loadXmlButton_clicked()
+void KdReportWidget::loadXml()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Choose a XML file"),
                                                     QString(),
@@ -102,7 +95,7 @@ void KdReportWidget::on_loadXmlButton_clicked()
 
 /******************************************************************/
 
-void KdReportWidget::on_saveXmlButton_clicked()
+void KdReportWidget::saveXml()
 {
     QString filename = QFileDialog::getSaveFileName(this, tr("Choose a XML file"),
                                                     QString(),
@@ -142,6 +135,17 @@ void KdReportWidget::setupUI()
 #ifndef KD_REPORTS
     ui->printKdReportButton->setHidden(true);
 #endif
+
+    connect(ui->setKdHeadersButton, &QToolButton::clicked,
+            this, &KdReportWidget::tableHeaders);
+    connect(ui->printKdReportButton, &QToolButton::clicked,
+            this, &KdReportWidget::printReport);
+    connect(ui->clearXmlButton, &QToolButton::clicked,
+            this, &KdReportWidget::clearXml);
+    connect(ui->loadXmlButton, &QToolButton::clicked,
+            this, &KdReportWidget::loadXml);
+    connect(ui->saveXmlButton, &QToolButton::clicked,
+            this, &KdReportWidget::saveXml);
 }
 
 /******************************************************************/
