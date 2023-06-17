@@ -583,6 +583,27 @@ void MainWindow::setupUI()
 
 /******************************************************************/
 
+QVariantMap MainWindow::setBindValues(const QStringList &params, DbConnection *dbc)
+{
+    if (params.isEmpty()) {
+        return QVariantMap();
+    }
+
+    QueryParamDlg dlg(dbc);
+    dlg.setBindSql(bindRef);
+    dlg.setBindTypes(bindTypes);
+    dlg.setupParams(params);
+    if (dlg.exec()) {
+        bindTypes = dlg.bindTypes();
+        bindRef = dlg.bindSql();
+        return dlg.bindings(params);
+    }
+
+    return QVariantMap();
+}
+
+/******************************************************************/
+
 void MainWindow::saveToClipboard(QSqlQuery query, const QItemSelection &sellist, QClipboard::Mode mode)
 {
     if (!query.isSelect() || !query.isActive()) {
@@ -634,22 +655,6 @@ QStringList MainWindow::findBindings(const QString &sql)
         }
     }
     return result;
-}
-
-/******************************************************************/
-
-QVariantMap MainWindow::setBindValues(const QStringList &params, DbConnection *dbc)
-{
-    if (params.isEmpty()) {
-        return QVariantMap();
-    }
-
-    QueryParamDlg dlg(params, dbc);
-    if (dlg.exec()) {
-        return dlg.bindings();
-    }
-
-    return QVariantMap();
 }
 
 /******************************************************************/

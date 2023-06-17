@@ -1,6 +1,7 @@
 #ifndef QUERYPARAMDLG_H
 #define QUERYPARAMDLG_H
 
+#include <QVariantMap>
 #include <QDialog>
 
 QT_BEGIN_NAMESPACE
@@ -19,25 +20,35 @@ class QueryParamDlg : public QDialog
     };
 
 public:
-    explicit QueryParamDlg(const QStringList &params, DbConnection *dbc, QWidget *parent = nullptr);
+    explicit QueryParamDlg(DbConnection *dbc, QWidget *parent = nullptr);
     ~QueryParamDlg();
 
-    QVariantMap bindings() const;
+    void setBindSql(const QVariantMap &sqlRef);
+    QVariantMap bindSql() const;
+
+    void setBindTypes(const QVariantMap &map);
+    QVariantMap bindTypes();
+
+    void setupParams(const QStringList& params);
+    QVariantMap bindings(const QStringList& params) const;
 
 private Q_SLOTS:
-    void fillReference(QComboBox *cmb);
+    void fillReference(QComboBox *cmb, const QString& param);
 
 private:
     void setupUI();
-    QComboBox *createCmb(const QString &param, int row, QWidget *parent = nullptr);
+    QComboBox *createCmb(const QString &param, int row, QWidget *parent = Q_NULLPTR);
     void updateValueEditor(const QString &param, int row, Type type);
-    QWidget *createValueEditor(const QString &param, Type type, QWidget *parent = nullptr);
+    QWidget *createValueEditor(const QString &param, Type type, QWidget *parent = Q_NULLPTR);
     QString editorName(const QString &param) const;
+    QString comboName(const QString &param) const;
+    bool fillSqlRef(QComboBox *cmb, const QString& sql, QString *err = Q_NULLPTR);
     QVariant getValue(const QString &param) const;
 
 private:
-    QStringList m_Params;
-    QGridLayout *ui_Grid;
+    QVariantMap   m_BndTypes;
+    QVariantMap   m_RefSql;
+    QGridLayout  *ui_Grid;
     DbConnection *m_Db;
 };
 

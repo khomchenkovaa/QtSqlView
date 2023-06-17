@@ -29,10 +29,9 @@ enum {
 
 /******************************************************************/
 
-QueryParamDlg::QueryParamDlg(const QStringList &params, DbConnection *dbc, QWidget *parent) :
+QueryParamDlg::QueryParamDlg(DbConnection *dbc, QWidget *parent) :
     QDialog(parent)
 {
-    m_Params = params;
     m_Db = dbc;
     setupUI();
 }
@@ -46,10 +45,73 @@ QueryParamDlg::~QueryParamDlg()
 
 /******************************************************************/
 
-QVariantMap QueryParamDlg::bindings() const
+void QueryParamDlg::setBindSql(const QVariantMap &sqlRef)
+{
+    QMapIterator<QString, QVariant> i(sqlRef);
+    while (i.hasNext()) {
+        i.next();
+        m_RefSql.insert(i.key(), i.value());
+    }
+}
+
+/******************************************************************/
+
+QVariantMap QueryParamDlg::bindSql() const
 {
     QVariantMap result;
-    for (auto param : m_Params) {
+    QMapIterator<QString, QVariant> i(m_RefSql);
+    while (i.hasNext()) {
+        i.next();
+        result.insert(i.key(), i.value());
+    }
+    return result;
+}
+
+/******************************************************************/
+
+void QueryParamDlg::setBindTypes(const QVariantMap &map)
+{
+    QMapIterator<QString, QVariant> i(map);
+    while (i.hasNext()) {
+        i.next();
+        m_BndTypes.insert(i.key(), i.value());
+    }
+}
+
+/******************************************************************/
+
+QVariantMap QueryParamDlg::bindTypes()
+{
+    QVariantMap result;
+    QMapIterator<QString, QVariant> i(m_BndTypes);
+    while (i.hasNext()) {
+        i.next();
+        result.insert(i.key(), i.value());
+    }
+    return result;
+}
+
+/******************************************************************/
+
+void QueryParamDlg::setupParams(const QStringList &params)
+{
+    for (QString param : params) {
+        const int row = ui_Grid->rowCount();
+        ui_Grid->addWidget(new QLabel(param, this), row, NameColumn);
+        QComboBox *cmbType = createCmb(param, row, this);
+        Type type = static_cast<Type>(cmbType->currentIndex());
+        ui_Grid->addWidget(cmbType, row, TypeColumn);
+        QWidget *editor = createValueEditor(param, type, this);
+        ui_Grid->addWidget(editor, row, ValueColumn);
+    }
+}
+
+/******************************************************************/
+
+QVariantMap QueryParamDlg::bindings(const QStringList &params) const
+{
+    QVariantMap result;
+    for (auto param : params) {
         QVariant value = getValue(param);
         result.insert(param, value);
     }
@@ -58,33 +120,26 @@ QVariantMap QueryParamDlg::bindings() const
 
 /******************************************************************/
 
-void QueryParamDlg::fillReference(QComboBox *cmb)
+void QueryParamDlg::fillReference(QComboBox *cmb, const QString &param)
 {
-    const QSignalBlocker blocker(cmb);
-    cmb->clear();
-
     QString sql;
     bool ok = false;
-    bool done = false;
+    bool done = fillSqlRef(cmb, m_RefSql.value(param).toString());
     while (!done) {
         sql = QInputDialog::getMultiLineText(this, tr("Reference"), tr("SQL"), sql, &ok);
         if (!ok) break; // canceled
         if (sql.isEmpty()) {
             QMessageBox::warning(this, tr("Reference"),
                                  tr("Error in SQL\nSQL text is Empty"));
-
         } else {
-            QSqlQuery query(sql, m_Db->db);
-            if (query.isSelect()) {
-                while (query.next()) {
-                    cmb->addItem(query.value(1).toString(), query.value(0));
-                }
-                done = true;
-            } else {
-                 if (query.lastError().type() != QSqlError::NoError) {
-                    QMessageBox::warning(this, tr("Reference"),
-                                         tr("Error in SQL\n%1").arg(query.lastError().text()));
-                }
+            QString err;
+            done = fillSqlRef(cmb, sql, &err);
+            if (done) {
+                m_RefSql.insert(param, sql);
+            }
+            if (!err.isEmpty()) {
+                QMessageBox::warning(this, tr("Reference"),
+                                     tr("Error in SQL\n%1").arg(err));
             }
         }
     }
@@ -100,14 +155,6 @@ void QueryParamDlg::setupUI()
     ui_Grid->addWidget(new QLabel(tr("Name"), this), 0, NameColumn);
     ui_Grid->addWidget(new QLabel(tr("Type"), this), 0, TypeColumn);
     ui_Grid->addWidget(new QLabel(tr("Value"), this), 0, ValueColumn);
-    for (QString param : m_Params) {
-        const int row = ui_Grid->rowCount();
-        ui_Grid->addWidget(new QLabel(param, this), row, NameColumn);
-        QComboBox *cmbType = createCmb(param, row, this);
-        ui_Grid->addWidget(cmbType, row, TypeColumn);
-        QWidget *editor = createValueEditor(param, Type::String, this);
-        ui_Grid->addWidget(editor, row, ValueColumn);
-    }
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(this);
     buttonBox->setOrientation(Qt::Horizontal);
@@ -136,12 +183,17 @@ QComboBox *QueryParamDlg::createCmb(const QString &param, int row, QWidget *pare
             << tr("Date")
             << tr("Date and Time")
             << tr("Reference");
+    Type typeSelected = static_cast<Type>(m_BndTypes.value(param, Type::String).toInt());
+
     QComboBox *result = new QComboBox(parent);
-    result->addItems(items);
-    result->setCurrentIndex(Type::String);
+    result->setObjectName(comboName(param));
+    result->addItems(items);   
+    result->setCurrentIndex(typeSelected);
 
     connect(result, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, param, row](int type){
-        updateValueEditor(param, row, static_cast<Type>(type));
+        Type t = static_cast<Type>(type);
+        m_BndTypes.insert(param, t);
+        updateValueEditor(param, row, t);
     });
 
     return result;
@@ -204,7 +256,7 @@ QWidget *QueryParamDlg::createValueEditor(const QString &param, Type type, QWidg
         result = new QComboBox(parent);
         sizePolicy.setHeightForWidth(result->sizePolicy().hasHeightForWidth());
         result->setSizePolicy(sizePolicy);
-        fillReference(qobject_cast<QComboBox*>(result));
+        fillReference(qobject_cast<QComboBox*>(result), param);
         break;
     default:
         result = new QWidget(parent);
@@ -220,6 +272,39 @@ QString QueryParamDlg::editorName(const QString &param) const
     QString result(param);
     result.remove(":");
     return result;
+}
+
+/******************************************************************/
+
+QString QueryParamDlg::comboName(const QString &param) const
+{
+    QString result(param);
+    result.replace(":","cmb_");
+    return result;
+}
+
+/******************************************************************/
+
+bool QueryParamDlg::fillSqlRef(QComboBox *cmb, const QString &sql, QString *err)
+{
+    if (!cmb) return false;
+    if (sql.isEmpty()) return false;
+
+    const QSignalBlocker blocker(cmb);
+    cmb->clear();
+
+    QSqlQuery query(sql, m_Db->db);
+    if (query.isSelect()) {
+        while (query.next()) {
+            cmb->addItem(query.value(1).toString(), query.value(0));
+        }
+        return true;
+    }
+
+    if (query.lastError().type() != QSqlError::NoError && err) {
+        err->append(query.lastError().text());
+    }
+    return false;
 }
 
 /******************************************************************/

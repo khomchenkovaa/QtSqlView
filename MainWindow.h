@@ -84,12 +84,12 @@ private slots:
 
 private:
     void setupUI();
+    QVariantMap setBindValues(const QStringList &params, DbConnection *dbc);
 
 private: // static
     static void saveToClipboard(QSqlQuery query, const QItemSelection &sellist, QClipboard::Mode mode);
     static bool launch(const QUrl &url, const QString &client);
     static QStringList findBindings(const QString &sql);
-    static QVariantMap setBindValues(const QStringList &params, DbConnection *dbc);
 
 public:
     DbListModel	    dblist;
@@ -97,6 +97,8 @@ public:
     int			    datatablemodel_lastsort;
     DbSchemaModel   schemamodel;
     QSqlQueryModel  userquerymodel;
+    QVariantMap     bindTypes;
+    QVariantMap     bindRef;
 
     SimpleReportWidget *simpleReportTab;
     KdReportWidget     *kdReportTab;
