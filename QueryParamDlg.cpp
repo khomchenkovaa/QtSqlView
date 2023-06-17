@@ -99,9 +99,8 @@ void QueryParamDlg::setupParams(const QStringList &params)
         const int row = ui_Grid->rowCount();
         ui_Grid->addWidget(new QLabel(param, this), row, NameColumn);
         QComboBox *cmbType = createCmb(param, row, this);
-        Type type = static_cast<Type>(cmbType->currentIndex());
         ui_Grid->addWidget(cmbType, row, TypeColumn);
-        QWidget *editor = createValueEditor(param, type, this);
+        QWidget *editor = createValueEditor(param, this);
         ui_Grid->addWidget(editor, row, ValueColumn);
     }
 }
@@ -120,11 +119,22 @@ QVariantMap QueryParamDlg::bindings(const QStringList &params) const
 
 /******************************************************************/
 
+void QueryParamDlg::setDefaults(const QVariantMap &map)
+{
+    QMapIterator<QString, QVariant> i(map);
+    while (i.hasNext()) {
+        i.next();
+        setValue(i.key(), i.value());
+    }
+}
+
+/******************************************************************/
+
 void QueryParamDlg::fillReference(QComboBox *cmb, const QString &param)
 {
-    QString sql;
+    QString sql = m_RefSql.value(param).toString();
     bool ok = false;
-    bool done = fillSqlRef(cmb, m_RefSql.value(param).toString());
+    bool done = fillSqlRef(cmb, sql);
     while (!done) {
         sql = QInputDialog::getMultiLineText(this, tr("Reference"), tr("SQL"), sql, &ok);
         if (!ok) break; // canceled
@@ -191,9 +201,8 @@ QComboBox *QueryParamDlg::createCmb(const QString &param, int row, QWidget *pare
     result->setCurrentIndex(typeSelected);
 
     connect(result, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, param, row](int type){
-        Type t = static_cast<Type>(type);
-        m_BndTypes.insert(param, t);
-        updateValueEditor(param, row, t);
+        m_BndTypes.insert(param, type);
+        updateValueEditor(param, row);
     });
 
     return result;
@@ -201,7 +210,7 @@ QComboBox *QueryParamDlg::createCmb(const QString &param, int row, QWidget *pare
 
 /******************************************************************/
 
-void QueryParamDlg::updateValueEditor(const QString &param, int row, Type type)
+void QueryParamDlg::updateValueEditor(const QString &param, int row)
 {
     QString objName = editorName(param);
     QWidget *editor = findChild<QWidget *>(objName);
@@ -210,18 +219,19 @@ void QueryParamDlg::updateValueEditor(const QString &param, int row, Type type)
         parent = qobject_cast<QWidget*>(editor->parent());
         editor->deleteLater();
     }
-    editor = createValueEditor(param, type, parent);
+    editor = createValueEditor(param, parent);
     ui_Grid->addWidget(editor, row, ValueColumn);
 }
 
 /******************************************************************/
 
-QWidget *QueryParamDlg::createValueEditor(const QString &param, Type type, QWidget *parent)
+QWidget *QueryParamDlg::createValueEditor(const QString &param, QWidget *parent)
 {
     QWidget *result = Q_NULLPTR;
     QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
+    Type type = static_cast<Type>(m_BndTypes.value(param, Type::String).toInt());
 
     switch (type) {
     case Type::Null:
@@ -305,6 +315,46 @@ bool QueryParamDlg::fillSqlRef(QComboBox *cmb, const QString &sql, QString *err)
         err->append(query.lastError().text());
     }
     return false;
+}
+
+/******************************************************************/
+
+void QueryParamDlg::setValue(const QString &param, const QVariant &value)
+{
+    QString objName = editorName(param);
+    QWidget *editor = findChild<QWidget *>(objName);
+    if (!editor) return;
+
+    QComboBox *cmbRef = qobject_cast<QComboBox*>(editor);
+    if (cmbRef) {
+        int idx = cmbRef->findData(value);
+        cmbRef->setCurrentIndex(idx);
+    }
+
+    QLineEdit *stringEdit = qobject_cast<QLineEdit*>(editor);
+    if (stringEdit) {
+        stringEdit->setText(value.toString());
+    }
+
+    QSpinBox *intEdit = qobject_cast<QSpinBox*>(editor);
+    if (intEdit) {
+        intEdit->setValue(value.toInt());
+    }
+
+    QDoubleSpinBox *realEdit = qobject_cast<QDoubleSpinBox*>(editor);
+    if (realEdit) {
+        realEdit->setValue(value.toDouble());
+    }
+
+    QDateEdit *dateEdit = qobject_cast<QDateEdit*>(editor);
+    if (dateEdit) {
+        dateEdit->setDate(value.toDate());
+    }
+
+    QDateTimeEdit *dateTimeEdit = qobject_cast<QDateTimeEdit*>(editor);
+    if (dateTimeEdit) {
+        dateTimeEdit->setDateTime(value.toDateTime());
+    }
 }
 
 /******************************************************************/

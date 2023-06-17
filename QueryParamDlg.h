@@ -32,17 +32,20 @@ public:
     void setupParams(const QStringList& params);
     QVariantMap bindings(const QStringList& params) const;
 
+    void setDefaults(const QVariantMap &map);
+
 private Q_SLOTS:
     void fillReference(QComboBox *cmb, const QString& param);
 
 private:
     void setupUI();
     QComboBox *createCmb(const QString &param, int row, QWidget *parent = Q_NULLPTR);
-    void updateValueEditor(const QString &param, int row, Type type);
-    QWidget *createValueEditor(const QString &param, Type type, QWidget *parent = Q_NULLPTR);
+    void updateValueEditor(const QString &param, int row);
+    QWidget *createValueEditor(const QString &param, QWidget *parent = Q_NULLPTR);
     QString editorName(const QString &param) const;
     QString comboName(const QString &param) const;
     bool fillSqlRef(QComboBox *cmb, const QString& sql, QString *err = Q_NULLPTR);
+    void setValue(const QString &param, const QVariant& value);
     QVariant getValue(const QString &param) const;
 
 private:
