@@ -27,7 +27,7 @@ public:
     QVariantMap bindSql() const;
 
     void setBindTypes(const QVariantMap &map);
-    QVariantMap bindTypes();
+    QVariantMap bindTypes() const;
 
     void setupParams(const QStringList& params);
     QVariantMap bindings(const QStringList& params) const;

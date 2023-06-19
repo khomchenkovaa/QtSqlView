@@ -80,7 +80,7 @@ void QueryParamDlg::setBindTypes(const QVariantMap &map)
 
 /******************************************************************/
 
-QVariantMap QueryParamDlg::bindTypes()
+QVariantMap QueryParamDlg::bindTypes() const
 {
     QVariantMap result;
     QMapIterator<QString, QVariant> i(m_BndTypes);

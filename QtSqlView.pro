@@ -4,7 +4,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
-# Define to use KD Reports library
+# Define to use KD Reports and KD Chart libraries
+#DEFINES += KD_CHART
 DEFINES += KD_REPORTS
 
 # The following define makes your compiler emit warnings if you use
@@ -52,6 +53,15 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+contains(DEFINES, KD_CHART) {
+    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../KDChart-2.8.0/lib/release/ -lkdchart
+    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../KDChart-2.8.0/lib/debug/ -lkdchart
+    else:unix: LIBS += -L/usr/local/KDAB/KDChart-2.8.0/lib/ -lkdchart
+
+    INCLUDEPATH += /usr/local/KDAB/KDChart-2.8.0/include/KDChart
+    DEPENDPATH += /usr/local/KDAB/KDChart-2.8.0/include/KDChart
+}
 
 contains(DEFINES, KD_REPORTS) {
     win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../KDReports-2.2.1/lib/release/ -lkdreports
