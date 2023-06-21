@@ -15,9 +15,7 @@
 
 #include <QSqlQueryModel>
 
-#ifdef KD_REPORTS
-#include "kdxmlreport.h"
-#endif
+#include "report.h"
 
 /******************************************************************/
 
@@ -78,13 +76,8 @@ void KdReportWidget::preview()
 
 void KdReportWidget::exportToPdf()
 {
-    QFileDialog fileDialog(this, tr("Export PDF"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
-    fileDialog.setDefaultSuffix("pdf");
-    if (fileDialog.exec() != QDialog::Accepted)
-        return;
-    QString fileName = fileDialog.selectedFiles().first();
+    QString fileName = Report::exportToPdfDlg(this, tr("Export PDF"));
+    if (fileName.isEmpty()) return;
 
     auto report = createReport();
     if (!report.isNull()) {
@@ -96,13 +89,8 @@ void KdReportWidget::exportToPdf()
 
 void KdReportWidget::exportToHtml()
 {
-    QFileDialog fileDialog(this, tr("Export HTML"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setMimeTypeFilters(QStringList("text/html"));
-    fileDialog.setDefaultSuffix("html");
-    if (fileDialog.exec() != QDialog::Accepted)
-        return;
-    QString fileName = fileDialog.selectedFiles().first();
+    QString fileName = Report::exportToHtmlDlg(this, tr("Export HTML"));
+    if (fileName.isEmpty()) return;
 
     auto report = createReport();
     if (!report.isNull()) {
@@ -114,13 +102,8 @@ void KdReportWidget::exportToHtml()
 
 void KdReportWidget::exportToCsv()
 {
-    QFileDialog fileDialog(this, tr("Export CSV"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setMimeTypeFilters(QStringList("text/csv"));
-    fileDialog.setDefaultSuffix("csv");
-    if (fileDialog.exec() != QDialog::Accepted)
-        return;
-    QString fileName = fileDialog.selectedFiles().first();
+    QString fileName = Report::exportToCsvDlg(this, tr("Export CSV"));
+    if (fileName.isEmpty()) return;
 
     auto report = createReport();
     if (!report.isNull()) {

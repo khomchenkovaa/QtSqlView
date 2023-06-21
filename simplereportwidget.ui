@@ -31,7 +31,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="editSrTitle"/>
+          <widget class="QLineEdit" name="editTitle"/>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="lblHeader">
@@ -41,7 +41,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QTextEdit" name="textSrHeader"/>
+          <widget class="XTextEdit" name="textHeader"/>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="lblFooter">
@@ -51,7 +51,7 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QTextEdit" name="textSrFooter"/>
+          <widget class="XTextEdit" name="textFooter"/>
          </item>
         </layout>
        </item>
@@ -145,6 +145,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>XTextEdit</class>
+   <extends>QWidget</extends>
+   <header>xtextedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

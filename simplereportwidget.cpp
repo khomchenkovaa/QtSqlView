@@ -1,20 +1,14 @@
 #include "simplereportwidget.h"
 #include "ui_simplereportwidget.h"
 
-#include "xtextedit.h"
+#include "report.h"
 
 #include <QMenu>
-#include <QFileDialog>
 
 #include <QMimeDatabase>
 #include <QMimeType>
 
 #include <QSqlQueryModel>
-
-#include "simplereport.h"
-#ifdef KD_REPORTS
-#include "kdsimplereport.h"
-#endif
 
 /******************************************************************/
 
@@ -71,13 +65,8 @@ void SimpleReportWidget::preview()
 
 void SimpleReportWidget::exportToPdf()
 {
-    QFileDialog fileDialog(this, tr("Export PDF"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
-    fileDialog.setDefaultSuffix("pdf");
-    if (fileDialog.exec() != QDialog::Accepted)
-        return;
-    QString fileName = fileDialog.selectedFiles().first();
+    QString fileName = Report::exportToPdfDlg(this, tr("Export PDF"));
+    if (fileName.isEmpty()) return;
 
     auto report = createReport();
     report->toPdfFile(fileName);
@@ -87,13 +76,8 @@ void SimpleReportWidget::exportToPdf()
 
 void SimpleReportWidget::exportToHtml()
 {
-    QFileDialog fileDialog(this, tr("Export HTML"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setMimeTypeFilters(QStringList("text/html"));
-    fileDialog.setDefaultSuffix("html");
-    if (fileDialog.exec() != QDialog::Accepted)
-        return;
-    QString fileName = fileDialog.selectedFiles().first();
+    QString fileName = Report::exportToHtmlDlg(this, tr("Export HTML"));
+    if (fileName.isEmpty()) return;
 
     auto report = createReport();
     report->toHtmlFile(fileName);
@@ -103,13 +87,8 @@ void SimpleReportWidget::exportToHtml()
 
 void SimpleReportWidget::exportToCsv()
 {
-    QFileDialog fileDialog(this, tr("Export CSV"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setMimeTypeFilters(QStringList("text/csv"));
-    fileDialog.setDefaultSuffix("csv");
-    if (fileDialog.exec() != QDialog::Accepted)
-        return;
-    QString fileName = fileDialog.selectedFiles().first();
+    QString fileName = Report::exportToCsvDlg(this, tr("Export CSV"));
+    if (fileName.isEmpty()) return;
 
     auto report = createReport();
     report->toCsvFile(fileName);
@@ -119,27 +98,15 @@ void SimpleReportWidget::exportToCsv()
 
 void SimpleReportWidget::clearFields()
 {
-    ui->editSrTitle->clear();
-    for (auto widget : findChildren<XTextEdit*>()) {
-        widget->clear();
-    }
+    ui->editTitle->clear();
+    ui->textHeader->clear();
+    ui->textFooter->clear();
 }
 
 /******************************************************************/
 
 void SimpleReportWidget::setupUI()
 {
-    ui->formSimpleReport->removeRow(2);
-    ui->formSimpleReport->removeRow(1);
-
-    auto textSrHeader = new XTextEdit(this);
-    textSrHeader->setObjectName("textSrHeader");
-    ui->formSimpleReport->addRow(tr("Header"), textSrHeader);
-
-    auto textSrFooter = new XTextEdit(this);
-    textSrFooter->setObjectName("textSrFooter");
-    ui->formSimpleReport->addRow(tr("Footer"), textSrFooter);
-
     connect(ui->setTblHeadersButton, &QToolButton::clicked,
             this, &SimpleReportWidget::tableHeaders);
     connect(ui->clearSrPropertiesButton, &QToolButton::clicked,
@@ -185,23 +152,11 @@ void SimpleReportWidget::setupActions()
 
 QSharedPointer<ListReport> SimpleReportWidget::createReport() const
 {
-    QString title = ui->editSrTitle->text();
-    QString header;
-    QString footer;
-    auto textSrHeader = findChild<XTextEdit*>("textSrHeader");
-    if (textSrHeader) {
-        header = textSrHeader->text();
-    }
-    auto textSrFooter = findChild<XTextEdit*>("textSrFooter");
-    if (textSrFooter) {
-        footer = textSrFooter->text();
-    }
+    QString title  = ui->editTitle->text();
+    QString header = ui->textHeader->text();
+    QString footer = ui-> textFooter->text();
 
-#ifdef KD_REPORTS
-    auto report = QSharedPointer<KdSimpleReport>::create();
-#else
-    auto report = QSharedPointer<SimpleReport>::create();
-#endif
+    auto report = Report::simpleReport();
     report->setTitle(title);
     report->setHeader(header);
     report->setModel(m_Model);

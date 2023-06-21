@@ -3,6 +3,9 @@ DEPENDPATH += $$PWD
 
 HEADERS += \
     $$PWD/listreport.h \
+    $$PWD/report.h \
+    $$PWD/reporttypes.h \
+    $$PWD/reportutils.h \
     $$PWD/simplereport.h
 
 SOURCES += \

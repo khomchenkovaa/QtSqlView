@@ -24,7 +24,7 @@
 #include <QtPrintSupport/QPrintDialog>
 #include <QtPrintSupport/QPrintPreviewDialog>
 
-#include "listreport.h"
+#include "report.h"
 
 #include <QDebug>
 
@@ -388,7 +388,7 @@ void MainWindow::on_goQueryButton_clicked()
 
     // prepare for bindings
     QString sqlText = ui->editQuery->toPlainText();
-    QStringList params = findBindings(sqlText);
+    QStringList params = Report::findBindings(sqlText);
     QVariantMap bindings = setBindValues(params, dbc);
 
     // initialize new sql query object   
@@ -638,23 +638,6 @@ void MainWindow::saveToClipboard(QSqlQuery query, const QItemSelection &sellist,
 bool MainWindow::launch(const QUrl &url, const QString &client)
 {
     return (QProcess::startDetached(client + " " + url.toEncoded()));
-}
-
-/******************************************************************/
-
-QStringList MainWindow::findBindings(const QString &sql)
-{
-    QStringList result;
-    QRegularExpression re(":[\\d\\w]+");
-    QRegularExpressionMatchIterator i = re.globalMatch(sql);
-    while (i.hasNext()) {
-        QRegularExpressionMatch match = i.next();
-        QString word = match.captured(0);
-        if (!result.contains(word)) {
-            result << word;
-        }
-    }
-    return result;
 }
 
 /******************************************************************/

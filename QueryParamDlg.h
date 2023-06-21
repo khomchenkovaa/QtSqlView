@@ -15,10 +15,6 @@ class QueryParamDlg : public QDialog
 {
     Q_OBJECT
 
-    enum Type {
-        Null, String, Integer, Real, Date, DateTime, Ref
-    };
-
 public:
     explicit QueryParamDlg(DbConnection *dbc, QWidget *parent = nullptr);
     ~QueryParamDlg();
@@ -44,7 +40,6 @@ private:
     QWidget *createValueEditor(const QString &param, QWidget *parent = Q_NULLPTR);
     QString editorName(const QString &param) const;
     QString comboName(const QString &param) const;
-    bool fillSqlRef(QComboBox *cmb, const QString& sql, QString *err = Q_NULLPTR);
     void setValue(const QString &param, const QVariant& value);
     QVariant getValue(const QString &param) const;
 
