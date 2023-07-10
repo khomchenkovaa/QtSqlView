@@ -1,12 +1,10 @@
 #include "listreport.h"
 
 #include "xcsvmodel.h"
+#include "reportutils.h"
 
 #include <QCoreApplication>
-#include <QAbstractTableModel>
 #include <QTextStream>
-#include <QTextCursor>
-#include <QTextTable>
 #include <QFileDialog>
 
 #include <QPrinter>
@@ -52,28 +50,7 @@ bool ListReport::toCsvFile(const QString& fileName) const
 
 void ListReport::toTextCursor(QTextCursor *cursor) const
 {
-    cursor->clearSelection();
-    cursor->movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
-
-    const int rows = m_Model->rowCount();
-    const int cols = m_Model->columnCount();
-
-    QTextTable* table = cursor->insertTable(rows+1, cols);
-    // print header
-    for (int j=0; j<cols; ++j) {
-        auto pos = table->cellAt(0, j).firstCursorPosition();
-        pos.insertHtml("<p align=\"center\"><b>" +
-                       m_Model->headerData(j, Qt::Horizontal).toString() +
-                       "</b>");
-    }
-    // print data
-    for (int i=0; i<rows; ++i) {
-        for (int j=0; j<cols; ++j) {
-            auto pos = table->cellAt(i+1, j).firstCursorPosition();
-            QModelIndex idx = m_Model->index(i, j);
-            pos.insertHtml(m_Model->data(idx).toString());
-        }
-    }
+    Report::printTable(cursor, m_Model);
 }
 
 /******************************************************************/
@@ -147,31 +124,6 @@ bool ListReport::toHtmlFile(const QString &fileName) const
         return true;
     }
     return false;
-}
-
-/******************************************************************/
-
-void ListReport::exportToCsv(QAbstractTableModel *model)
-{
-    QString filters("CSV files (*.csv);;All files (*.*)");
-    QString defaultFilter("CSV files (*.csv)");
-    QString fileName = QFileDialog::getSaveFileName(Q_NULLPTR, tr("Export to CSV-file"),
-                                                    QCoreApplication::applicationDirPath(),
-                                                    filters, &defaultFilter);
-    if (fileName.isEmpty()) return;
-
-    ListReport report;
-    report.setModel(model);
-    report.toCsvFile(fileName);
-}
-
-/******************************************************************/
-
-void ListReport::printTable(QTextCursor *cursor, QAbstractTableModel *model)
-{
-    ListReport report;
-    report.setModel(model);
-    report.toTextCursor(cursor);
 }
 
 /******************************************************************/

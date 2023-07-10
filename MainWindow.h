@@ -85,6 +85,7 @@ private slots:
 private:
     void setupUI();
     QVariantMap setBindValues(const QStringList &params, DbConnection *dbc);
+    void exportToCsv(QAbstractTableModel *model);
 
 private: // static
     static void saveToClipboard(QSqlQuery query, const QItemSelection &sellist, QClipboard::Mode mode);

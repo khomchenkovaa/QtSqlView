@@ -420,7 +420,7 @@ void XCsvModel::toCSV(QIODevice* dest, bool withHeader, QChar separator, QTextCo
         data = "";
         for(col = 0; col < cols; ++col) {
             if(col > 0) data += separator;
-            data += xAddCsvQuotes(m_QuoteMode, m_Header.at(col));
+            data += xAddCsvQuotes(m_QuoteMode, m_Header.at(col).simplified());
         }
         stream << data << endl;
     }
@@ -432,7 +432,7 @@ void XCsvModel::toCSV(QIODevice* dest, bool withHeader, QChar separator, QTextCo
                 data += separator;
             }
             if(col < rowData.length()) {
-                data += xAddCsvQuotes(m_QuoteMode, rowData.at(col));
+                data += xAddCsvQuotes(m_QuoteMode, rowData.at(col).simplified());
             } else {
                 data += xAddCsvQuotes(m_QuoteMode, QString());
             }

@@ -291,7 +291,8 @@ void MainWindow::on_copyDataButton_clicked()
 
 void MainWindow::on_toCsvDataButton_clicked()
 {
-    ListReport::exportToCsv(datatablemodel);
+    if (!datatablemodel) return;
+    exportToCsv(datatablemodel);
 }
 
 /******************************************************************/
@@ -448,7 +449,7 @@ void MainWindow::on_toScvButton_clicked()
 {
     if (ui->queryTable->isHidden()) return;
 
-    ListReport::exportToCsv(&userquerymodel);
+    exportToCsv(&userquerymodel);
 }
 
 /******************************************************************/
@@ -600,6 +601,18 @@ QVariantMap MainWindow::setBindValues(const QStringList &params, DbConnection *d
     }
 
     return QVariantMap();
+}
+
+/******************************************************************/
+
+void MainWindow::exportToCsv(QAbstractTableModel *model)
+{
+    QString fileName = Report::exportToCsvDlg(this);
+    if (fileName.isEmpty()) return;
+
+    ListReport report;
+    report.setModel(model);
+    report.toCsvFile(fileName);
 }
 
 /******************************************************************/

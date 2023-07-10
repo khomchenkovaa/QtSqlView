@@ -25,10 +25,6 @@ public:
     virtual bool toPdfFile(const QString& fileName) const;
     virtual bool toHtmlFile(const QString& fileName) const;
 
-public:
-    static void exportToCsv(QAbstractTableModel *model);
-    static void printTable(QTextCursor *cursor, QAbstractTableModel *model);
-
 protected:
     QAbstractTableModel *m_Model;
     bool b_WithHeaders;
