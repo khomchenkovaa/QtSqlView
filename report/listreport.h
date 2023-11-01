@@ -6,7 +6,7 @@
 
 QT_BEGIN_NAMESPACE
 class QTextCursor;
-class QAbstractTableModel;
+class QAbstractItemModel;
 QT_END_NAMESPACE
 
 class ListReport : public QObject
@@ -14,7 +14,7 @@ class ListReport : public QObject
     Q_OBJECT
 public:
     explicit ListReport(QObject *parent = nullptr);
-    void setModel(QAbstractTableModel *model);
+    void setModel(QAbstractItemModel *model);
     void setWithHeaders(bool withHeaders);
 
     virtual bool toCsvFile(const QString& fileName) const;
@@ -26,7 +26,7 @@ public:
     virtual bool toHtmlFile(const QString& fileName) const;
 
 protected:
-    QAbstractTableModel *m_Model;
+    QAbstractItemModel *m_Model;
     bool b_WithHeaders;
 
 };

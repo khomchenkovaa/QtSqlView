@@ -13,8 +13,6 @@
 #include <QVBoxLayout>
 
 #include <QMimeData>
-#include <QPrinter>
-#include <QPrintPreviewDialog>
 
 #include <QDebug>
 

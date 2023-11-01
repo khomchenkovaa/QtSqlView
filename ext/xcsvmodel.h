@@ -62,7 +62,7 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex& index) const;
 
-    void importFromModel(QAbstractTableModel *model);
+    void importFromModel(QAbstractItemModel *model);
 
 private:
     QList<QStringList> m_CsvData;

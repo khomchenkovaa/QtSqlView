@@ -22,7 +22,7 @@ ListReport::ListReport(QObject *parent)
 
 /******************************************************************/
 
-void ListReport::setModel(QAbstractTableModel *model)
+void ListReport::setModel(QAbstractItemModel *model)
 {
     m_Model = model;
 }

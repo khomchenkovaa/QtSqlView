@@ -469,7 +469,7 @@ Qt::ItemFlags XCsvModel::flags(const QModelIndex& index) const
 
 /******************************************************************/
 
-void XCsvModel::importFromModel(QAbstractTableModel *model)
+void XCsvModel::importFromModel(QAbstractItemModel *model)
 {
     emit beginResetModel();
     m_CsvData.clear();
