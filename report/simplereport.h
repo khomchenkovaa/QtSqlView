@@ -13,7 +13,7 @@ public:
     void setHeader(const QString& header);
     void setFooter(const QString& footer);
 
-    void toTextCursor(QTextCursor *cursor) const;
+    virtual QSharedPointer<QTextDocument> toTextDocument() const;
 
 protected:
     QString m_Title;

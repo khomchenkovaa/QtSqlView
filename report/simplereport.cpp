@@ -1,6 +1,8 @@
 #include "simplereport.h"
 
-#include <QTextCursor>
+#include "reporttextelement.h"
+#include "reporthtmlelement.h"
+#include "reporttableelement.h"
 
 /******************************************************************/
 
@@ -33,24 +35,33 @@ void SimpleReport::setFooter(const QString &footer)
 
 /******************************************************************/
 
-void SimpleReport::toTextCursor(QTextCursor *cursor) const
+QSharedPointer<QTextDocument> SimpleReport::toTextDocument() const
 {
+    auto document = ReportBase::toTextDocument();
+    QTextCursor cursor(document.data());
     if (!m_Title.isEmpty()) {
-        cursor->insertHtml("<h1 align=\"center\">" + m_Title + "</h1>");
-        cursor->insertBlock();
+        Report::TextElement title(m_Title, Report::TextElement::h1);
+        title.build(&cursor);
     }
     if (!m_Header.isEmpty()) {
-        cursor->movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-        cursor->insertHtml(m_Header);
-        cursor->insertBlock();
+        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+        cursor.insertBlock();
+        Report::HtmlElement header(m_Header);
+        header.build(&cursor);
     }
-    ListReport::toTextCursor(cursor);
+    if (m_Model) {
+        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+        cursor.insertBlock();
+        Report::TableElement table(m_Model, b_WithHeaders);
+        table.build(&cursor);
+    }
     if (!m_Footer.isEmpty()) {
-        cursor->movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-        cursor->insertBlock();
-        cursor->insertHtml(m_Footer);
-        cursor->insertBlock();
+        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+        cursor.insertBlock();
+        Report::HtmlElement footer(m_Footer);
+        footer.build(&cursor);
     }
+    return document;
 }
 
 /******************************************************************/

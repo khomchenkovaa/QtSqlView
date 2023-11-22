@@ -60,18 +60,21 @@ void KdSimpleReport::createReport(KDReports::Report *report) const
     if (!m_Header.isEmpty()) {
         // add 20 mm of vertical space:
         report->addVerticalSpacing(20);
-        // add some more text
+        // add html text
         KDReports::HtmlElement textElement(m_Header);
         report->addElement(textElement);
     }
-    KDReports::AutoTableElement tableElement(m_Model);
-    tableElement.setVerticalHeaderVisible(false);
-    report->addElement(tableElement);
+
+    if (m_Model) {
+        KDReports::AutoTableElement tableElement(m_Model);
+        tableElement.setVerticalHeaderVisible(false);
+        report->addElement(tableElement);
+    }
 
     if (!m_Footer.isEmpty()) {
         // add 20 mm of vertical space:
         report->addVerticalSpacing(20);
-        // add some more text
+        // add html text
         KDReports::HtmlElement textElement(m_Footer);
         report->addElement(textElement);
     }
