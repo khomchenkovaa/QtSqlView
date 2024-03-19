@@ -4,7 +4,6 @@
 #include "sqlhighlighter.h"
 
 #include "simplereportwidget.h"
-#include "kdreportwidget.h"
 #include "ConnectionDlg.h"
 #include "QueryParamDlg.h"
 #include "TableHeadersDlg.h"
@@ -32,8 +31,7 @@ enum {
     DataTab,
     SchemaTab,
     QueryTab,
-    SimpleReportTab,
-    KdReportTab
+    SimpleReportTab
 };
 
 /******************************************************************/
@@ -411,14 +409,9 @@ void MainWindow::on_goQueryButton_clicked()
             if (simpleReportTab) {
                 simpleReportTab->updateView();
             }
-            ui->tabWidget->setTabEnabled(KdReportTab, true);
-            if (kdReportTab) {
-                kdReportTab->updateView();
-            }
         } else {
             ui->queryTable->hide();
             ui->tabWidget->setTabEnabled(SimpleReportTab, false);
-            ui->tabWidget->setTabEnabled(KdReportTab, false);
             ui->queryResultText->show();
 
             ui->queryResultText->setPlainText(QString("%1 rows affected.")
@@ -427,7 +420,6 @@ void MainWindow::on_goQueryButton_clicked()
     } else {
         ui->queryTable->hide();
         ui->tabWidget->setTabEnabled(SimpleReportTab, false);
-        ui->tabWidget->setTabEnabled(KdReportTab, false);
         ui->queryResultText->show();
         ui->queryResultText->setPlainText(QString("%1\n%2")
                                       .arg(query.lastError().driverText(),
@@ -570,15 +562,6 @@ void MainWindow::setupUI()
     ui->tabWidget->setTabEnabled(SimpleReportTab, false);
 
     connect(simpleReportTab, &SimpleReportWidget::tableHeaders,
-            this, &MainWindow::setTableHeaders);
-
-    // configure KD report tab
-    kdReportTab = new KdReportWidget(this);
-    kdReportTab->setUserQueryModel(&userquerymodel);
-    ui->tabWidget->addTab(kdReportTab, QIcon::fromTheme("document-print"), tr("KD Report"));
-    ui->tabWidget->setTabEnabled(KdReportTab, false);
-
-    connect(kdReportTab, &KdReportWidget::tableHeaders,
             this, &MainWindow::setTableHeaders);
 }
 

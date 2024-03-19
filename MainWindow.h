@@ -27,7 +27,6 @@ class MainWindow;
 }
 
 class SimpleReportWidget;
-class KdReportWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -101,7 +100,6 @@ public:
     QVariantMap     bindRef;
 
     SimpleReportWidget *simpleReportTab;
-    KdReportWidget     *kdReportTab;
 
 private:
     Ui::MainWindow *ui;
