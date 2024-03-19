@@ -5,7 +5,6 @@
 
 #include "simplereport.h"
 #ifdef KD_REPORTS
-#include "kdsimplereport.h"
 #include "kdxmlreport.h"
 #endif
 
@@ -14,20 +13,6 @@
 #include <QRegularExpression>
 
 namespace Report {
-
-/******************************************************************/
-
-#ifdef KD_REPORTS
-inline QSharedPointer<KdSimpleReport> simpleReport()
-{
-    return QSharedPointer<KdSimpleReport>::create();
-}
-#else
-inline QSharedPointer<SimpleReport> simpleReport()
-{
-    return QSharedPointer<SimpleReport>::create();
-}
-#endif
 
 /******************************************************************/
 

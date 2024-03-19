@@ -4,10 +4,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
-# Define to use KD Reports and KD Chart libraries
-#DEFINES += KD_CHART
-DEFINES += KD_REPORTS
-
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -31,7 +27,6 @@ SOURCES += \
     MainWindow.cpp \
     QueryParamDlg.cpp \
     TableHeadersDlg.cpp \
-    kdreportwidget.cpp \
     main.cpp \
     simplereportwidget.cpp
 
@@ -40,37 +35,17 @@ HEADERS += \
     MainWindow.h \
     QueryParamDlg.h \
     TableHeadersDlg.h \
-    kdreportwidget.h \
     simplereportwidget.h
 
 FORMS += \
     ConnectionDlg.ui \
     MainWindow.ui \
-    kdreportwidget.ui \
     simplereportwidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-contains(DEFINES, KD_CHART) {
-    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../KDChart-2.8.0/lib/release/ -lkdchart
-    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../KDChart-2.8.0/lib/debug/ -lkdchart
-    else:unix: LIBS += -L/usr/local/KDAB/KDChart-2.8.0/lib/ -lkdchart
-
-    INCLUDEPATH += /usr/local/KDAB/KDChart-2.8.0/include/KDChart
-    DEPENDPATH += /usr/local/KDAB/KDChart-2.8.0/include/KDChart
-}
-
-contains(DEFINES, KD_REPORTS) {
-    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../KDReports-2.2.1/lib/release/ -lkdreports
-    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../KDReports-2.2.1/lib/debug/ -lkdreports
-    else:unix: LIBS += -L/usr/local/KDAB/KDReports-2.2.1/lib/ -lkdreports
-
-    INCLUDEPATH += /usr/local/KDAB/KDReports-2.2.1/include/KDReports
-    DEPENDPATH += /usr/local/KDAB/KDReports-2.2.1/include/KDReports
-}
 
 RESOURCES += \
     QtSqlView.qrc

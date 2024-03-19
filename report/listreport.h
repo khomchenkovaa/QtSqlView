@@ -1,29 +1,48 @@
 #ifndef LISTREPORT_H
 #define LISTREPORT_H
 
-#include <QObject>
-#include <QTextDocument>
+#include "reportbase.h"
+#include "xcsvmodel.h"
 
-QT_BEGIN_NAMESPACE
-class QTextCursor;
-class QAbstractItemModel;
-QT_END_NAMESPACE
-
-class ListReport : public QObject
+class ListReport : public Report::ReportBase
 {
     Q_OBJECT
 public:
-    explicit ListReport(QObject *parent = nullptr);
-    void setModel(QAbstractItemModel *model);
-    void setWithHeaders(bool withHeaders);
+    explicit ListReport(QObject *parent = nullptr)
+        : Report::ReportBase(parent)
+        , m_Model(Q_NULLPTR)
+        , b_WithHeaders(true)
+    { }
 
-    virtual bool toCsvFile(const QString& fileName) const;
-    virtual void toTextCursor(QTextCursor *cursor) const;
-    virtual QSharedPointer<QTextDocument> toTextDocument() const;
-    virtual bool toPrinter() const;
-    virtual int  toPreviewDialog() const;
-    virtual bool toPdfFile(const QString& fileName) const;
-    virtual bool toHtmlFile(const QString& fileName) const;
+    void setModel(QAbstractItemModel *model) {
+        m_Model = model;
+    }
+
+    void setWithHeaders(bool withHeaders) {
+        b_WithHeaders = withHeaders;
+    }
+
+    virtual bool toCsvFile(const QString& fileName) const {
+        XCsvModel csvModel;
+        csvModel.importFromModel(m_Model);
+        csvModel.toCSV(fileName, b_WithHeaders);
+        return true;
+    }
+
+    virtual QSharedPointer<QTextDocument> toTextDocument() const {
+        XReport report;
+        createReport(&report);
+        QSharedPointer<QTextDocument> result(report.mainTextDocument()->clone());
+        return result;
+    }
+
+protected:
+    virtual bool createReport(XReport* report) const {
+        XAutoTableElement tableElement(m_Model);
+        tableElement.setVerticalHeaderVisible(b_WithHeaders);
+        report->addElement(tableElement);
+        return true;
+    }
 
 protected:
     QAbstractItemModel *m_Model;

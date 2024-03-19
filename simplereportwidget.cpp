@@ -156,7 +156,7 @@ QSharedPointer<ListReport> SimpleReportWidget::createReport() const
     QString header = ui->textHeader->text();
     QString footer = ui-> textFooter->text();
 
-    auto report = Report::simpleReport();
+    auto report = QSharedPointer<SimpleReport>::create();
     report->setTitle(title);
     report->setHeader(header);
     report->setModel(m_Model);

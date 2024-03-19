@@ -21,25 +21,31 @@ namespace Report {
 
 /******************************************************************/
 
-inline void printTable(QTextCursor *cursor, QAbstractItemModel *model) {
+inline void printTable(QTextCursor *cursor, QAbstractItemModel *model, bool withHeaders=true) {
+    if (model == Q_NULLPTR) return;
+
     cursor->clearSelection();
     cursor->movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
 
     const int rows = model->rowCount();
     const int cols = model->columnCount();
+    const int rowsTotal = withHeaders ? rows+1 : rows;
 
-    QTextTable* table = cursor->insertTable(rows+1, cols);
+    QTextTable* table = cursor->insertTable(rowsTotal, cols);
     // print header
-    for (int j=0; j<cols; ++j) {
-        auto pos = table->cellAt(0, j).firstCursorPosition();
-        pos.insertHtml("<p align=\"center\"><b>" +
-                       model->headerData(j, Qt::Horizontal).toString() +
-                       "</b>");
+    if (withHeaders) {
+        for (int j=0; j<cols; ++j) {
+            auto pos = table->cellAt(0, j).firstCursorPosition();
+            pos.insertHtml("<p align=\"center\"><b>" +
+                           model->headerData(j, Qt::Horizontal).toString() +
+                           "</b>");
+        }
     }
     // print data
     for (int i=0; i<rows; ++i) {
         for (int j=0; j<cols; ++j) {
-            auto pos = table->cellAt(i+1, j).firstCursorPosition();
+            const int curRow = withHeaders ? i+1 : i;
+            auto pos = table->cellAt(curRow, j).firstCursorPosition();
             QModelIndex idx = model->index(i, j);
             pos.insertHtml(model->data(idx).toString());
         }
