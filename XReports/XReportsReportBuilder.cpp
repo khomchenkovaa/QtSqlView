@@ -53,16 +53,6 @@ void XReports::ReportBuilder::addBlockElement(const Element &element, Qt::Alignm
 
     cursor.setCharFormat(charFormat); // restore, we don't want addElement(bold text) + addInline(normal text) to make the normal text bold
     cursor.endEditBlock();
-
-#if 0 // DEBUG CODE for tab positions
-    if (!m_tabPositions.isEmpty()) {
-        QTextBlock block = cursor.document()->firstBlock();
-        do {
-            qDebug() << "addBlock: Looking at block" << block.blockNumber() << "tabs:" << block.blockFormat().tabPositions().count();
-            block = block.next();
-        } while ( block.isValid() );
-    }
-#endif
 }
 
 /***********************************************************/

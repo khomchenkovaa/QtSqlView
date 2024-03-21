@@ -23,7 +23,6 @@
 //
 
 #include "XReportsReportLayout.h"
-#include "XReportsHeaderMap.h"
 
 #include <QHash>
 #include <QMap>
@@ -48,7 +47,6 @@ public:
     ReportBuilder *builder();
 
     qreal textDocumentWidth() const; // called by ImageElement, ChartElement
-    bool skipHeadersFooters() const;
     qreal rawMainTextDocHeight() const;
     qreal mainTextDocHeight() const;
     QRect mainTextDocRect() const;
@@ -68,8 +66,6 @@ public:
     qreal m_marginRight;
     qreal m_headerBodySpacing;
     qreal m_footerBodySpacing;
-    HeaderMap m_headers;
-    HeaderMap m_footers;
     int m_firstPageNumber;
     bool m_pageContentSizeDirty;
     ReportLayout m_layout;

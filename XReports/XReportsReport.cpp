@@ -1,7 +1,6 @@
 #include "XReportsReport.h"
 
 #include "XReportsElement.h"
-#include "XReportsHeader.h"
 #include "XReportsUtils.h"
 #include "XReportsReport_p.h"
 
@@ -26,8 +25,6 @@ XReports::ReportPrivate::ReportPrivate(Report *report)
     , m_marginRight(20.0)
     , m_headerBodySpacing(0)
     , m_footerBodySpacing(0)
-    , m_headers()
-    , m_footers()
     , m_firstPageNumber(1)
     , m_pageContentSizeDirty(true)
     , m_layout(report)
@@ -78,25 +75,7 @@ void XReports::ReportPrivate::ensureLayouted()
 // The height of the text doc, by calculation. Adjusted by caller, if negative.
 qreal XReports::ReportPrivate::rawMainTextDocHeight() const
 {
-    qreal textDocHeight = paperSize().height() - mmToPixels(m_marginTop + m_marginBottom);
-    const qreal headerHeight = m_headers.height();
-    textDocHeight -= headerHeight;
-    textDocHeight -= mmToPixels(m_headerBodySpacing);
-    const qreal footerHeight = m_footers.height();
-    textDocHeight -= mmToPixels(m_footerBodySpacing);
-    textDocHeight -= footerHeight;
-    // qDebug() << "pageContent height (pixels): paper size" << m_paperSize.height() << "minus margins" << mmToPixels( m_marginTop + m_marginBottom )
-    //        << "minus headerHeight" << headerHeight << "minus footerHeight" << footerHeight << "and spacings =" << textDocHeight;
-    return textDocHeight;
-}
-
-bool XReports::ReportPrivate::skipHeadersFooters() const
-{
-    const bool skip = rawMainTextDocHeight() <= 0;
-    if (skip) {
-        qDebug() << "Not enough height for headers and footers in this page size, hiding headers and footers.";
-    }
-    return skip;
+    return paperSize().height() - mmToPixels(m_marginTop + m_marginBottom);
 }
 
 qreal XReports::ReportPrivate::mainTextDocHeight() const
@@ -116,19 +95,14 @@ QRect XReports::ReportPrivate::mainTextDocRect() const
 {
     const int left = qRound(mmToPixels(m_marginLeft));
     const int top = qRound(mmToPixels(m_marginTop));
-    const int headerHeightWithSpacing = qRound((skipHeadersFooters() ? 0 : m_headers.height()) + mmToPixels(m_headerBodySpacing));
     const int textDocWidth = qRound(m_paperSize.width() - mmToPixels(m_marginLeft + m_marginRight));
     const int textDocHeight = qRound(mainTextDocHeight());
-    return {left, top + headerHeightWithSpacing, textDocWidth, textDocHeight};
+    return {left, top, textDocWidth, textDocHeight};
 }
 
 /*
    [top margin]
-   [header]
-   [m_headerBodySpacing]
    [body]
-   [m_footerBodySpacing]
-   [footer]
    [bottom margin]
  */
 void XReports::ReportPrivate::setPaperSizeFromPrinter(QSizeF paperSize)
@@ -138,9 +112,6 @@ void XReports::ReportPrivate::setPaperSizeFromPrinter(QSizeF paperSize)
     m_paperSize = paperSize;
     const qreal marginsInPixels = mmToPixels(m_marginLeft + m_marginRight);
     qreal textDocWidth = m_paperSize.width() - marginsInPixels;
-
-    m_headers.layoutWithTextWidth(textDocWidth);
-    m_footers.layoutWithTextWidth(textDocWidth);
 
     const qreal textDocHeight = mainTextDocHeight();
 
@@ -161,18 +132,7 @@ void XReports::ReportPrivate::paintPage(int pageNumber, QPainter &painter)
 {
     ensureLayouted();
 
-    const int pageCount = m_layout.numberOfPages();
-    XReports::Header *header = m_headers.headerForPage(pageNumber + 1, pageCount);
-    if (header) {
-        header->preparePaintingPage(pageNumber + m_firstPageNumber - 1);
-    }
-    XReports::Header *footer = m_footers.headerForPage(pageNumber + 1, pageCount);
-    if (footer) {
-        footer->preparePaintingPage(pageNumber + m_firstPageNumber - 1);
-    }
-
     const QRect textDocRect = mainTextDocRect();
-    const bool skipHeadersFooters = this->skipHeadersFooters();
 
     painter.save();
     // painter.setClipRect( textDocRect, Qt::IntersectClip ); // triggers a Qt-Windows bug when printing
@@ -183,37 +143,15 @@ void XReports::ReportPrivate::paintPage(int pageNumber, QPainter &painter)
 
     QAbstractTextDocumentLayout::PaintContext ctx;
     ctx.palette.setColor(QPalette::Text, Qt::black);
-    if (header && !skipHeadersFooters) {
-        painter.save();
-        const int top = qRound(mmToPixels(m_marginTop));
-        painter.translate(textDocRect.left(), top);
-        ctx.clip = painter.clipRegion().boundingRect();
-        header->doc().contentDocument().documentLayout()->draw(&painter, ctx);
-        painter.restore();
-    }
-    if (footer && !skipHeadersFooters) {
-        painter.save();
-        const int bottom = qRound(mmToPixels(m_marginBottom));
-        const int footerHeight = qRound(m_footers.height());
-        painter.translate(textDocRect.left(), m_paperSize.height() - bottom - footerHeight);
-        ctx.clip = painter.clipRegion().boundingRect();
-        footer->doc().contentDocument().documentLayout()->draw(&painter, ctx);
-        painter.restore();
-    }
 }
 //@endcond
 
 QSizeF XReports::ReportPrivate::layoutAsOnePage(qreal docWidth)
 {
-    m_headers.layoutWithTextWidth(docWidth);
-    m_footers.layoutWithTextWidth(docWidth);
-
     const qreal docHeight = m_layout.layoutAsOnePage(docWidth);
 
     qreal pageWidth = docWidth + mmToPixels(m_marginLeft + m_marginRight);
     qreal pageHeight = docHeight + mmToPixels(m_marginTop + m_marginBottom);
-    pageHeight += m_headers.height();
-    pageHeight += m_footers.height();
 
     m_pageContentSizeDirty = false;
 
@@ -596,44 +534,9 @@ bool XReports::Report::exportToImage(QSize size, const QString &fileName, const 
     return image.save(fileName, format);
 }
 
-XReports::Header &XReports::Report::header(HeaderLocations hl)
-{
-    if (!d->m_headers.contains(hl))
-        d->m_headers.insert(hl, new Header(this));
-    return *d->m_headers.value(hl);
-}
-
-void XReports::Report::setHeaderLocation(HeaderLocations hl, Header *header)
-{
-    // Remove old entry for this header
-    HeaderLocations loc = d->m_headers.headerLocation(header);
-    d->m_headers.remove(loc);
-    d->m_headers.insert(hl, header);
-}
-
-XReports::Header &XReports::Report::footer(HeaderLocations hl)
-{
-    if (!d->m_footers.contains(hl))
-        d->m_footers.insert(hl, new Header(this));
-    return *d->m_footers.value(hl);
-}
-
-void XReports::Report::setFooterLocation(HeaderLocations hl, Footer *footer)
-{
-    // Remove old entry for this header
-    HeaderLocations loc = d->m_footers.headerLocation(footer);
-    d->m_footers.remove(loc);
-    d->m_footers.insert(hl, footer);
-}
-
 XReports::TextDocument &XReports::Report::doc() const
 {
     return d->m_layout.textDocument();
-}
-
-void XReports::Report::setHeaderChanged()
-{
-    d->m_pageContentSizeDirty = true;
 }
 
 void XReports::Report::beginEdit()
@@ -667,8 +570,6 @@ void XReports::Report::addPageBreak()
 void XReports::Report::associateTextValue(const QString &id, const QString &value)
 {
     d->m_layout.updateTextValue(id, value);
-    d->m_headers.updateTextValue(id, value);
-    d->m_footers.updateTextValue(id, value);
 }
 
 QSizeF XReports::Report::paperSize() const
@@ -692,28 +593,6 @@ QFont XReports::Report::defaultFont() const
     return d->m_layout.defaultFont();
 }
 
-void XReports::Report::setHeaderBodySpacing(qreal spacing)
-{
-    d->m_headerBodySpacing = spacing;
-    d->m_pageContentSizeDirty = true;
-}
-
-qreal XReports::Report::headerBodySpacing() const
-{
-    return d->m_headerBodySpacing;
-}
-
-void XReports::Report::setFooterBodySpacing(qreal spacing)
-{
-    d->m_footerBodySpacing = spacing;
-    d->m_pageContentSizeDirty = true;
-}
-
-qreal XReports::Report::footerBodySpacing() const
-{
-    return d->m_footerBodySpacing;
-}
-
 void XReports::Report::setDocumentName(const QString &name)
 {
     d->m_documentName = name;
@@ -732,16 +611,6 @@ void XReports::Report::setTabPositions(const QList<QTextOption::Tab> &tabs)
 void XReports::Report::setParagraphMargins(qreal left, qreal top, qreal right, qreal bottom)
 {
     d->builder()->setParagraphMargins(left, top, right, bottom);
-}
-
-XReports::HeaderLocations XReports::Report::headerLocation(XReports::Header *header) const
-{
-    return d->m_headers.headerLocation(header);
-}
-
-XReports::HeaderLocations XReports::Report::footerLocation(XReports::Footer *footer) const
-{
-    return d->m_footers.headerLocation(footer);
 }
 
 int XReports::Report::currentPosition() const

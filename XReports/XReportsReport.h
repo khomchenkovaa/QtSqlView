@@ -28,8 +28,6 @@ namespace XReports {
 
 class MainTable;
 class Element;
-class Header;
-typedef Header Footer;
 class ReportPrivate;
 class ReportBuilder;
 class TextDocument;
@@ -250,51 +248,6 @@ public:
     qreal bottomPageMargins() const;
 
     /**
-     * Sets the margin between the header and the body of the report, in mm.
-     * This margin is 0 by default, i.e. the body starts immediately under the header.
-     */
-    void setHeaderBodySpacing(qreal spacing);
-
-    //! \return the margin between the header and the body of the report, in mm.
-    qreal headerBodySpacing() const;
-
-    /**
-     * Sets the margin between the footer and the body of the report, in mm.
-     * This margin is 0 by default, i.e. the footer starts immediately under the body.
-     */
-    void setFooterBodySpacing(qreal spacing);
-
-    //! \return the margin between the footer and the body of the report, in mm.
-    qreal footerBodySpacing() const;
-
-    /**
-     * Returns a reference to a header object.
-     * Calling this method makes the report have a header on the specified pages.
-     *
-     * Calling the method with different sets of intersecting flags leads to undefined behavior.
-     * For instance header(EvenPages|FirstPage) and header(OddPages) is fine,
-     * but header(EvenPages|FirstPage) and header(FirstPage) leads to two headers being
-     * defined for the first page, anyone of the two could be picked.
-     * Calling the method with the same set multiple times, for instance header(EvenPages|FirstPage),
-     * is ok though: the same header instance will be returned every time.
-     *
-     * Note that all headers will occupy the same height: the height of the
-     * tallest header.
-     *
-     * Specify the contents of the header by calling Header::addElement.
-     */
-    Header &header(HeaderLocations hl = AllPages);
-
-    /**
-     * \return a reference to the footer object.
-     * Calling this method makes the report have a footer on the specified pages.
-     * See header() for caveats.
-     *
-     * Specify the contents of the footer by calling Footer::addElement.
-     */
-    Footer &footer(HeaderLocations hl = AllPages);
-
-    /**
      * Associate a text string with the id of a text or html element.
      *
      * \param id the id of the text or html element, specified using TextElement::setId().
@@ -388,18 +341,6 @@ public:
     //! \return the report's number of pages (with the current page size).
     int numberOfPages() const;
 
-    //! \return the location for the given header.
-    XReports::HeaderLocations headerLocation(XReports::Header *header) const;
-
-    //! \return the location for the given footer.
-    XReports::HeaderLocations footerLocation(XReports::Footer *footer) const;
-
-    //! Set the header location
-    void setHeaderLocation(HeaderLocations hl, Header *header);
-
-    //! Set the footer location
-    void setFooterLocation(HeaderLocations hl, Footer *footer);
-
     //! \internal Returns the paper size in pixels.
     QSizeF paperSize() const;
 
@@ -446,7 +387,6 @@ private:
     friend class ::ReportData;
     friend class ::EditorData;
     XReports::TextDocument &doc() const;
-    void setHeaderChanged();
 
     QString asHtml() const;
 
@@ -456,7 +396,6 @@ private:
     Q_DISABLE_COPY(Report)
     friend class ImageElement; // for textDocumentWidth()
     friend class ChartElement; // for textDocumentWidth()
-    friend class Header; // doc(), headerChanged()
     friend class ReportPrivate; // setupPrinter
     std::unique_ptr<ReportPrivate> d;
 };

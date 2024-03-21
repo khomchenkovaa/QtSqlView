@@ -40,20 +40,6 @@ enum VariableProperty {
     ResizableImageProperty = QTextFormat::UserProperty + 5984
 };
 
-/**
- * If no header was specified for the first and last pages, then the
- * even/odd headers are used for those.
- */
-enum HeaderLocation
-{
-    FirstPage = 1, ///< The first page of the report
-    EvenPages = 2, ///< The even pages of the report: 2, 4, 6 etc.
-    OddPages  = 4, ///< The odd pages of the report: 1 (unless FirstPage has its own header), 3, 5, 7 etc.
-    LastPage  = 8, ///< The last page of the report.
-    AllPages  = OddPages | EvenPages ///< All pages (except first and last if FirstPage or LastPage have their own headers)
-};
-Q_DECLARE_FLAGS(HeaderLocations, HeaderLocation)
-
 } // namespace XReports
 
 #endif /* XREPORTS_ENUMS_H */

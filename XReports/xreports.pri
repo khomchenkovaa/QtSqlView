@@ -12,8 +12,6 @@ HEADERS += \
     $$PWD/XReportsFrameElement.h \
     $$PWD/XReportsHLineElement.h \
     $$PWD/XReportsHLineTextObject.h \
-    $$PWD/XReportsHeader.h \
-    $$PWD/XReportsHeaderMap.h \
     $$PWD/XReportsHtmlElement.h \
     $$PWD/XReportsImageElement.h \
     $$PWD/XReportsReport.h \

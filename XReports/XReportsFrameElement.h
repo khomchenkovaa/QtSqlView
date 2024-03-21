@@ -133,7 +133,6 @@ public:
 
     /**
      * Adds an variable in the text of the current paragraph.
-     * @see XReportsHeader::addVariable
      */
     void addVariable(VariableType variable) {
         d.elements.append(XReports::ElementData(variable));

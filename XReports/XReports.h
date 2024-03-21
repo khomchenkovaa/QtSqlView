@@ -1,7 +1,6 @@
 #include "XReportsAutoTableElement.h"
 #include "XReportsCellElement.h"
 #include "XReportsHLineElement.h"
-#include "XReportsHeader.h"
 #include "XReportsHtmlElement.h"
 #include "XReportsImageElement.h"
 #include "XReportsReport.h"
