@@ -12,7 +12,6 @@ class HLineElement : public Element
 {
     struct HLineElementPrivate
     {
-        QString id;
         QColor  color     = Qt::gray;
         qreal   thickness = 2;
         int     margin    = 6;

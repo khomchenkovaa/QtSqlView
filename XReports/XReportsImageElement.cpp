@@ -10,8 +10,8 @@ void XReports::ImageElement::build(ReportBuilder &builder) const
 
     static int imageNumber = 0;
     const QString name = QStringLiteral("image%1.png").arg(++imageNumber);
-    builder.currentDocument().addResource(QTextDocument::ImageResource, QUrl(name), d.pixmap);
-    builder.currentDocumentData().addResourceName(name);
+    builder.document().addResource(QTextDocument::ImageResource, QUrl(name), d.pixmap);
+    builder.textDocument().addResourceName(name);
 
     QTextImageFormat imageFormat;
     imageFormat.setName(name);
@@ -30,8 +30,7 @@ void XReports::ImageElement::build(ReportBuilder &builder) const
             imageFormat.setHeight(pixelHeight);
         } else {
             imageFormat.setProperty(ResizableImageProperty, QString(QLatin1Char('W') + QString::number(d.width)));
-            XReports::TextDocumentData::updatePercentSize(imageFormat, QSizeF(builder.report()->d->textDocumentWidth(), -1 /*unknown*/));
-            builder.currentDocumentData().setHasResizableImages();
+            builder.textDocument().setHasResizableImages();
         }
     } else if (d.height) {
         if (d.unit == Millimeters) {
@@ -41,12 +40,12 @@ void XReports::ImageElement::build(ReportBuilder &builder) const
             imageFormat.setWidth(pixelWidth);
         } else {
             imageFormat.setProperty(ResizableImageProperty, QString(QLatin1Char('H') + QString::number(d.height)));
-            builder.currentDocumentData().setHasResizableImages();
+            builder.textDocument().setHasResizableImages();
             // can't calc size yet, will be done at layouting time... hopefully.
         }
     } else if (d.fitToPage) {
         imageFormat.setProperty(ResizableImageProperty, QString(QLatin1Char('T')));
-        builder.currentDocumentData().setHasResizableImages();
+        builder.textDocument().setHasResizableImages();
     }
 
     QTextCursor &cursor = builder.cursor();

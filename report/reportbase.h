@@ -26,11 +26,12 @@ class ReportBase : public QObject
 public:
     explicit ReportBase(QObject *parent = nullptr)
         : QObject(parent)
-        , m_Document(new QTextDocument())
         {}
 
     virtual QSharedPointer<QTextDocument> toTextDocument() const {
-        return m_Document;
+        XReport report;
+        if (!createReport(&report)) return QSharedPointer<QTextDocument>::create();
+        return QSharedPointer<QTextDocument>(report.mainTextDocument()->clone());
     }
 
     virtual bool toPrinter() const {
@@ -68,30 +69,11 @@ public:
         return report.exportToHtml(fileName);
     }
 
-    //! Clears the document
-    void clear() {
-        m_Document->clear();
-    }
-
-    //! Replaces the entire contents of the document with the given HTML-formatted text in the html string
-    void setHtml(const QString& html) {
-        m_Document->setHtml(html);
-    }
-
-    //! Replaces the entire contents of the document with the given plain text.
-    void setPlainText(const QString& text) {
-        m_Document->setPlainText(text);
-    }
-
 protected:
     virtual bool createReport(XReport* report) const {
-        XHtmlElement htmlElement(m_Document->toHtml());
-        report->addElement(htmlElement);
-        return true;
+        Q_UNUSED(report)
+        return false;
     }
-
-private:
-    QSharedPointer<QTextDocument> m_Document;
 };
 
 } // Report

@@ -20,7 +20,6 @@ class TextElement : public Element
     struct TextElementPrivate
     {
         QString string;
-        QString id;
 
         QString fontFamily;
         bool    bold           = false;
@@ -131,16 +130,6 @@ public:
     //! \return the text color.
     QColor textColor() const {
         return d.foreground;
-    }
-
-    //! Set the ID associated with this text element.
-    void setId(const QString &id) {
-        d.id = id;
-    }
-
-    //! \return the ID associated with this text element.
-    QString id() const {
-        return d.id;
     }
 
     //! \return the text associated with this text element.

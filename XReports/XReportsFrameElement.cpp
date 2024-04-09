@@ -37,7 +37,7 @@ void XReports::FrameElement::build(ReportBuilder &builder) const
 
     QTextCursor contentsCursor = frame->firstCursorPosition();
 
-    ReportBuilder contentsBuilder(builder.currentDocumentData(), contentsCursor, builder.report());
+    ReportBuilder contentsBuilder(builder.textDocument(), contentsCursor, builder.report());
     contentsBuilder.copyStateFrom(builder);
 
     foreach (const XReports::ElementData &ed, d.elements) {

@@ -36,38 +36,18 @@ class ReportPrivate
 public:
     explicit ReportPrivate(Report *report);
 
-    void setPaperSizeFromPrinter(QSizeF paperSize);
-    void ensureLayouted();
-    QSizeF paperSize() const;
     void paintPage(int pageNumber, QPainter &painter);
     bool doPrint(QPrinter *printer, QWidget *parent);
-    QSizeF layoutAsOnePage(qreal docWidth);
-    bool wantEndlessPrinting() const;
     bool hasNonLayoutedTextDocument() const;
     ReportBuilder *builder();
-
-    qreal textDocumentWidth() const; // called by ImageElement, ChartElement
-    qreal rawMainTextDocHeight() const;
-    qreal mainTextDocHeight() const;
-    QRect mainTextDocRect() const;
 
     ReportPrivate(const ReportPrivate &) = delete;
     ReportPrivate &operator=(const ReportPrivate &) = delete;
 
     qreal m_layoutWidth; // in pixels; used for layoutAsOnePage only
-    qreal m_endlessPrinterWidth; // in mm
     QPageLayout::Orientation m_orientation;
-    mutable QSizeF m_paperSize; // in pixels
-    QPageSize m_pageSize;
     QString m_documentName;
-    qreal m_marginTop;
-    qreal m_marginLeft;
-    qreal m_marginBottom;
-    qreal m_marginRight;
-    qreal m_headerBodySpacing;
-    qreal m_footerBodySpacing;
     int m_firstPageNumber;
-    bool m_pageContentSizeDirty;
     ReportLayout m_layout;
 };
 

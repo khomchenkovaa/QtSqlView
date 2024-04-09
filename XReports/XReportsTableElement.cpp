@@ -41,13 +41,11 @@ void XReports::TableElement::build(ReportBuilder &builder) const
         tableCellFormat.setTableCellRowSpan(cell.rowSpan());
         tableCell.setFormat(tableCellFormat);
         cellCursor.setCharFormat(tableCellFormat);
-        ReportBuilder cellBuilder(builder.currentDocumentData(), cellCursor, builder.report());
+        ReportBuilder cellBuilder(builder.textDocument(), cellCursor, builder.report());
         cellBuilder.copyStateFrom(builder);
         cellBuilder.setDefaultFont(charFormat.font());
         cell.build(cellBuilder);
     }
 
     textDocCursor.movePosition(QTextCursor::End);
-
-    builder.currentDocumentData().registerTable(textTable);
 }

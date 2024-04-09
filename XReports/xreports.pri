@@ -20,7 +20,6 @@ HEADERS += \
     $$PWD/XReportsReport_p.h \
     $$PWD/XReportsTableElement.h \
     $$PWD/XReportsTextDocument.h \
-    $$PWD/XReportsTextDocumentData.h \
     $$PWD/XReportsTextElement.h \
     $$PWD/XReportsUtils.h
 
@@ -32,9 +31,8 @@ SOURCES += \
     $$PWD/XReportsImageElement.cpp \
     $$PWD/XReportsReport.cpp \
     $$PWD/XReportsReportBuilder.cpp \
-    $$PWD/XReportsReportLayout.cpp \
     $$PWD/XReportsTableElement.cpp \
-    $$PWD/XReportsTextDocumentData.cpp \
+    $$PWD/XReportsTextDocument.cpp \
     $$PWD/XReportsTextElement.cpp
 
 FORMS +=

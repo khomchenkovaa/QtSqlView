@@ -1,8 +1,7 @@
 #ifndef XREPORTS_TEXTDOCUMENT_H
 #define XREPORTS_TEXTDOCUMENT_H
 
-#include "XReportsAutoTableElement.h"
-#include "XReportsTextDocumentData.h"
+#include "XReportsHLineTextObject.h"
 
 #include "XReportsReport.h"
 
@@ -21,52 +20,94 @@ namespace XReports {
 
 /**
  * @internal  (exported for unit tests)
- * There is one instance of TextDocument in the report,
- * but also one in each header/footer.
+ * Contains a QTextDocument and its associated data
  */
 class TextDocument
 {
+    struct TextDocumentPrivate
+    {
+        QTextDocument  document;
+        QList<QString> resourceNames;
+        bool           hasResizableImages = false;
+    };
+
 public:
-    explicit TextDocument() {}
+    explicit TextDocument() {
+        d.document.setUseDesignMetrics(true);
+        HLineTextObject::registerHLineObjectHandler(&(d.document));
+    }
 
     ~TextDocument() {}
 
     // like QTextDocument::setTextWidth but also takes care of objects with % sizes
-    void layoutWithTextWidth(qreal w) {
-        m_contentDocument.setTextWidth(w);
+    void setTextWidth(qreal w) {
+        if (w != d.document.textWidth()) {
+            d.document.setTextWidth(w);
+            updatePercentSizes(d.document.size());
+        }
     }
 
     // like QTextDocument::setPageSize but also takes care of objects with % sizes
     void setPageSize(QSizeF size) {
-        m_contentDocument.setPageSize(size);
-    }
-
-    void updateTextValue(const QString &id, const QString &newValue) {
-        m_contentDocument.updateTextValue(id, newValue);
-    }
-
-    void scaleFontsBy(qreal factor) {
-        m_contentDocument.scaleFontsBy(factor);
+        if (size != d.document.pageSize()) {
+            d.document.setPageSize(size);
+            updatePercentSizes(size);
+        }
     }
 
     QFont defaultFont() const {
-        return m_contentDocument.document().defaultFont();
+        return d.document.defaultFont();
     }
 
-    QTextDocument &contentDocument() {
-        return contentDocumentData().document();
+    QTextDocument &document() {
+        return d.document;
     }
 
-    TextDocumentData &contentDocumentData() {
-        return m_contentDocument;
+    const QTextDocument &document() const {
+        return d.document;
     }
+
+    void saveResourcesToFiles() {
+        for (const QString &name: d.resourceNames) {
+            const QVariant v = d.document.resource(QTextDocument::ImageResource, QUrl(name));
+            QPixmap pix = v.value<QPixmap>();
+            if (!pix.isNull()) {
+                pix.save(name);
+            }
+        }
+    }
+
+    void updatePercentSizes(QSizeF size);
 
     QString asHtml() const {
-        return m_contentDocument.asHtml();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        QString htmlText = d.document.toHtml("utf-8");
+#else
+        QString htmlText = d.document.toHtml();
+#endif
+        htmlText.remove(QLatin1String("margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; "));
+        htmlText.remove(QLatin1String("-qt-block-indent:0; "));
+        htmlText.remove(QLatin1String("text-indent:0px;"));
+        htmlText.remove(QLatin1String("style=\"\""));
+        htmlText.remove(QLatin1String("style=\" \""));
+        return htmlText;
     }
 
+    void addResourceName(const QString &resourceName) {
+        d.resourceNames.append(resourceName);
+    }
+
+    void setHasResizableImages() {
+        d.hasResizableImages = true;
+    }
+
+    static void updatePercentSize(QTextImageFormat &format, QSizeF size);
+
 private:
-    TextDocumentData m_contentDocument;
+    void setFontSizeHelper(QTextCursor &lastCursor, int endPosition, qreal pointSize, qreal factor);
+
+private:
+    TextDocumentPrivate d;
 };
 
 }

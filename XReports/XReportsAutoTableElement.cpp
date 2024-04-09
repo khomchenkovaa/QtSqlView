@@ -1,7 +1,6 @@
 #include "XReportsAutoTableElement.h"
 #include "XReportsUtils.h"
 #include "XReportsReportBuilder.h"
-#include "XReportsReport_p.h" // modelForKey
 
 #include <QAbstractItemModel>
 #include <QBitArray>
@@ -131,7 +130,7 @@ void FillCellHelper::insertDecoration(XReports::ReportBuilder &builder, QTextDoc
         static int imageNumber = 0;
         const QString name = QStringLiteral("cell-image%1.png").arg(++imageNumber);
         textDoc.addResource(QTextDocument::ImageResource, QUrl(name), img);
-        builder.currentDocumentData().addResourceName(name);
+        builder.textDocument().addResourceName(name);
         cellCursor.insertImage(name);
     }
 }
@@ -145,7 +144,7 @@ void XReports::AutoTableElement::build(ReportBuilder &builder) const
     if (!d.m_tableModel) {
         return;
     }
-    QTextDocument &textDoc = builder.currentDocument();
+    QTextDocument &textDoc = builder.document();
     QTextCursor &textDocCursor = builder.cursor();
     textDocCursor.beginEditBlock();
 

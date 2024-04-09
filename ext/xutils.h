@@ -188,6 +188,30 @@ inline QString boolToString(bool value)
 
 /******************************************************************/
 
+inline QString varFloatToStr(const QVariant &val)
+{
+    QString result;
+    if (val.isValid()) {
+        result = QString::number(val.toDouble());
+    }
+    return result;
+}
+
+/******************************************************************/
+
+inline QVariant strToVarReal(const QString &val)
+{
+    QVariant result;
+    bool ok;
+    qreal realVal = val.toDouble(&ok);
+    if (ok) {
+        result = realVal;
+    }
+    return result;
+}
+
+/******************************************************************/
+
 
 } // namespace Utils
 

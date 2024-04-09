@@ -3,6 +3,7 @@
 
 #include "reporttypes.h"
 
+#include "reportdoc.h"
 #include "simplereport.h"
 #ifdef KD_REPORTS
 #include "kdxmlreport.h"

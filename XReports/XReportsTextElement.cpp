@@ -3,7 +3,6 @@
 
 void XReports::TextElement::build(ReportBuilder &builder) const {
     QTextCursor &cursor = builder.cursor();
-    const int charPosition = cursor.position();
     QTextCharFormat charFormat = cursor.charFormat();
     XReports::cleanupVariableProperties(charFormat);
     if (d.fontSet) {
@@ -35,6 +34,4 @@ void XReports::TextElement::build(ReportBuilder &builder) const {
         charFormat.clearBackground();
     cursor.setCharFormat(charFormat);
     cursor.insertText(d.string);
-    if (!d.id.isEmpty())
-        builder.currentDocumentData().setTextValueMarker(charPosition, d.id, d.string.length(), false);
 }

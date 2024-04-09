@@ -4,12 +4,8 @@
 #include "XReportsTextDocument.h"
 #include "XReportsReportBuilder.h"
 
-QT_BEGIN_NAMESPACE
-class QFont;
-class QPainter;
-class QPoint;
-class QSizeF;
-QT_END_NAMESPACE
+#include <QAbstractTextDocumentLayout>
+#include <QPainter>
 
 namespace XReports {
 
@@ -20,22 +16,17 @@ class ReportLayout
         ReportBuilder builder;
 
         ReportLayoutPrivate (XReports::Report *report)
-            : textDocument()
-            , builder(textDocument.contentDocumentData(),
-                      QTextCursor(&textDocument.contentDocument()),
+            : builder(textDocument,
+                      QTextCursor(&textDocument.document()),
                       report)
         {}
-
-        QTextDocument &contentDocument() {
-            return textDocument.contentDocument();
-        }
     };
 
 public:
     explicit ReportLayout(XReports::Report *report) : d(report) {}
 
     void setDefaultFont(const QFont &font)  {
-        d.textDocument.contentDocument().setDefaultFont(font);
+        d.textDocument.document().setDefaultFont(font);
         d.builder.setDefaultFont(font);
     }
 
@@ -43,10 +34,22 @@ public:
         return d.textDocument.defaultFont();
     }
 
-    void paintPageContent(int pageNumber, QPainter &painter);
+    void paintPageContent(int pageNumber, QPainter &painter) {
+        painter.translate(0, -pageNumber * d.textDocument.document().pageSize().height());
+
+        // Instead of using drawContents directly, we have to fork it in order to fix the palette (to avoid white-on-white in dark color schemes)
+        // d.contentDocument().drawContents(&painter, painter.clipRegion().boundingRect());
+        // This even allows us to optimize it a bit (painter clip rect already set)
+
+        QAbstractTextDocumentLayout::PaintContext ctx;
+        ctx.clip = painter.clipRegion().boundingRect();
+        ctx.palette.setColor(QPalette::Text, Qt::black);
+        d.textDocument.document().documentLayout()->draw(&painter, ctx);
+
+    }
 
     int numberOfPages()  {
-        return d.textDocument.contentDocument().pageCount();
+        return d.textDocument.document().pageCount();
     }
 
     /**
@@ -56,7 +59,7 @@ public:
      */
     qreal idealWidth()  {
         // See Database example for the +1, the right border was missing otherwise.
-        return d.textDocument.contentDocument().idealWidth() + 1; // in pixels
+        return d.textDocument.document().idealWidth() + 1; // in pixels
     }
 
     /**
@@ -68,15 +71,9 @@ public:
         d.textDocument.setPageSize(size);
     }
 
-    void updateTextValue(const QString &id, const QString &newValue)  {
-        d.textDocument.updateTextValue(id, newValue);
-    }
-
-    qreal layoutAsOnePage(qreal width) ;
-
     QString anchorAt(int pageNumber, QPoint pos)  {
-        const QPointF posInPage = pos + QPointF(0, pageNumber * d.contentDocument().pageSize().height());
-        return d.contentDocument().documentLayout()->anchorAt(posInPage);
+        const QPointF posInPage = pos + QPointF(0, pageNumber * d.textDocument.document().pageSize().height());
+        return d.textDocument.document().documentLayout()->anchorAt(posInPage);
     }
 
     QString toHtml() const  {
@@ -84,7 +81,7 @@ public:
     }
 
     void finishHtmlExport()  {
-        d.textDocument.contentDocumentData().saveResourcesToFiles();
+        d.textDocument.saveResourcesToFiles();
     }
 
     TextDocument &textDocument() {

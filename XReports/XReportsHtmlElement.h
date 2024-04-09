@@ -19,7 +19,6 @@ class HtmlElement : public Element
     struct HtmlElementPrivate
     {
         QString html;
-        QString id;
     };
 
 public:
@@ -58,26 +57,13 @@ public:
         return *this;
     }
 
-    //! Set the ID associated with this text element.
-    void setId(const QString &id) {
-        d.id = id;
-    }
-
-    //! @return the ID associated with this text element.
-    QString id() const {
-        return d.id;
-    }
-
-    /**
+   /**
      * @internal
      * @reimp
      */
     void build(ReportBuilder &builder) const override {
         QTextCursor &cursor = builder.cursor();
-        const int charPosition = cursor.position();
         cursor.insertHtml(d.html);
-        if (!d.id.isEmpty())
-            builder.currentDocumentData().setTextValueMarker(charPosition, d.id, cursor.position(), false);
     }
 
     /**

@@ -69,7 +69,7 @@ void XReports::ReportBuilder::addVariable(XReports::VariableType variable)
     const QTextCharFormat origCharFormat = cursor.charFormat();
 
     // Keep the current font (KDRE-91).
-    QTextCursor docCursor(&currentDocument());
+    QTextCursor docCursor(&document());
     docCursor.setPosition(charPosition);
     cursor.setCharFormat(docCursor.charFormat());
 
@@ -77,7 +77,7 @@ void XReports::ReportBuilder::addVariable(XReports::VariableType variable)
     element.build(*this);
     cursor.endEditBlock();
 
-    setVariableMarker(currentDocument(), charPosition, variable, value.length());
+    setVariableMarker(document(), charPosition, variable, value.length());
 
     cursor.setCharFormat(origCharFormat); // restore the orig format
 }

@@ -65,6 +65,29 @@ inline QIcon iconForMimeType(const QString &mime, const QIcon &fallback = QIcon(
 
 /******************************************************************/
 
+inline QIcon iconForFile(const QString &fileName, const QIcon &fallback = QIcon())
+{
+    QMimeDatabase db;
+    QMimeType t = db.mimeTypeForFile(fileName, QMimeDatabase::MatchExtension);
+    if (QIcon::hasThemeIcon(t.iconName())) {
+        return QIcon::fromTheme(t.iconName());
+    }
+    if (QIcon::hasThemeIcon(t.genericIconName())) {
+        return QIcon::fromTheme(t.genericIconName());
+    }
+    return fallback;
+}
+
+/******************************************************************/
+
+inline void findInCmb(QComboBox *cmb, QVariant data)
+{
+    int idx = cmb->findData(data);
+    cmb->setCurrentIndex(idx);
+}
+
+/******************************************************************/
+
 inline void fillCmb(QComboBox *cmb, const QStringList& cmbList)
 {
     const QSignalBlocker blocker(cmb);

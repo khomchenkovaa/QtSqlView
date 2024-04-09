@@ -26,7 +26,6 @@ class AutoTableElement : public AbstractTableElement
     struct AutoTableElementPrivate
     {
         QAbstractItemModel *m_tableModel = nullptr;
-        QString m_modelKey;
         bool m_verticalHeaderVisible = true;
         bool m_horizontalHeaderVisible = true;
         QBrush m_headerBackground = QColor(218, 218, 218);

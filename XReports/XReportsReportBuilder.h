@@ -1,7 +1,8 @@
 #ifndef XREPORTS_REPORTBUILDER_H
 #define XREPORTS_REPORTBUILDER_H
 
-#include "XReportsTextDocumentData.h"
+#include "XReportsTextDocument.h"
+#include "XReportsUtils.h"
 #include "XReportsReport.h"
 
 #include <QTextCursor>
@@ -14,10 +15,9 @@ namespace XReports {
 class ReportBuilder
 {
     struct ReportBuilderPrivate {
-        TextDocumentData &contentDocument;
+        TextDocument &textDocument;
         QTextCursor cursor;
         QTextCursor layoutDocCursor;
-        QList<QTextOption::Tab> tabPositions;
         qreal   leftMargin   = 0;
         qreal   rightMargin  = 0;
         qreal   topMargin    = 0;
@@ -26,8 +26,8 @@ class ReportBuilder
         QFont   defaultFont;
         bool    first = true;
 
-        ReportBuilderPrivate(TextDocumentData &contentDocument, const QTextCursor &cursor, Report *report)
-            : contentDocument (contentDocument)
+        ReportBuilderPrivate(TextDocument &textDocument, const QTextCursor &cursor, Report *report)
+            : textDocument (textDocument)
             , cursor(cursor)
             , report(report)
         {}
@@ -41,14 +41,13 @@ class ReportBuilder
     };
 
 public:
-    ReportBuilder(TextDocumentData &contentDocument, const QTextCursor &cursor, Report *report)
-        : d(contentDocument, cursor, report)
+    ReportBuilder(TextDocument &textDocument, const QTextCursor &cursor, Report *report)
+        : d(textDocument, cursor, report)
     {}
 
     virtual ~ReportBuilder() {}
 
     QTextCursor &cursor() {
-        d.contentDocument.aboutToModifyContents(TextDocumentData::Append);
         return d.cursor;
     }
 
@@ -75,12 +74,8 @@ public:
         d.cursor.insertFragment(fragment);
     }
 
-    TextDocumentData &currentDocumentData() {
-        return d.contentDocument;
-    }
-
-    QTextDocument &currentDocument() {
-        return currentDocumentData().document();
+    QTextDocument &document() {
+        return d.textDocument.document();
     }
 
     // Store default font in builder, so that toplevel text elements use the report's default font
@@ -94,39 +89,22 @@ public:
     }
 
     // should not be used directly, apart for creating another builder (e.g. cell builder)
-    TextDocumentData &contentDocumentData() {
-        return d.contentDocument;
-    }
-
-    QTextCursor &contentDocumentCursor() {
-        return d.cursor;
+    TextDocument &textDocument() {
+        return d.textDocument;
     }
 
     void setupBlockFormat(QTextBlockFormat &blockFormat) const {
-        blockFormat.setTabPositions(d.tabPositions);
         blockFormat.setLeftMargin(d.leftMargin);
         blockFormat.setRightMargin(d.rightMargin);
         blockFormat.setTopMargin(d.topMargin);
         blockFormat.setBottomMargin(d.bottomMargin);
     }
 
-    void setTabPositions(const QList<QTextOption::Tab> &tabs) { // in mm
-        QList<QTextOption::Tab> tabsInPixels;
-        for (QTextOption::Tab tab: tabs) {
-            tab.position = mmToPixels(tab.position);
-            tabsInPixels.append(tab);
-        }
-        d.tabPositions = tabsInPixels;
-        d.contentDocument.setUsesTabPositions(true);
-    }
-    // const QList<QTextOption::Tab>& tabPositions() const { return m_tabPositions; }
-
     void setParagraphMargins(qreal left, qreal top, qreal right, qreal bottom) {
         d.setMargins(left, top, right, bottom); // in mm
     }
 
     void copyStateFrom(const ReportBuilder &parentBuilder) {
-        d.tabPositions = parentBuilder.d.tabPositions;
         d.leftMargin   = parentBuilder.d.leftMargin;
         d.rightMargin  = parentBuilder.d.rightMargin;
         d.topMargin    = parentBuilder.d.topMargin;
@@ -134,7 +112,7 @@ public:
         d.defaultFont  = parentBuilder.d.defaultFont;
     }
 
-    int currentPosition() {
+    int cursorPosition() {
         return d.cursor.position();
     }
 

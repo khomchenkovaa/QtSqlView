@@ -24,7 +24,6 @@ class ImageElement : public Element
         qreal   height = 0;
         bool    fitToPage = false;
         Unit    unit = XReports::Millimeters;
-        QString id;
     };
 
 public:
@@ -158,16 +157,6 @@ public:
     //! \return if the image be scaled to fills the page.
     bool fitToPage() const {
         return d.fitToPage;
-    }
-
-    //! Set the ID associated with this image element.
-    void setId(const QString &id) {
-        d.id = id;
-    }
-
-    //! \return the ID associated with this image element.
-    QString id() const {
-        return d.id;
     }
 
     /**

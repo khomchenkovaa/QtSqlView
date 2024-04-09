@@ -117,72 +117,10 @@ public:
     void addPageBreak();
 
     /**
-     * Set the list of tabs (tabulations) to use when adding paragraph elements.
-     * Those tabs will be set for any paragraph element that is added from now on,
-     * until calling this method again.
-     *
-     * This method allows to align numbers based on their decimal separator, for instance.
-     * Example:
-     * \code
-     QList<QTextOption::Tab> tabs;
-     QTextOption::Tab tab;
-     tab.position = 50; // in mm
-     tab.type = QTextOption::DelimiterTab;
-     tab.delimiter = QLatin1Char( '.' );
-     tabs.append( tab );
-     report.setTabPositions( tabs );
-     * \endcode
-     * Then insert text using a tab, like TextElement("\t123.456").
-     */
-    void setTabPositions(const QList<QTextOption::Tab> &tabs);
-
-    /**
      * Sets the paragraph margins for all paragraph elements to be created from now on.
      * The default margins are 0,0,0,0.
      */
     void setParagraphMargins(qreal left, qreal top, qreal right, qreal bottom);
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    /**
-     * Sets the page size of the report. Example: setPageSize(QPrinter::A4) or setPageSize(QPrinter::Letter);
-     * Note that for performance reasons, it is recommended to do this after
-     * adding all the elements to the report rather than before.
-     * Deprecated, use setPageSize(QPageSize::PageSizeId), or setPageSize(QPageSize)
-     */
-    void setPageSize(QPrinter::PageSize size);
-#endif
-
-    /**
-     * Sets the page size of the report. Example: setPageSize(QPageSize::A4) or setPageSize(QPageSize::Letter);
-     * Note that for performance reasons, it is recommended to do this after
-     * adding all the elements to the report rather than before.
-     */
-    void setPageSize(QPageSize::PageSizeId size);
-
-    /**
-     * Sets the page size of the report. Example: setPageSize(QPageSize::A4) or setPageSize(QPageSize::Letter);
-     * Note that for performance reasons, it is recommended to do this after
-     * adding all the elements to the report rather than before.
-     */
-    void setPageSize(const QPageSize &size);
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    /**
-     * \return the page size set by setPageSize. The default page size is A4.
-     */
-    QPrinter::PageSize pageSize() const;
-#else
-    /**
-     * \return the page size set by setPageSize. The default page size is A4.
-     */
-    QPageSize pageSize() const;
-#endif
-
-    /**
-     * Sets a custom paper size for the report.
-     * Supported units are DevicePixel, Millimeter, Point and Inch.
-     */
-    void setPaperSize(QSizeF paperSize, QPrinter::Unit unit);
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     /**
@@ -205,58 +143,6 @@ public:
      * \return the orientation set by setPageOrientation. The default orientation is QPageLayout::Portrait.
      */
     QPageLayout::Orientation pageOrientation() const;
-
-    /**
-     * Set a custom page size for an endless printer.
-     * The page width is known, the document is laid out without pagination
-     * within that width. The page height is set automatically so that the
-     * entire document fits within one page.
-     *
-     * When calling setWidthForEndlessPrinter you don't have to call setPageSize or setOrientation.
-     *
-     * Call setWidthForEndlessPrinter(0) to reset to normal (pagesize-dependent) behavior.
-     */
-    void setWidthForEndlessPrinter(qreal widthMM);
-
-    //! Sets the page margins in mm. The default margins are 20 mm.
-    void setMargins(qreal top, qreal left, qreal bottom, qreal right);
-
-    void getMargins(qreal *top, qreal *left, qreal *bottom, qreal *right) const;
-
-    //! Sets the top page margins in mm. The default margin is 20 mm.
-    void setTopPageMargin(qreal top);
-
-    //! \return the top page margin in mm.
-    qreal topPageMargins() const;
-
-    //! Sets the left page margins in mm. The default margin is 20 mm.
-    void setLeftPageMargin(qreal left);
-
-    //! \return the left page margin in mm.
-    qreal leftPageMargins() const;
-
-    //! Sets the right page margins in mm. The default margin is 20 mm.
-    void setRightPageMargin(qreal right);
-
-    //! \return the right page margin in mm.
-    qreal rightPageMargins() const;
-
-    //! Sets the bottom page margins in mm. The default margin is 20 mm.
-    void setBottomPageMargin(qreal bottom);
-
-    //! \return the bottom page margin in mm.
-    qreal bottomPageMargins() const;
-
-    /**
-     * Associate a text string with the id of a text or html element.
-     *
-     * \param id the id of the text or html element, specified using TextElement::setId().
-     * \param value the text for this element, which will appear in the report.
-     * The value can include newlines.
-     * If associateTextValue was already called with the id \p id, the new value
-     * replaces the old one.
-     */
-    void associateTextValue(const QString &id, const QString &value);
 
     /**
      * Sets the name of the report.
@@ -340,9 +226,6 @@ public:
 
     //! \return the report's number of pages (with the current page size).
     int numberOfPages() const;
-
-    //! \internal Returns the paper size in pixels.
-    QSizeF paperSize() const;
 
     //! \internal Returns the current builder cursor position.
     int currentPosition() const;

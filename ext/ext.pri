@@ -3,6 +3,7 @@ DEPENDPATH += $$PWD
 
 HEADERS += \
     $$PWD/booleancheckboxdelegate.h \
+    $$PWD/xclickablelabel.h \
     $$PWD/xcolorselector.h \
     $$PWD/xcombobox.h \
     $$PWD/xcsvmodel.h \
@@ -11,6 +12,7 @@ HEADERS += \
     $$PWD/xguiutils.h \
     $$PWD/xpropertyhelper.h \
     $$PWD/xtextedit.h \
+    $$PWD/xtexttemplate.h \
     $$PWD/xutils.h
 
 SOURCES += \
