@@ -15,9 +15,14 @@ class QueryParamDlg : public QDialog
 {
     Q_OBJECT
 
+    struct QueryParamDlgPrivate {
+        QVariantMap   bindTypes;
+        QVariantMap   bindSql;
+        DbConnection *dbConn = Q_NULLPTR;
+    };
+
 public:
     explicit QueryParamDlg(DbConnection *dbc, QWidget *parent = nullptr);
-    ~QueryParamDlg();
 
     void setBindSql(const QVariantMap &sqlRef);
     QVariantMap bindSql() const;
@@ -44,10 +49,8 @@ private:
     QVariant getValue(const QString &param) const;
 
 private:
-    QVariantMap   m_BndTypes;
-    QVariantMap   m_RefSql;
     QGridLayout  *ui_Grid;
-    DbConnection *m_Db;
+    QueryParamDlgPrivate d;
 };
 
 #endif // QUERYPARAMDLG_H

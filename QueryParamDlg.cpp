@@ -22,15 +22,8 @@ enum {
 QueryParamDlg::QueryParamDlg(DbConnection *dbc, QWidget *parent) :
     QDialog(parent)
 {
-    m_Db = dbc;
+    d.dbConn = dbc;
     setupUI();
-}
-
-/******************************************************************/
-
-QueryParamDlg::~QueryParamDlg()
-{
-
 }
 
 /******************************************************************/
@@ -40,7 +33,7 @@ void QueryParamDlg::setBindSql(const QVariantMap &sqlRef)
     QMapIterator<QString, QVariant> i(sqlRef);
     while (i.hasNext()) {
         i.next();
-        m_RefSql.insert(i.key(), i.value());
+        d.bindSql.insert(i.key(), i.value());
     }
 }
 
@@ -49,7 +42,7 @@ void QueryParamDlg::setBindSql(const QVariantMap &sqlRef)
 QVariantMap QueryParamDlg::bindSql() const
 {
     QVariantMap result;
-    QMapIterator<QString, QVariant> i(m_RefSql);
+    QMapIterator<QString, QVariant> i(d.bindSql);
     while (i.hasNext()) {
         i.next();
         result.insert(i.key(), i.value());
@@ -64,7 +57,7 @@ void QueryParamDlg::setBindTypes(const QVariantMap &map)
     QMapIterator<QString, QVariant> i(map);
     while (i.hasNext()) {
         i.next();
-        m_BndTypes.insert(i.key(), i.value());
+        d.bindTypes.insert(i.key(), i.value());
     }
 }
 
@@ -73,7 +66,7 @@ void QueryParamDlg::setBindTypes(const QVariantMap &map)
 QVariantMap QueryParamDlg::bindTypes() const
 {
     QVariantMap result;
-    QMapIterator<QString, QVariant> i(m_BndTypes);
+    QMapIterator<QString, QVariant> i(d.bindTypes);
     while (i.hasNext()) {
         i.next();
         result.insert(i.key(), i.value());
@@ -122,9 +115,9 @@ void QueryParamDlg::setDefaults(const QVariantMap &map)
 
 void QueryParamDlg::fillReference(QComboBox *cmb, const QString &param)
 {
-    QString sql = m_RefSql.value(param).toString();
+    QString sql = d.bindSql.value(param).toString();
     bool ok = false;
-    bool done = Report::fillSqlRef(cmb, sql, m_Db->db);
+    bool done = Report::fillSqlRef(cmb, sql, d.dbConn->db);
     while (!done) {
         sql = QInputDialog::getMultiLineText(this, tr("Reference"), tr("SQL"), sql, &ok);
         if (!ok) break; // canceled
@@ -133,9 +126,9 @@ void QueryParamDlg::fillReference(QComboBox *cmb, const QString &param)
                                  tr("Error in SQL\nSQL text is Empty"));
         } else {
             QString err;
-            done = Report::fillSqlRef(cmb, sql,  m_Db->db, &err);
+            done = Report::fillSqlRef(cmb, sql,  d.dbConn->db, &err);
             if (done) {
-                m_RefSql.insert(param, sql);
+                d.bindSql.insert(param, sql);
             }
             if (!err.isEmpty()) {
                 QMessageBox::warning(this, tr("Reference"),
@@ -183,7 +176,7 @@ QComboBox *QueryParamDlg::createCmb(const QString &param, int row, QWidget *pare
             << tr("Date")
             << tr("Date and Time")
             << tr("Reference");
-    auto typeSelected = m_BndTypes.value(param, Report::ParamType::String).toInt();
+    auto typeSelected = d.bindTypes.value(param, Report::ParamType::String).toInt();
 
     QComboBox *result = new QComboBox(parent);
     result->setObjectName(comboName(param));
@@ -191,7 +184,7 @@ QComboBox *QueryParamDlg::createCmb(const QString &param, int row, QWidget *pare
     result->setCurrentIndex(typeSelected);
 
     connect(result, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, param, row](int type){
-        m_BndTypes.insert(param, type);
+        d.bindTypes.insert(param, type);
         updateValueEditor(param, row);
     });
 
@@ -217,7 +210,7 @@ void QueryParamDlg::updateValueEditor(const QString &param, int row)
 
 QWidget *QueryParamDlg::createValueEditor(const QString &param, QWidget *parent)
 {
-    auto type   = m_BndTypes.value(param, Report::ParamType::String).toInt();
+    auto type   = d.bindTypes.value(param, Report::ParamType::String).toInt();
     auto editor = Report::createParamEditor(type, editorName(param), parent);
 
     QComboBox *refCombo = qobject_cast<QComboBox*>(editor);
