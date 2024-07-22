@@ -62,10 +62,6 @@ public:
 
     DbTable *getDbTable(const QModelIndex &index) const;
 
-    void expanding(const QModelIndex &index);
-
-    void collapsed(const QModelIndex &index);
-
     void refresh();
 
     void tablelist_clear(class DbConnection &dbc);
@@ -73,6 +69,10 @@ public:
     void tablelist_load(class DbConnection &dbc);
 
     void tablelist_seterror(class DbConnection &dbc, QSqlError e);
+
+public Q_SLOTS:
+    void expanding(const QModelIndex &index);
+    void collapsed(const QModelIndex &index);
 
 private:
     DbListModelPrivate d;

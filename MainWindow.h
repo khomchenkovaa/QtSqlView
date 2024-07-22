@@ -40,23 +40,18 @@ public:
 
 private slots:
     // *** Menu Actions ***
-    void on_action_AddConnection_triggered();
-    void on_action_EditConnection_triggered();
-    void on_action_RemoveConnection_triggered();
-    void on_action_RefreshTablelist_triggered();
-    void on_action_Exit_triggered();
-    void on_action_About_triggered();
-    void on_action_VisitWebsite_triggered();
-    void on_action_AboutQt_triggered();
+    void addConnection();
+    void editConnection();
+    void removeConnection();
+    void showAboutBox();
+    void visitWebsite();
 
     // *** Triggers of the DbList TreeView 
-    void on_treeDbList_clicked(const QModelIndex &index);
-    void on_treeDbList_expanded(const QModelIndex &index);
-    void on_treeDbList_collapsed(const QModelIndex &index);
-    void show_treeDbList_contextMenu(const QPoint &position);
+    void changeCurrentTable(const QModelIndex &index);
+    void showTreeDbListContextMenu(const QPoint &position);
 
     // *** Data Table Tab ***
-    void show_dataTable_contextMenu(const QPoint &position);
+    void showDataTableContextMenu(const QPoint &position);
     void on_action_AddRow_triggered();
     void on_addRowButton_clicked();
     void on_action_DelRow_triggered();
@@ -69,7 +64,7 @@ private slots:
     void on_saveDataButton_clicked();
     void on_action_RevertData_triggered();
     void on_revertDataButton_clicked();
-    void slot_dataTable_horizontalHeader_sectionDoubleClicked(int logicalIndex);
+    void sortDataTable(int logicalIndex);
 
     // *** Query Tab ***
     void on_goQueryButton_clicked();
@@ -83,6 +78,7 @@ private slots:
 
 private:
     void setupUI();
+    void setupActions();
     QVariantMap setBindValues(const QStringList &params, DbConnection *dbc);
     void exportToCsv(QAbstractTableModel *model);
 

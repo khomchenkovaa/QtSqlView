@@ -43,6 +43,7 @@ MainWindow::MainWindow()
 {
     ui->setupUi(this);
     setupUI();
+    setupActions();
 }
 
 /******************************************************************/
@@ -61,7 +62,7 @@ void MainWindow::closeEvent(QCloseEvent *)
 
 /******************************************************************/
 
-void MainWindow::on_action_AddConnection_triggered()
+void MainWindow::addConnection()
 {
     ConnectionDlg wc(this);
     if (wc.exec() == QDialog::Accepted) {
@@ -71,7 +72,7 @@ void MainWindow::on_action_AddConnection_triggered()
 
 /******************************************************************/
 
-void MainWindow::on_action_EditConnection_triggered()
+void MainWindow::editConnection()
 {
     QModelIndex selected = ui->treeDbList->currentIndex();
 
@@ -90,7 +91,7 @@ void MainWindow::on_action_EditConnection_triggered()
 
 /******************************************************************/
 
-void MainWindow::on_action_RemoveConnection_triggered()
+void MainWindow::removeConnection()
 {
     QModelIndex selected = ui->treeDbList->currentIndex();
 
@@ -106,21 +107,7 @@ void MainWindow::on_action_RemoveConnection_triggered()
 
 /******************************************************************/
 
-void MainWindow::on_action_RefreshTablelist_triggered()
-{
-    dblist.refresh();
-}
-
-/******************************************************************/
-
-void MainWindow::on_action_Exit_triggered()
-{
-    close();
-}
-
-/******************************************************************/
-
-void MainWindow::on_action_About_triggered()
+void MainWindow::showAboutBox()
 {
     QMessageBox::about(this, "About QtSqlView",
                        "QtSqlView is a simple SQL database browser\n"
@@ -129,7 +116,7 @@ void MainWindow::on_action_About_triggered()
 
 /******************************************************************/
 
-void MainWindow::on_action_VisitWebsite_triggered()
+void MainWindow::visitWebsite()
 {
     QUrl url("https://github.com/khomchenkovaa/QtSqlView");
 
@@ -150,14 +137,7 @@ void MainWindow::on_action_VisitWebsite_triggered()
 
 /******************************************************************/
 
-void MainWindow::on_action_AboutQt_triggered()
-{
-    QMessageBox::aboutQt(this, "About Qt");
-}
-
-/******************************************************************/
-
-void MainWindow::on_treeDbList_clicked(const QModelIndex &index)
+void MainWindow::changeCurrentTable(const QModelIndex &index)
 {
     const QSignalBlocker blocker(ui->treeDbList);
 
@@ -186,21 +166,7 @@ void MainWindow::on_treeDbList_clicked(const QModelIndex &index)
 
 /******************************************************************/
 
-void MainWindow::on_treeDbList_expanded(const QModelIndex &index)
-{
-    dblist.expanding(index);
-}
-
-/******************************************************************/
-
-void MainWindow::on_treeDbList_collapsed(const QModelIndex &index)
-{
-    dblist.collapsed(index);
-}
-
-/******************************************************************/
-
-void MainWindow::show_treeDbList_contextMenu(const QPoint &position)
+void MainWindow::showTreeDbListContextMenu(const QPoint &position)
 {
     QMenu contextmenu(this);
 
@@ -219,7 +185,7 @@ void MainWindow::show_treeDbList_contextMenu(const QPoint &position)
 
 /******************************************************************/
 
-void MainWindow::show_dataTable_contextMenu(const QPoint &position)
+void MainWindow::showDataTableContextMenu(const QPoint &position)
 {
     QMenu contextmenu(this);
 
@@ -340,7 +306,7 @@ void MainWindow::on_revertDataButton_clicked()
 
 /******************************************************************/
 
-void MainWindow::slot_dataTable_horizontalHeader_sectionDoubleClicked(int logicalIndex)
+void MainWindow::sortDataTable(int logicalIndex)
 {
     if (!datatablemodel) return;
 
@@ -529,15 +495,15 @@ void MainWindow::setupUI()
     ui->treeDbList->setModel(&dblist);
 
     ui->treeDbList->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->treeDbList, SIGNAL(customContextMenuRequested(const QPoint&)),
-            this, SLOT(show_treeDbList_contextMenu(const QPoint &)));
+    connect(ui->treeDbList, &QWidget::customContextMenuRequested,
+            this, &MainWindow::showTreeDbListContextMenu);
 
     ui->dataTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->dataTable, SIGNAL(customContextMenuRequested(const QPoint&)),
-            this, SLOT(show_dataTable_contextMenu(const QPoint &)));
+    connect(ui->dataTable, &QWidget::customContextMenuRequested,
+            this, &MainWindow::showDataTableContextMenu);
 
-    connect(ui->dataTable->horizontalHeader(), SIGNAL(sectionDoubleClicked(int)),
-            this, SLOT(slot_dataTable_horizontalHeader_sectionDoubleClicked(int)));
+    connect(ui->dataTable->horizontalHeader(), &QHeaderView::sectionDoubleClicked,
+            this, &MainWindow::sortDataTable);
 
     ui->schemaTable->setModel(&schemamodel);
     ui->schemaTable->verticalHeader()->hide();
@@ -563,6 +529,39 @@ void MainWindow::setupUI()
 
     connect(simpleReportTab, &SimpleReportWidget::tableHeaders,
             this, &MainWindow::setTableHeaders);
+}
+
+/******************************************************************/
+
+void MainWindow::setupActions()
+{
+    // *** Menu Actions ***
+    connect(ui->action_AddConnection, &QAction::triggered,
+            this, &MainWindow::addConnection);
+    connect(ui->action_EditConnection, &QAction::triggered,
+            this, &MainWindow::editConnection);
+    connect(ui->action_RemoveConnection, &QAction::triggered,
+            this, &MainWindow::removeConnection);
+    connect(ui->action_RefreshTablelist, &QAction::triggered, this, [this](){
+        dblist.refresh();
+    });
+    connect(ui->action_Exit, &QAction::triggered,
+            this, &MainWindow::close);
+    connect(ui->action_About, &QAction::triggered,
+            this, &MainWindow::showAboutBox);
+    connect(ui->action_VisitWebsite, &QAction::triggered,
+            this, &MainWindow::visitWebsite);
+    connect(ui->action_AboutQt, &QAction::triggered, this, [this](){
+        QMessageBox::aboutQt(this, "About Qt");
+    });
+
+    // *** Triggers of the DbList TreeView
+    connect(ui->treeDbList, &QAbstractItemView::clicked,
+            this, &MainWindow::changeCurrentTable);
+    connect(ui->treeDbList, &QTreeView::expanded,
+            &dblist, &DbListModel::expanding);
+    connect(ui->treeDbList, &QTreeView::collapsed,
+            &dblist, &DbListModel::collapsed);
 }
 
 /******************************************************************/
