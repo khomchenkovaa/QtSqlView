@@ -22,7 +22,7 @@ enum {
 DbSchemaModel::DbSchemaModel(QObject *parent)
     : QAbstractTableModel(parent)
 {
-    m_Header << tr("Column name")
+    d.header << tr("Column name")
              << tr("Data Type")
              << tr("Length")
              << tr("Nullable")
@@ -35,7 +35,7 @@ DbSchemaModel::DbSchemaModel(QObject *parent)
 QVariant DbSchemaModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        return m_Header.at(section);
+        return d.header.at(section);
     }
     return QVariant();
 }
@@ -47,7 +47,7 @@ int DbSchemaModel::rowCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    return m_Record.count();
+    return d.sqlRecord.count();
 }
 
 /******************************************************************/
@@ -57,7 +57,7 @@ int DbSchemaModel::columnCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    return m_Header.size();
+    return d.header.size();
 }
 
 /******************************************************************/
@@ -81,8 +81,8 @@ QVariant DbSchemaModel::data(const QModelIndex &index, int role) const
 void DbSchemaModel::setRecord(DbTable *dbt, QSqlRecord r)
 {
     beginResetModel();
-    m_Driver = dbt->dbconn->db.driverName();
-    m_Record  = r;
+    d.driver = dbt->dbconn->db.driverName();
+    d.sqlRecord  = r;
     updateIndexFields(dbt->dbconn->db.primaryIndex(dbt->tablename));
     endResetModel();
 }
@@ -91,16 +91,16 @@ void DbSchemaModel::setRecord(DbTable *dbt, QSqlRecord r)
 
 QVariant DbSchemaModel::dataValue(int idx, int column) const
 {
-    if (idx >= m_Record.count())
+    if (idx >= d.sqlRecord.count())
         return QVariant();
 
-    QSqlField field = m_Record.field(idx);
+    QSqlField field = d.sqlRecord.field(idx);
 
     switch (column) {
     case ConnectionsColumn:
         return field.name();
     case TypeColumn:
-        return DbTypes::getName(m_Driver, field.typeID());
+        return DbTypes::getName(d.driver, field.typeID());
     case LengthColumn: {
         int length = field.length();
         int precision = field.precision();
@@ -126,7 +126,7 @@ QVariant DbSchemaModel::dataValue(int idx, int column) const
     }
     case ModifiersColumn: {
         QStringList mods;
-        if (m_Index.contains(field.name())) {
+        if (d.index.contains(field.name())) {
             mods << "PRIMARY KEY";
         }
         if (field.isAutoValue()) {
@@ -145,9 +145,9 @@ QVariant DbSchemaModel::dataValue(int idx, int column) const
 
 void DbSchemaModel::updateIndexFields(const QSqlIndex &pindex)
 {
-    m_Index.clear();
+    d.index.clear();
     for (int i=0; i < pindex.count(); ++i) {
-        m_Index << pindex.field(i).name();
+        d.index << pindex.field(i).name();
     }
 }
 

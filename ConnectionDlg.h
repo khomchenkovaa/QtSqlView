@@ -17,19 +17,18 @@ public:
     explicit ConnectionDlg(QWidget *parent = nullptr, const DbParameter &dbParameter = DbParameter());
     ~ConnectionDlg();
 
-    void fetchDbParameter();
+private slots:
     void updatePasswordStatus();
-    void updateFields();
-
-public slots:
-    void on_okButton_clicked();
-    void on_testButton_clicked();
-    void on_checkAskPassword_clicked();
-    void on_comboType_currentIndexChanged(int index);
-    void on_buttonSelectFile_clicked();
+    void testConnection();
+    void chooseSQLiteDbFile();
 
 private:
-    static QString getDescription(QString drv);
+    void setupConnections();
+    void fetchDbParameter();
+    void updateFields();
+
+private:
+    static QString getDescription(const QString &drv);
 
 public:
     DbParameter	dbp;

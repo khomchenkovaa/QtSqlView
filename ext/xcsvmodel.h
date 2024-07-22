@@ -57,6 +57,8 @@ public:
     void toCSV(QIODevice *file, bool withHeader = false, QChar separator = ',', QTextCodec* codec = Q_NULLPTR) const;
     void toCSV(const QString& filename, bool withHeader = false, QChar separator = ',', QTextCodec* codec = Q_NULLPTR) const;
 
+    QString toHTML(bool withHeader = false, int numEmpty = 0) const;
+
     QuoteMode quoteMode() const;
     void setQuoteMode(QuoteMode mode);
 

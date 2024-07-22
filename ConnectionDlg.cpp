@@ -15,9 +15,11 @@ ConnectionDlg::ConnectionDlg(QWidget *parent, const DbParameter &dbParameter)
     , ui(new Ui::ConnectionDlg)
 {
     ui->setupUi(this);
+    setupConnections();
 
-    for (QString drv : QSqlDatabase::drivers()) {
-        QString desc = getDescription(drv);
+    const auto drivers = QSqlDatabase::drivers();
+    for (const auto &drv : drivers) {
+        const QString desc = getDescription(drv);
         if (desc.isNull()) {
             ui->comboType->addItem(drv, drv);
         } else {
@@ -49,6 +51,66 @@ ConnectionDlg::~ConnectionDlg()
 
 /******************************************************************/
 
+void ConnectionDlg::updatePasswordStatus()
+{
+    if (!ui->checkAskPassword->isEnabled()) return;
+    ui->editPassword->setEnabled( !ui->checkAskPassword->isChecked() );
+}
+
+/******************************************************************/
+
+void ConnectionDlg::testConnection()
+{
+    fetchDbParameter();
+
+    DbConnection conn(dbp);
+    DbListModel dblist;
+
+    QSqlError ce = conn.connect(&dblist);
+
+    if (ce.isValid()) {
+        QMessageBox::critical(this, "Testing Connection",
+                              QString("Connection failed:\n%1\n%2")
+                              .arg(ce.driverText(), ce.databaseText()));
+    } else {
+        QMessageBox::information(this, "Testing Connection",
+                                 QString("Connection established successfully."));
+    }
+}
+
+/******************************************************************/
+
+void ConnectionDlg::chooseSQLiteDbFile()
+{
+    QString filename = QFileDialog::getOpenFileName(this, "Choose a SQLite database file",
+                                                    QString(),
+                                                    "SQLite databases (*.db);;All Files (*.*)");
+    if (filename.isEmpty()) return;
+    ui->editDatabase->setText(filename);
+}
+
+/******************************************************************/
+
+void ConnectionDlg::setupConnections()
+{
+    connect(ui->okButton, &QAbstractButton::clicked, this, [this](){
+        fetchDbParameter();
+        accept();
+    });
+    connect(ui->testButton, &QAbstractButton::clicked,
+            this, &ConnectionDlg::testConnection);
+    connect(ui->checkAskPassword, &QAbstractButton::clicked,
+            this, &ConnectionDlg::updatePasswordStatus);
+    connect(ui->comboType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index){
+        dbp.driver = ui->comboType->itemData(index).toString();
+        updateFields();
+    });
+    connect(ui->buttonSelectFile, &QAbstractButton::clicked,
+            this, &ConnectionDlg::chooseSQLiteDbFile);
+}
+
+/******************************************************************/
+
 void ConnectionDlg::fetchDbParameter()
 {
     dbp.label         = ui->editLabel->text();
@@ -64,14 +126,6 @@ void ConnectionDlg::fetchDbParameter()
     if (dbp.askpassword) {
         dbp.password.clear();
     }
-}
-
-/******************************************************************/
-
-void ConnectionDlg::updatePasswordStatus()
-{
-    if (!ui->checkAskPassword->isEnabled()) return;
-    ui->editPassword->setEnabled( !ui->checkAskPassword->isChecked() );
 }
 
 /******************************************************************/
@@ -101,62 +155,7 @@ void ConnectionDlg::updateFields()
 
 /******************************************************************/
 
-void ConnectionDlg::on_okButton_clicked()
-{
-    fetchDbParameter();
-    accept();
-}
-
-/******************************************************************/
-
-void ConnectionDlg::on_testButton_clicked()
-{
-    fetchDbParameter();
-
-    DbConnection conn(dbp);
-    DbListModel dblist;
-
-    QSqlError ce = conn.connect(&dblist);
-
-    if (ce.isValid()) {
-        QMessageBox::critical(this, "Testing Connection",
-                              QString("Connection failed:\n%1\n%2")
-                              .arg(ce.driverText(), ce.databaseText()));
-    } else {
-        QMessageBox::information(this, "Testing Connection",
-                                 QString("Connection established successfully."));
-    }
-}
-
-/******************************************************************/
-
-void ConnectionDlg::on_checkAskPassword_clicked()
-{
-    updatePasswordStatus();
-}
-
-/******************************************************************/
-
-void ConnectionDlg::on_comboType_currentIndexChanged(int index)
-{
-    dbp.driver = ui->comboType->itemData(index).toString();
-    updateFields();
-}
-
-/******************************************************************/
-
-void ConnectionDlg::on_buttonSelectFile_clicked()
-{
-    QString filename = QFileDialog::getOpenFileName(this, "Choose a SQLite database file",
-                                                    QString(),
-                                                    "SQLite databases (*.db);;All Files (*.*)");
-    if (filename.isEmpty()) return;
-    ui->editDatabase->setText(filename);
-}
-
-/******************************************************************/
-
-QString ConnectionDlg::getDescription(QString drv)
+QString ConnectionDlg::getDescription(const QString &drv)
 {
     if (0) return "";
     else if (drv == "QDB2")		return "IBM DB2";

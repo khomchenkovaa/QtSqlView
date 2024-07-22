@@ -101,7 +101,7 @@ inline void fillCmb(QComboBox *cmb, const CmbList& cmbList)
 {
     const QSignalBlocker blocker(cmb);
     cmb->clear();
-    for (auto item : cmbList) {
+    for (const auto &item : cmbList) {
         cmb->addItem(item.first, item.second);
     }
     cmb->setCurrentIndex(-1);
@@ -113,7 +113,7 @@ inline void fillCmb(QComboBox *cmb, const CmbExtList& cmbList)
 {
     const QSignalBlocker blocker(cmb);
     cmb->clear();
-    for (auto item : cmbList) {
+    for (const auto &item : cmbList) {
         if (item.second.isEmpty()) {
             cmb->addItem(item.first);
         } else {

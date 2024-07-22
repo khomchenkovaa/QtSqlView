@@ -5,6 +5,7 @@
 #include "xcsvmodel.h"
 #include <QFile>
 #include <QTextStream>
+#include <QUrl>
 #include <QDebug>
 
 /******************************************************************/
@@ -240,7 +241,7 @@ void XCsvModel::setHeaderData(const QStringList& data)
 bool XCsvModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant& value, int role)
 {
     if(orientation != Qt::Horizontal) return false;                   // We don't support the vertical header
-    if(role != Qt::DisplayRole || role != Qt::EditRole) return false; // We don't support any other roles
+    if(role != Qt::DisplayRole && role != Qt::EditRole) return false; // We don't support any other roles
     if(section < 0) return false;                                     // Bogus input
     while(section > m_Header.size()) {
         m_Header << QString();
@@ -280,14 +281,14 @@ bool XCsvModel::setData(const QModelIndex& index, const QVariant& data, int role
 bool XCsvModel::insertRows(int row, int count, const QModelIndex& parent)
 {
     if (parent.isValid() || row < 0) return false;
-    emit beginInsertRows(parent, row, row + count);
+    beginInsertRows(parent, row, row + count);
 
     if(row >= rowCount()) {
         for(int i = 0; i < count; i++) m_CsvData << QStringList();
     } else {
         for(int i = 0; i < count; i++) m_CsvData.insert(row, QStringList());
     }
-    emit endInsertRows();
+    endInsertRows();
     return true;
 }
 
@@ -303,11 +304,11 @@ bool XCsvModel::removeRows(int row, int count, const QModelIndex& parent)
     if (row + count >= rowCount()) {
         count = rowCount() - row;
     }
-    emit beginRemoveRows(parent, row, row + count);
+    beginRemoveRows(parent, row, row + count);
     for (int i = 0; i < count; i++) {
         m_CsvData.removeAt(row);
     }
-    emit endRemoveRows();
+    endRemoveRows();
     return true;
 }
 
@@ -350,8 +351,7 @@ bool XCsvModel::removeColumns(int col, int count, const QModelIndex& parent)
     if (col + count >= columnCount()) {
         count = columnCount() - col;
     }
-    emit beginRemoveColumns(parent, col, col + count);
-    QString before, after;
+    beginRemoveColumns(parent, col, col + count);
     for(int i = 0; i < rowCount(); i++) {
         for(int j = 0; j < count; j++) {
             m_CsvData[i].removeAt(col);
@@ -360,7 +360,7 @@ bool XCsvModel::removeColumns(int col, int count, const QModelIndex& parent)
     for(int i = 0; i < count; i++) {
         m_Header.removeAt(col);
     }
-    emit endRemoveColumns();
+    endRemoveColumns();
     return true;
 }
 
@@ -422,7 +422,7 @@ void XCsvModel::toCSV(QIODevice* dest, bool withHeader, QChar separator, QTextCo
             if(col > 0) data += separator;
             data += xAddCsvQuotes(m_QuoteMode, m_Header.at(col).simplified());
         }
-        stream << data << endl;
+        stream << data << Qt::endl;
     }
     for(row = 0; row < rows; ++row) {
         const QStringList& rowData = m_CsvData[row];
@@ -437,9 +437,9 @@ void XCsvModel::toCSV(QIODevice* dest, bool withHeader, QChar separator, QTextCo
                 data += xAddCsvQuotes(m_QuoteMode, QString());
             }
         }
-        stream << data << endl;
+        stream << data << Qt::endl;
     }
-    stream << flush;
+    stream << Qt::flush;
     dest->close();
 }
 
@@ -459,6 +459,50 @@ void XCsvModel::toCSV(const QString& filename, bool withHeader, QChar separator,
 }
 
 /******************************************************************/
+//! Outputs the content of the model as a HTML table.
+QString XCsvModel::toHTML(bool withHeader, int numEmpty) const
+{
+    int rows = rowCount();
+    int cols = columnCount();
+    QString result;
+    QTextStream stream(&result);
+    stream << "<table border=1 cellspacing=0 cellpadding=0 width=\"100%\">" << Qt::endl;
+    if(withHeader) {
+        stream << "<tr>" << Qt::endl;
+        for(int col = 0; col < cols; ++col) {
+//            auto htmlEncoded = QUrl::toPercentEncoding(m_Header.at(col).simplified());
+            stream << "<td valign=top>" << "<p align=center>" << m_Header.at(col).simplified() << "</p>" << "</td>" << Qt::endl;
+        }
+        stream << "</tr>" << Qt::endl;
+    }
+    if (!rows && numEmpty) {
+        for (int row = 0; row < numEmpty; ++row) {
+            stream << "<tr>" << Qt::endl;
+            for(int col = 0; col < cols; ++col) {
+                stream << "<td>" << "&nbsp;" << "</td>" << Qt::endl;
+            }
+            stream << "</tr>" << Qt::endl;
+        }
+    }
+    for(int row = 0; row < rows; ++row) {
+        const QStringList& rowData = m_CsvData[row];
+        stream << "<tr>" << Qt::endl;
+        for(int col = 0; col < cols; ++col) {
+            if(col < rowData.length()) {
+//                auto htmlEncoded = QUrl::toPercentEncoding(rowData.at(col).simplified());
+                stream << "<td valign=top>" << "<p align=center>" << rowData.at(col).simplified() << "</p>" << "</td>" << Qt::endl;
+            } else {
+                stream << "<td>" << "&nbsp;" << "</td>" << Qt::endl;
+            }
+        }
+        stream << "</tr>" << Qt::endl;
+    }
+    stream << "</table>" << Qt::endl;
+    stream << Qt::flush;
+    return result;
+}
+
+/******************************************************************/
 /*!
     \reimp
  */
@@ -471,7 +515,7 @@ Qt::ItemFlags XCsvModel::flags(const QModelIndex& index) const
 
 void XCsvModel::importFromModel(QAbstractItemModel *model)
 {
-    emit beginResetModel();
+    beginResetModel();
     m_CsvData.clear();
     m_Header.clear();
     m_MaxColumn = model->columnCount();
@@ -490,7 +534,7 @@ void XCsvModel::importFromModel(QAbstractItemModel *model)
         m_CsvData << rowData;
     }
 
-    emit endResetModel();
+    endResetModel();
 }
 
 /******************************************************************/

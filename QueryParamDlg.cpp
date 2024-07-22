@@ -78,7 +78,7 @@ QVariantMap QueryParamDlg::bindTypes() const
 
 void QueryParamDlg::setupParams(const QStringList &params)
 {
-    for (QString param : params) {
+    for (const auto &param : params) {
         const int row = ui_Grid->rowCount();
         ui_Grid->addWidget(new QLabel(param, this), row, NameColumn);
         QComboBox *cmbType = createCmb(param, row, this);
@@ -93,7 +93,7 @@ void QueryParamDlg::setupParams(const QStringList &params)
 QVariantMap QueryParamDlg::bindings(const QStringList &params) const
 {
     QVariantMap result;
-    for (auto param : params) {
+    for (const auto &param : params) {
         QVariant value = getValue(param);
         result.insert(param, value);
     }
@@ -183,7 +183,7 @@ QComboBox *QueryParamDlg::createCmb(const QString &param, int row, QWidget *pare
     result->addItems(items);   
     result->setCurrentIndex(typeSelected);
 
-    connect(result, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, param, row](int type){
+    connect(result, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this, param, row](int type){
         d.bindTypes.insert(param, type);
         updateValueEditor(param, row);
     });

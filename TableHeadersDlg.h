@@ -18,7 +18,6 @@ class TableHeadersDlg : public QDialog
 
 public:
     explicit TableHeadersDlg(const QStringList &fields, QWidget *parent = nullptr);
-    ~TableHeadersDlg();
 
     void setHeaders(const QStringList &headers);
     QStringList headers() const;

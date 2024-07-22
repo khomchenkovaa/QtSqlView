@@ -11,6 +11,13 @@ class DbSchemaModel : public QAbstractTableModel
 {
     Q_OBJECT
 
+    struct DbSchemaModelPrivate {
+        QSqlRecord  sqlRecord;  ///< the record of which the schema is displayed
+        QString     driver;     ///< driver name
+        QStringList index;      ///< index fields
+        QStringList header;
+    };
+
 public:
     explicit DbSchemaModel(QObject *parent = nullptr);
 
@@ -30,11 +37,7 @@ private:
     void updateIndexFields(const QSqlIndex &pindex);
 
 private:
-    QSqlRecord  m_Record;  ///< the record of which the schema is displayed
-    QString     m_Driver;  ///< driver name
-    QStringList m_Index;  ///< index fields
-
-    QStringList m_Header;
+    DbSchemaModelPrivate d;
 };
 
 #endif // DBSCHEMAMODEL_H

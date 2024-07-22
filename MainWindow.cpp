@@ -81,7 +81,7 @@ void MainWindow::on_action_EditConnection_triggered()
         QMessageBox::critical(this, "QtSqlView",
                               "No database connection selected. Click on one of the entries in the database list.");
     } else {
-        ConnectionDlg wc(this, dblist.list[selectednum]->dbparam);
+        ConnectionDlg wc(this, dblist.getDbConnection(selectednum)->dbparam);
         if (wc.exec() == QDialog::Accepted) {
             dblist.editDbConnection(selectednum, wc.dbp);
         }
@@ -609,7 +609,7 @@ void MainWindow::saveToClipboard(QSqlQuery query, const QItemSelection &sellist,
 
     QString seltext;
 
-    for (auto selrange : sellist) {
+    for (const auto &selrange : sellist) {
         if (!query.seek(selrange.top())) {
             qDebug() << "Could not seek in result";
             continue;
@@ -633,7 +633,7 @@ void MainWindow::saveToClipboard(QSqlQuery query, const QItemSelection &sellist,
 
 bool MainWindow::launch(const QUrl &url, const QString &client)
 {
-    return (QProcess::startDetached(client + " " + url.toEncoded()));
+    return (QProcess::startDetached(client, QStringList() << url.toEncoded()));
 }
 
 /******************************************************************/

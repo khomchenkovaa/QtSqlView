@@ -86,7 +86,7 @@ void XDateEdit::keyPressEvent(QKeyEvent *event)
             setDate(QDate::currentDate());
         }
         if (event->key() == Qt::Key_Tab) {
-            QAbstractSpinBox::keyPressEvent(event);
+            QAbstractSpinBox::keyPressEvent(event); // clazy:exclude=skipped-base-method
             return;
         }
     } else {
@@ -188,15 +188,15 @@ void XDateEdit::setupUI()
     QAction *clearAction = edit->addAction(style()->standardIcon(QStyle::SP_LineEditClearButton), QLineEdit::TrailingPosition);
     clearAction->setToolTip(tr("Clear"));
 
-    connect(edit, &QLineEdit::textChanged, [this, clearAction](const QString &text) {
+    connect(edit, &QLineEdit::textChanged, this, [this, clearAction](const QString &text) {
         f_DateIsNull = text.isEmpty();
         clearAction->setDisabled(f_DateIsNull);
     });
-    connect(this, &QDateEdit::dateChanged, [this, clearAction](const QDate &dt) {
+    connect(this, &QDateEdit::dateChanged, this, [this, clearAction](const QDate &dt) {
         f_DateIsNull = dt.isNull();
         clearAction->setDisabled(f_DateIsNull);
     });
-    connect(clearAction, &QAction::triggered, [this](){
+    connect(clearAction, &QAction::triggered, this, [this](){
         setDate(QDate());
     });
 }

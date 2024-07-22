@@ -29,13 +29,6 @@ TableHeadersDlg::TableHeadersDlg(const QStringList &fields, QWidget *parent) :
 
 /******************************************************************/
 
-TableHeadersDlg::~TableHeadersDlg()
-{
-
-}
-
-/******************************************************************/
-
 void TableHeadersDlg::setHeaders(const QStringList &headers)
 {
     for (int i=0; i < headers.size(); ++i) {
@@ -50,7 +43,7 @@ void TableHeadersDlg::setHeaders(const QStringList &headers)
 QStringList TableHeadersDlg::headers() const
 {
     QStringList result;
-    for (auto field : m_Fields) {
+    for (const auto &field : m_Fields) {
          result << getValue(field);
     }
     return result;
@@ -66,18 +59,18 @@ void TableHeadersDlg::setupUI()
     ui_Grid->setVerticalSpacing(2);
     ui_Grid->addWidget(new QLabel(tr("Field"), this), 0, FieldColumn);
     ui_Grid->addWidget(new QLabel(tr("Title"), this), 0, TitleColumn);
-    for (QString field : m_Fields) {
+    for (const auto &field : qAsConst(m_Fields)) {
         const int row = ui_Grid->rowCount();
         ui_Grid->addWidget(new QLabel(field, this), row, FieldColumn);
         QWidget *editor = createValueEditor(field, this);
         ui_Grid->addWidget(editor, row, TitleColumn);
     }
 
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(this);
+    auto buttonBox = new QDialogButtonBox(this);
     buttonBox->setOrientation(Qt::Vertical);
     buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
-    QHBoxLayout *mainLayout = new QHBoxLayout(this);
+    auto mainLayout = new QHBoxLayout(this);
     mainLayout->addLayout(ui_Grid);
     mainLayout->addWidget(buttonBox);
 

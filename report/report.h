@@ -43,7 +43,7 @@ inline QString exportToPdfDlg(QWidget *parent = Q_NULLPTR, const QString &captio
     if (fileDialog.exec() != QDialog::Accepted) {
         return QString();
     }
-    return fileDialog.selectedFiles().first();
+    return fileDialog.selectedFiles().constFirst();
 }
 
 /******************************************************************/
@@ -57,7 +57,7 @@ inline QString exportToHtmlDlg(QWidget *parent = Q_NULLPTR, const QString &capti
     if (fileDialog.exec() != QDialog::Accepted) {
         return QString();
     }
-    return fileDialog.selectedFiles().first();
+    return fileDialog.selectedFiles().constFirst();
 }
 
 /******************************************************************/
@@ -71,7 +71,7 @@ inline QString exportToCsvDlg(QWidget *parent = Q_NULLPTR, const QString &captio
     if (fileDialog.exec() != QDialog::Accepted) {
         return QString();
     }
-    return fileDialog.selectedFiles().first();
+    return fileDialog.selectedFiles().constFirst();
 }
 
 /******************************************************************/

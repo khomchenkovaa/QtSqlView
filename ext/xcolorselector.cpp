@@ -53,7 +53,7 @@ void XColorSelector::setupUI()
     mainLayout->addWidget(btnSelect);
     mainLayout->addWidget(lblColor);
 
-    QObject::connect(btnSelect, &QPushButton::clicked, [this](){
+    QObject::connect(btnSelect, &QPushButton::clicked, this, [this](){
         const QColor bgColor = color();
         const QColor color = QColorDialog::getColor(bgColor, this, "Select Color");
         if (color.isValid()) {

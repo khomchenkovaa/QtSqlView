@@ -11,6 +11,11 @@ class DbListModel : public QAbstractItemModel
 {
     Q_OBJECT
 
+    struct DbListModelPrivate {
+        QList<DbConnection*> list;   ///< the primary list of data connections
+        QStringList          header;
+    };
+
 public:
     explicit DbListModel(QObject *parent = nullptr);
     ~DbListModel();
@@ -51,6 +56,10 @@ public:
 
     DbConnection *getDbConnection(const QModelIndex &index) const;
 
+    DbConnection *getDbConnection(int idx) const {
+        return d.list.at(idx);
+    }
+
     DbTable *getDbTable(const QModelIndex &index) const;
 
     void expanding(const QModelIndex &index);
@@ -65,11 +74,8 @@ public:
 
     void tablelist_seterror(class DbConnection &dbc, QSqlError e);
 
-public:
-    QList<DbConnection*> list; ///< the primary list of data connections
-
 private:
-    QStringList m_Header;
+    DbListModelPrivate d;
 };
 
 #endif // DBLISTMODEL_H

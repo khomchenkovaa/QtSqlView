@@ -38,6 +38,7 @@ QSqlError DbConnection::connect(DbListModel *dblist)
             dblist->tablelist_seterror(*this, e);
             return e;
         }
+        db.setPassword(passwd);
     } else {
         db.setPassword(dbparam.password);
     }

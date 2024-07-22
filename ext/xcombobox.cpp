@@ -212,11 +212,11 @@ void XComboBox::setupTreeView()
     QAction *clearAction = edit->addAction(style()->standardIcon(QStyle::SP_LineEditClearButton), QLineEdit::TrailingPosition);
     clearAction->setToolTip(tr("Clear"));
 
-    QObject::connect(edit, &QLineEdit::textChanged, [clearAction](const QString &text) {
+    QObject::connect(edit, &QLineEdit::textChanged, this, [clearAction](const QString &text) {
         clearAction->setDisabled(text.isEmpty());
     });
 
-    QObject::connect(this, QOverload<int>::of(&QComboBox::currentIndexChanged), [clearAction](int idx) {
+    QObject::connect(this, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [clearAction](int idx) {
         clearAction->setDisabled(idx == -1);
     });
 

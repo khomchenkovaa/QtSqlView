@@ -390,7 +390,7 @@ void XTextEdit::setupTextActions()
 
     comboFont = new QFontComboBox(tb);
     tb->addWidget(comboFont);
-    connect(comboFont, QOverload<const QString &>::of(&QComboBox::activated),
+    connect(comboFont, &QComboBox::textActivated,
             this, &XTextEdit::textFamily);
 
     comboSize = new QComboBox(tb);
@@ -404,7 +404,7 @@ void XTextEdit::setupTextActions()
     }
     comboSize->setCurrentIndex(standardSizes.indexOf(QApplication::font().pointSize()));
 
-    connect(comboSize, QOverload<const QString &>::of(&QComboBox::activated),
+    connect(comboSize, &QComboBox::textActivated,
             this, &XTextEdit::textSize);
 }
 

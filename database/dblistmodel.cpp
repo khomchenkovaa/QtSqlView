@@ -7,7 +7,7 @@
 DbListModel::DbListModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
-    m_Header << tr("Connections");
+    d.header << tr("Connections");
 }
 
 /******************************************************************/
@@ -22,7 +22,7 @@ DbListModel::~DbListModel()
 QVariant DbListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        return m_Header.at(section);
+        return d.header.at(section);
     }
 
     if (orientation == Qt::Vertical && role == Qt::DisplayRole) {
@@ -37,8 +37,8 @@ QVariant DbListModel::headerData(int section, Qt::Orientation orientation, int r
 QModelIndex DbListModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid()) {
-        if (row < list.size())
-        return createIndex(row, column, list.at(row));
+        if (row < d.list.size())
+        return createIndex(row, column, d.list.at(row));
     } else {
         QObject *obj = static_cast<QObject*>(parent.internalPointer());
 
@@ -68,10 +68,10 @@ QModelIndex DbListModel::parent(const QModelIndex &index) const
         return QModelIndex();
     }
     if (DbTable *dbt = qobject_cast<DbTable*>(obj)) {
-        return createIndex(list.indexOf(dbt->dbconn), 0, dbt->dbconn);
+        return createIndex(d.list.indexOf(dbt->dbconn), 0, dbt->dbconn);
     }
     if (DbError *err = qobject_cast<DbError*>(obj)) {
-        return createIndex(list.indexOf(err->dbconn), 0, err->dbconn);
+        return createIndex(d.list.indexOf(err->dbconn), 0, err->dbconn);
     }
     return QModelIndex();
 }
@@ -81,7 +81,7 @@ QModelIndex DbListModel::parent(const QModelIndex &index) const
 int DbListModel::rowCount(const QModelIndex &parent) const
 {
     if (!parent.isValid()) {
-        return list.size();
+        return d.list.size();
     } else {
         QObject *obj = static_cast<QObject*>(parent.internalPointer());
         DbConnection *dbc = qobject_cast<DbConnection*>(obj);
@@ -98,7 +98,7 @@ int DbListModel::rowCount(const QModelIndex &parent) const
 int DbListModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-    return m_Header.size();
+    return d.header.size();
 }
 
 /******************************************************************/
@@ -166,15 +166,15 @@ QVariant DbListModel::data(const QModelIndex &index, int role) const
 
 void DbListModel::clear()
 {
-    if (list.isEmpty()) return;
+    if (d.list.isEmpty()) return;
 
-    for (DbConnection *dbc : list) {
+    for (DbConnection *dbc : qAsConst(d.list)) {
         dbc->disconnect(this);
     }
 
     beginResetModel();
-    qDeleteAll(list);
-    list.clear();
+    qDeleteAll(d.list);
+    d.list.clear();
     endResetModel();
 }
 
@@ -182,8 +182,8 @@ void DbListModel::clear()
 
 void DbListModel::addDbConnection(const DbParameter &dbp)
 {
-    beginInsertRows(QModelIndex(), list.size(), list.size());
-    list << new DbConnection(dbp);
+    beginInsertRows(QModelIndex(), d.list.size(), d.list.size());
+    d.list << new DbConnection(dbp);
     endInsertRows();
 }
 
@@ -191,28 +191,28 @@ void DbListModel::addDbConnection(const DbParameter &dbp)
 
 void DbListModel::editDbConnection(int num, DbParameter &dbp)
 {
-    if (0 > num || num >= list.size()) return;
+    if (0 > num || num >= d.list.size()) return;
 
     // close old connection and change parameters
-    list[num]->disconnect(this);
-    list[num]->dbparam = dbp;
+    d.list[num]->disconnect(this);
+    d.list[num]->dbparam = dbp;
 
-    emit dataChanged(createIndex(num, 0, list[num]),
-                     createIndex(num, 0, list[num]));
+    emit dataChanged(createIndex(num, 0, d.list[num]),
+                     createIndex(num, 0, d.list[num]));
 }
 
 /******************************************************************/
 
 void DbListModel::delDbConnection(int num)
 {
-    if (0 > num || num >= list.size()) return;
+    if (0 > num || num >= d.list.size()) return;
 
     beginRemoveRows(QModelIndex(), num, num);
 
-    list[num]->disconnect(this);
-    delete list[num];
+    d.list[num]->disconnect(this);
+    delete d.list[num];
 
-    list.removeAt(num);
+    d.list.removeAt(num);
 
     endRemoveRows();
 }
@@ -225,7 +225,7 @@ void DbListModel::saveToSettings()
 
     settings.beginWriteArray("connections");
     int i = 0;
-    for(auto dbc : list) {
+    for(auto dbc : qAsConst(d.list)) {
         settings.setArrayIndex(i++);
         dbc->dbparam.saveToSettings(settings);
     }
@@ -260,9 +260,9 @@ int DbListModel::getDbConnectionNum(const QModelIndex &index) const
     QObject *obj = (QObject*)index.internalPointer();
 
     if (DbConnection *dbc = qobject_cast<DbConnection*>(obj)) {
-        return list.indexOf(dbc);
+        return d.list.indexOf(dbc);
     } else if (const DbTable *dbt = qobject_cast<const DbTable*>(obj)) {
-        return list.indexOf(dbt->dbconn);
+        return d.list.indexOf(dbt->dbconn);
     }
     return 0;
 }
@@ -333,7 +333,7 @@ void DbListModel::collapsed(const QModelIndex &index)
 
 void DbListModel::refresh()
 {
-    for (auto dbc : list) {
+    for (auto dbc : qAsConst(d.list)) {
         if (dbc->db.isOpen()) {
             tablelist_clear(*dbc);
             tablelist_load(*dbc);
@@ -346,13 +346,13 @@ void DbListModel::refresh()
 void DbListModel::tablelist_clear(DbConnection &dbc)
 {
     if (!dbc.tablelist.isEmpty()) {
-        beginRemoveRows(createIndex(list.indexOf(&dbc), 0, &dbc), 0, dbc.tablelist.size()-1);
+        beginRemoveRows(createIndex(d.list.indexOf(&dbc), 0, &dbc), 0, dbc.tablelist.size()-1);
         qDeleteAll(dbc.tablelist);
         dbc.tablelist.clear();
         endRemoveRows();
     }
     if (dbc.connecterror.isValid()) {
-        beginRemoveRows(createIndex(list.indexOf(&dbc), 0, &dbc), 0, 1);
+        beginRemoveRows(createIndex(d.list.indexOf(&dbc), 0, &dbc), 0, 1);
         dbc.connecterror = QSqlError();
         endRemoveRows();
     }
@@ -368,21 +368,24 @@ void DbListModel::tablelist_load(DbConnection &dbc)
 
     QList<DbTable*> newtablelist;
 
-    for (QString table : dbc.db.tables()) {
+    const auto userTables = dbc.db.tables();
+    for (const auto &table : userTables) {
         newtablelist << new DbTable(&dbc, table, DbTable::UserTable);
     }
 
-    for (QString table : dbc.db.tables(QSql::Views)) {
+    const auto views = dbc.db.tables(QSql::Views);
+    for (const auto &table : views) {
         newtablelist << new DbTable(&dbc, table, DbTable::View);
     }
 
     if (dbc.dbparam.showsystables) {
-        for (QString table : dbc.db.tables(QSql::SystemTables)) {
+        const auto sysTables = dbc.db.tables(QSql::SystemTables);
+        for (const auto &table : sysTables) {
             newtablelist << new DbTable(&dbc, table, DbTable::SystemTable);
         }
     }
 
-    beginInsertRows(createIndex(list.indexOf(&dbc), 0, &dbc), 0, newtablelist.size()-1);
+    beginInsertRows(createIndex(d.list.indexOf(&dbc), 0, &dbc), 0, newtablelist.size()-1);
     dbc.tablelist = newtablelist;
     endInsertRows();
 }
@@ -393,7 +396,7 @@ void DbListModel::tablelist_seterror(DbConnection &dbc, QSqlError e)
 {
     tablelist_clear(dbc);
 
-    beginInsertRows(createIndex(list.indexOf(&dbc), 0, &dbc), 0, 1);
+    beginInsertRows(createIndex(d.list.indexOf(&dbc), 0, &dbc), 0, 1);
 
     dbc.connecterror = e;
 
