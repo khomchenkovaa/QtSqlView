@@ -52,27 +52,22 @@ private slots:
 
     // *** Data Table Tab ***
     void showDataTableContextMenu(const QPoint &position);
-    void on_action_AddRow_triggered();
-    void on_addRowButton_clicked();
-    void on_action_DelRow_triggered();
-    void on_delRowButton_clicked();
-    void on_copyDataButton_clicked();
-    void on_toCsvDataButton_clicked();
-    void on_action_RefreshData_triggered();
-    void on_refreshDataButton_clicked();
-    void on_action_SaveData_triggered();
-    void on_saveDataButton_clicked();
-    void on_action_RevertData_triggered();
-    void on_revertDataButton_clicked();
+    void addTableRow();
+    void delTableRow();
+    void copyTableData();
+    void exportTableToCsv();
+    void refreshTableData();
+    void saveTableData();
+    void revertTableData();
     void sortDataTable(int logicalIndex);
 
     // *** Query Tab ***
-    void on_goQueryButton_clicked();
-    void on_copyQueryDataButton_clicked();
-    void on_toScvButton_clicked();
-    void on_clearQueryButton_clicked();
-    void on_loadQueryButton_clicked();
-    void on_saveQueryButton_clicked();
+    void runQuery();
+    void copyQueryResult();
+    void exportQueryToCsv();
+    void clearQueryResult();
+    void loadQueryFromFile();
+    void saveQueryToFile();
 
     void setTableHeaders();
 

@@ -200,7 +200,7 @@ void MainWindow::showDataTableContextMenu(const QPoint &position)
 
 /******************************************************************/
 
-void MainWindow::on_action_AddRow_triggered()
+void MainWindow::addTableRow()
 {
     if (!datatablemodel) return;
 
@@ -216,14 +216,7 @@ void MainWindow::on_action_AddRow_triggered()
 
 /******************************************************************/
 
-void MainWindow::on_addRowButton_clicked()
-{
-    on_action_AddRow_triggered();
-}
-
-/******************************************************************/
-
-void MainWindow::on_action_DelRow_triggered()
+void MainWindow::delTableRow()
 {
     if (!datatablemodel) return;
 
@@ -236,14 +229,7 @@ void MainWindow::on_action_DelRow_triggered()
 
 /******************************************************************/
 
-void MainWindow::on_delRowButton_clicked()
-{
-    on_action_DelRow_triggered();
-}
-
-/******************************************************************/
-
-void MainWindow::on_copyDataButton_clicked()
+void MainWindow::copyTableData()
 {
     if (!datatablemodel) return;
 
@@ -253,7 +239,7 @@ void MainWindow::on_copyDataButton_clicked()
 
 /******************************************************************/
 
-void MainWindow::on_toCsvDataButton_clicked()
+void MainWindow::exportTableToCsv()
 {
     if (!datatablemodel) return;
     exportToCsv(datatablemodel);
@@ -261,7 +247,7 @@ void MainWindow::on_toCsvDataButton_clicked()
 
 /******************************************************************/
 
-void MainWindow::on_action_RefreshData_triggered()
+void MainWindow::refreshTableData()
 {
     if (!datatablemodel) return;
     datatablemodel->select();
@@ -269,14 +255,7 @@ void MainWindow::on_action_RefreshData_triggered()
 
 /******************************************************************/
 
-void MainWindow::on_refreshDataButton_clicked()
-{
-    on_action_RefreshData_triggered();
-}
-
-/******************************************************************/
-
-void MainWindow::on_action_SaveData_triggered()
+void MainWindow::saveTableData()
 {
     if (!datatablemodel) return;
     datatablemodel->submitAll();
@@ -284,24 +263,10 @@ void MainWindow::on_action_SaveData_triggered()
 
 /******************************************************************/
 
-void MainWindow::on_saveDataButton_clicked()
-{
-    on_action_SaveData_triggered();
-}
-
-/******************************************************************/
-
-void MainWindow::on_action_RevertData_triggered()
+void MainWindow::revertTableData()
 {
     if (!datatablemodel) return;
     datatablemodel->revertAll();
-}
-
-/******************************************************************/
-
-void MainWindow::on_revertDataButton_clicked()
-{
-    on_action_RevertData_triggered();
 }
 
 /******************************************************************/
@@ -324,7 +289,7 @@ void MainWindow::sortDataTable(int logicalIndex)
 
 /******************************************************************/
 
-void MainWindow::on_goQueryButton_clicked()
+void MainWindow::runQuery()
 {
     // clear all
     userquerymodel.clear();
@@ -395,31 +360,30 @@ void MainWindow::on_goQueryButton_clicked()
 
 /******************************************************************/
 
-void MainWindow::on_copyQueryDataButton_clicked()
+void MainWindow::copyQueryResult()
 {
-    QItemSelectionModel *selmodel = ui->queryTable->selectionModel();
+    auto selmodel = ui->queryTable->selectionModel();
     saveToClipboard(userquerymodel.query(), selmodel->selection(), QClipboard::Clipboard);
 }
 
 /******************************************************************/
 
-void MainWindow::on_toScvButton_clicked()
+void MainWindow::exportQueryToCsv()
 {
     if (ui->queryTable->isHidden()) return;
-
     exportToCsv(&userquerymodel);
 }
 
 /******************************************************************/
 
-void MainWindow::on_clearQueryButton_clicked()
+void MainWindow::clearQueryResult()
 {
     ui->editQuery->clear();
 }
 
 /******************************************************************/
 
-void MainWindow::on_loadQueryButton_clicked()
+void MainWindow::loadQueryFromFile()
 {
     QString filename = QFileDialog::getOpenFileName(this, "Choose a SQL text file",
                                                     QString(),
@@ -439,7 +403,7 @@ void MainWindow::on_loadQueryButton_clicked()
 
 /******************************************************************/
 
-void MainWindow::on_saveQueryButton_clicked()
+void MainWindow::saveQueryToFile()
 {
     QString filename = QFileDialog::getSaveFileName(this, "Choose a SQL text file",
                                                     QString(),
@@ -562,6 +526,46 @@ void MainWindow::setupActions()
             &dblist, &DbListModel::expanding);
     connect(ui->treeDbList, &QTreeView::collapsed,
             &dblist, &DbListModel::collapsed);
+
+    // *** Data Table Tab ***
+    connect(ui->action_AddRow, &QAction::triggered,
+            this, &MainWindow::addTableRow);
+    connect(ui->addRowButton, &QAbstractButton::clicked,
+            this, &MainWindow::addTableRow);
+    connect(ui->action_DelRow, &QAction::triggered,
+            this, &MainWindow::delTableRow);
+    connect(ui->delRowButton, &QAbstractButton::clicked,
+            this, &MainWindow::delTableRow);
+    connect(ui->copyDataButton, &QAbstractButton::clicked,
+            this, &MainWindow::copyTableData);
+    connect(ui->toCsvDataButton, &QAbstractButton::clicked,
+            this, &MainWindow::exportTableToCsv);
+    connect(ui->action_RefreshData, &QAction::triggered,
+            this, &MainWindow::refreshTableData);
+    connect(ui->refreshDataButton, &QAbstractButton::clicked,
+            this, &MainWindow::refreshTableData);
+    connect(ui->action_SaveData, &QAction::triggered,
+            this, &MainWindow::saveTableData);
+    connect(ui->saveDataButton, &QAbstractButton::clicked,
+            this, &MainWindow::saveTableData);
+    connect(ui->action_RevertData, &QAction::triggered,
+            this, &MainWindow::revertTableData);
+    connect(ui->revertDataButton, &QAbstractButton::clicked,
+            this, &MainWindow::revertTableData);
+
+    // *** Query Tab ***
+    connect(ui->goQueryButton, &QAbstractButton::clicked,
+            this, &MainWindow::runQuery);
+    connect(ui->copyQueryDataButton, &QAbstractButton::clicked,
+            this, &MainWindow::copyQueryResult);
+    connect(ui->toScvButton, &QAbstractButton::clicked,
+            this, &MainWindow::exportQueryToCsv);
+    connect(ui->clearQueryButton, &QAbstractButton::clicked,
+            this, &MainWindow::clearQueryResult);
+    connect(ui->loadQueryButton, &QAbstractButton::clicked,
+            this, &MainWindow::loadQueryFromFile);
+    connect(ui->saveQueryButton, &QAbstractButton::clicked,
+            this, &MainWindow::saveQueryToFile);
 }
 
 /******************************************************************/
@@ -632,7 +636,8 @@ void MainWindow::saveToClipboard(QSqlQuery query, const QItemSelection &sellist,
 
 bool MainWindow::launch(const QUrl &url, const QString &client)
 {
-    return (QProcess::startDetached(client, QStringList() << url.toEncoded()));
+    const auto args = QStringList() << url.toEncoded();
+    return (QProcess::startDetached(client, args));
 }
 
 /******************************************************************/
