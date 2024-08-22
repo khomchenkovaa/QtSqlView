@@ -43,6 +43,7 @@ MainWindow::MainWindow()
 {
     ui->setupUi(this);
     setupUI();
+    setupIcons();
     setupActions();
 }
 
@@ -493,6 +494,43 @@ void MainWindow::setupUI()
 
     connect(simpleReportTab, &SimpleReportWidget::tableHeaders,
             this, &MainWindow::setTableHeaders);
+}
+
+/******************************************************************/
+
+void MainWindow::setupIcons()
+{
+    auto iconAddRow = QIcon::fromTheme("list-add", QIcon(":/img/addrow.png"));
+    ui->action_AddRow->setIcon(iconAddRow);
+    ui->addRowButton->setIcon(iconAddRow);
+
+    auto iconDelRow = QIcon::fromTheme("list-remove", QIcon(":/img/delrow.png"));
+    ui->action_DelRow->setIcon(iconDelRow);
+    ui->delRowButton->setIcon(iconDelRow);
+
+    auto iconCopyEdit = QIcon::fromTheme("edit-copy", QIcon(":/img/copyedit.png"));
+    ui->copyDataButton->setIcon(iconCopyEdit);
+    ui->copyQueryDataButton->setIcon(iconCopyEdit);
+
+    auto iconFileSave = QIcon::fromTheme("document-save", QIcon(":/img/filesave.png"));
+    ui->action_SaveData->setIcon(iconFileSave);
+    ui->saveDataButton->setIcon(iconFileSave);
+    ui->saveQueryButton->setIcon(iconFileSave);
+
+    auto iconClear = QIcon::fromTheme("edit-clear", QIcon(":/img/trash.png"));
+    ui->clearQueryButton->setIcon(iconClear);
+
+    auto iconFileLoad = QIcon::fromTheme("document-open", QIcon(":/img/fileload.png"));
+    ui->loadQueryButton->setIcon(iconFileLoad);
+
+    auto iconRefresh = QIcon::fromTheme("view-refresh", QIcon(":/img/refresh.png"));
+    ui->action_RefreshData->setIcon(iconRefresh);
+    ui->action_RefreshTablelist->setIcon(iconRefresh);
+    ui->refreshDataButton->setIcon(iconRefresh);
+
+    // document-revert
+    // x-office-spreadsheet
+    // insert-text
 }
 
 /******************************************************************/

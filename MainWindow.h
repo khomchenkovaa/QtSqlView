@@ -73,6 +73,7 @@ private slots:
 
 private:
     void setupUI();
+    void setupIcons();
     void setupActions();
     QVariantMap setBindValues(const QStringList &params, DbConnection *dbc);
     void exportToCsv(QAbstractTableModel *model);

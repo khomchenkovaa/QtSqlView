@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>690</width>
+    <width>842</width>
     <height>624</height>
    </rect>
   </property>
@@ -40,7 +40,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabData">
         <attribute name="icon">
@@ -102,8 +102,7 @@
               <string>Add Row</string>
              </property>
              <property name="icon">
-              <iconset theme="list-add">
-               <normaloff>.</normaloff>.</iconset>
+              <iconset theme="list-add"/>
              </property>
             </widget>
            </item>
@@ -116,8 +115,7 @@
               <string>Delete Row</string>
              </property>
              <property name="icon">
-              <iconset theme="list-remove">
-               <normaloff>.</normaloff>.</iconset>
+              <iconset theme="list-remove"/>
              </property>
             </widget>
            </item>
@@ -130,8 +128,7 @@
               <string>Copy Selected Cells</string>
              </property>
              <property name="icon">
-              <iconset theme="edit-copy">
-               <normaloff>.</normaloff>.</iconset>
+              <iconset theme="edit-copy"/>
              </property>
             </widget>
            </item>
@@ -340,8 +337,7 @@
                   <string>Copy Selected Cells</string>
                  </property>
                  <property name="icon">
-                  <iconset theme="edit-copy">
-                   <normaloff>.</normaloff>.</iconset>
+                  <iconset theme="edit-copy"/>
                  </property>
                 </widget>
                </item>
@@ -491,8 +487,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>690</width>
-     <height>30</height>
+     <width>842</width>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -561,8 +557,7 @@
   </action>
   <action name="action_AddRow">
    <property name="icon">
-    <iconset theme="list-add">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="list-add"/>
    </property>
    <property name="text">
     <string>Add Row</string>

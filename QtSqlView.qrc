@@ -15,5 +15,15 @@
         <file>img/tablesys.png</file>
         <file>img/view.png</file>
         <file>img/world.png</file>
+        <file>img/addrow.png</file>
+        <file>img/copyedit.png</file>
+        <file>img/delrow.png</file>
+        <file>img/edit.png</file>
+        <file>img/fileload.png</file>
+        <file>img/filesave.png</file>
+        <file>img/progicon.ico</file>
+        <file>img/progicon.xcf</file>
+        <file>img/remove.png</file>
+        <file>img/trash.png</file>
     </qresource>
 </RCC>
