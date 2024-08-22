@@ -32,6 +32,16 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    struct MainWindowPrivate {
+        DbListModel	    dblist;
+        QSqlTableModel *datatablemodel = Q_NULLPTR;
+        int			    datatablemodel_lastsort = -1;
+        DbSchemaModel   schemamodel;
+        QSqlQueryModel  userquerymodel;
+        QVariantMap     bindTypes;
+        QVariantMap     bindRef;
+    };
+
 public:
     MainWindow();
     ~MainWindow();
@@ -82,19 +92,10 @@ private: // static
     static void saveToClipboard(QSqlQuery query, const QItemSelection &sellist, QClipboard::Mode mode);
     static bool launch(const QUrl &url, const QString &client);
 
-public:
-    DbListModel	    dblist;
-    QSqlTableModel *datatablemodel;
-    int			    datatablemodel_lastsort;
-    DbSchemaModel   schemamodel;
-    QSqlQueryModel  userquerymodel;
-    QVariantMap     bindTypes;
-    QVariantMap     bindRef;
-
-    SimpleReportWidget *simpleReportTab;
-
 private:
     Ui::MainWindow *ui;
+    SimpleReportWidget *simpleReportTab;
+    MainWindowPrivate d;
 };
 
 #endif // MAINWINDOW_H

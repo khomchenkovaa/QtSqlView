@@ -38,7 +38,6 @@ enum {
 
 MainWindow::MainWindow()
     : QMainWindow()
-    , datatablemodel(NULL)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -58,7 +57,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *)
 {
-    dblist.saveToSettings();
+    d.dblist.saveToSettings();
 }
 
 /******************************************************************/
@@ -67,7 +66,7 @@ void MainWindow::addConnection()
 {
     ConnectionDlg wc(this);
     if (wc.exec() == QDialog::Accepted) {
-        dblist.addDbConnection( wc.dbp );
+        d.dblist.addDbConnection( wc.dbp );
     }
 }
 
@@ -77,15 +76,15 @@ void MainWindow::editConnection()
 {
     QModelIndex selected = ui->treeDbList->currentIndex();
 
-    int selectednum = dblist.getDbConnectionNum(selected);
+    int selectednum = d.dblist.getDbConnectionNum(selected);
 
     if (selectednum < 0) {
         QMessageBox::critical(this, "QtSqlView",
                               "No database connection selected. Click on one of the entries in the database list.");
     } else {
-        ConnectionDlg wc(this, dblist.getDbConnection(selectednum)->dbparam);
+        ConnectionDlg wc(this, d.dblist.getDbConnection(selectednum)->dbparam);
         if (wc.exec() == QDialog::Accepted) {
-            dblist.editDbConnection(selectednum, wc.dbp);
+            d.dblist.editDbConnection(selectednum, wc.dbp);
         }
     }
 }
@@ -96,13 +95,13 @@ void MainWindow::removeConnection()
 {
     QModelIndex selected = ui->treeDbList->currentIndex();
 
-    int selectednum = dblist.getDbConnectionNum(selected);
+    int selectednum = d.dblist.getDbConnectionNum(selected);
 
     if (selectednum < 0) {
         QMessageBox::critical(this, "QtSqlView",
                               "No database connection selected. Click on one of the entries in the database list.");
     } else {
-        dblist.delDbConnection( selectednum );
+        d.dblist.delDbConnection( selectednum );
     }
 }
 
@@ -142,27 +141,27 @@ void MainWindow::changeCurrentTable(const QModelIndex &index)
 {
     const QSignalBlocker blocker(ui->treeDbList);
 
-    DbTable* dbt = dblist.getDbTable(index);
+    DbTable* dbt = d.dblist.getDbTable(index);
 
     if (!dbt) return;
 
-    if (datatablemodel) {
-        datatablemodel->deleteLater();
+    if (d.datatablemodel) {
+        d.datatablemodel->deleteLater();
     }
 
-    datatablemodel = new QSqlTableModel(this, dbt->dbconn->db);
-    ui->dataTable->setModel(datatablemodel);
+    d.datatablemodel = new QSqlTableModel(this, dbt->dbconn->db);
+    ui->dataTable->setModel(d.datatablemodel);
 
-    datatablemodel->setTable(dbt->tablename);
-    datatablemodel->setEditStrategy(QSqlTableModel::OnManualSubmit);
+    d.datatablemodel->setTable(dbt->tablename);
+    d.datatablemodel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-    datatablemodel->select();
-    datatablemodel_lastsort = -1;
+    d.datatablemodel->select();
+    d.datatablemodel_lastsort = -1;
 
     ui->dataTable->resizeColumnsToContents();
     ui->dataTable->resizeRowsToContents();
 
-    schemamodel.setRecord(dbt, datatablemodel->record());
+    d.schemamodel.setRecord(dbt, d.datatablemodel->record());
 }
 
 /******************************************************************/
@@ -203,14 +202,14 @@ void MainWindow::showDataTableContextMenu(const QPoint &position)
 
 void MainWindow::addTableRow()
 {
-    if (!datatablemodel) return;
+    if (!d.datatablemodel) return;
 
     QModelIndex index = ui->dataTable->currentIndex();
 
     int row = index.row() == -1 ? 0 : index.row();
-    datatablemodel->insertRow(row);
+    d.datatablemodel->insertRow(row);
 
-    index = datatablemodel->index(row, 0);
+    index = d.datatablemodel->index(row, 0);
     ui->dataTable->setCurrentIndex(index);
     ui->dataTable->edit(index);
 }
@@ -219,12 +218,12 @@ void MainWindow::addTableRow()
 
 void MainWindow::delTableRow()
 {
-    if (!datatablemodel) return;
+    if (!d.datatablemodel) return;
 
     QModelIndexList indexlist = ui->dataTable->selectionModel()->selectedIndexes();
 
     for (int i = 0; i < indexlist.count(); ++i) {
-        datatablemodel->removeRow(indexlist.at(i).row());
+        d.datatablemodel->removeRow(indexlist.at(i).row());
     }
 }
 
@@ -232,60 +231,60 @@ void MainWindow::delTableRow()
 
 void MainWindow::copyTableData()
 {
-    if (!datatablemodel) return;
+    if (!d.datatablemodel) return;
 
     QItemSelectionModel *selmodel = ui->dataTable->selectionModel();
-    saveToClipboard(datatablemodel->query(), selmodel->selection(), QClipboard::Clipboard);
+    saveToClipboard(d.datatablemodel->query(), selmodel->selection(), QClipboard::Clipboard);
 }
 
 /******************************************************************/
 
 void MainWindow::exportTableToCsv()
 {
-    if (!datatablemodel) return;
-    exportToCsv(datatablemodel);
+    if (!d.datatablemodel) return;
+    exportToCsv(d.datatablemodel);
 }
 
 /******************************************************************/
 
 void MainWindow::refreshTableData()
 {
-    if (!datatablemodel) return;
-    datatablemodel->select();
+    if (!d.datatablemodel) return;
+    d.datatablemodel->select();
 }
 
 /******************************************************************/
 
 void MainWindow::saveTableData()
 {
-    if (!datatablemodel) return;
-    datatablemodel->submitAll();
+    if (!d.datatablemodel) return;
+    d.datatablemodel->submitAll();
 }
 
 /******************************************************************/
 
 void MainWindow::revertTableData()
 {
-    if (!datatablemodel) return;
-    datatablemodel->revertAll();
+    if (!d.datatablemodel) return;
+    d.datatablemodel->revertAll();
 }
 
 /******************************************************************/
 
 void MainWindow::sortDataTable(int logicalIndex)
 {
-    if (!datatablemodel) return;
+    if (!d.datatablemodel) return;
 
     Qt::SortOrder order = Qt::AscendingOrder;
 
-    if (logicalIndex == datatablemodel_lastsort) {
+    if (logicalIndex == d.datatablemodel_lastsort) {
         order = Qt::DescendingOrder;
-        datatablemodel_lastsort = -1;
+        d.datatablemodel_lastsort = -1;
     } else {
-        datatablemodel_lastsort = logicalIndex;
+        d.datatablemodel_lastsort = logicalIndex;
     }
 
-    datatablemodel->sort(logicalIndex, order);
+    d.datatablemodel->sort(logicalIndex, order);
 }
 
 /******************************************************************/
@@ -293,11 +292,11 @@ void MainWindow::sortDataTable(int logicalIndex)
 void MainWindow::runQuery()
 {
     // clear all
-    userquerymodel.clear();
+    d.userquerymodel.clear();
     ui->queryResultText->clear();
 
     // check connections
-    DbConnection *dbc = dblist.getDbConnection( ui->treeDbList->currentIndex() );
+    DbConnection *dbc = d.dblist.getDbConnection( ui->treeDbList->currentIndex() );
 
     if (!dbc) {
         ui->queryTable->hide();
@@ -307,7 +306,7 @@ void MainWindow::runQuery()
     }
 
     if (!dbc->db.isOpen()) {
-        QSqlError ce = dbc->connect(&dblist);
+        QSqlError ce = dbc->connect(&d.dblist);
         if (ce.isValid()) {
             ui->queryTable->hide();
             ui->queryResultText->show();
@@ -332,7 +331,7 @@ void MainWindow::runQuery()
     }
     if (query.exec()) {
         if (query.isSelect()) {
-            userquerymodel.setQuery(query);
+            d.userquerymodel.setQuery(query);
             ui->queryResultText->hide();
             ui->queryTable->show();
             ui->queryTable->resizeColumnsToContents();
@@ -364,7 +363,7 @@ void MainWindow::runQuery()
 void MainWindow::copyQueryResult()
 {
     auto selmodel = ui->queryTable->selectionModel();
-    saveToClipboard(userquerymodel.query(), selmodel->selection(), QClipboard::Clipboard);
+    saveToClipboard(d.userquerymodel.query(), selmodel->selection(), QClipboard::Clipboard);
 }
 
 /******************************************************************/
@@ -372,7 +371,7 @@ void MainWindow::copyQueryResult()
 void MainWindow::exportQueryToCsv()
 {
     if (ui->queryTable->isHidden()) return;
-    exportToCsv(&userquerymodel);
+    exportToCsv(&d.userquerymodel);
 }
 
 /******************************************************************/
@@ -427,7 +426,7 @@ void MainWindow::saveQueryToFile()
 
 void MainWindow::setTableHeaders()
 {
-    QSqlRecord rec = userquerymodel.record();
+    QSqlRecord rec = d.userquerymodel.record();
     if (rec.isEmpty()) {
         return;
     }
@@ -436,15 +435,15 @@ void MainWindow::setTableHeaders()
         fields << rec.field(i).name();
     }
     QStringList headers;
-    for (int i=0; i < userquerymodel.columnCount(); ++i) {
-        headers << userquerymodel.headerData(i, Qt::Horizontal).toString();
+    for (int i=0; i < d.userquerymodel.columnCount(); ++i) {
+        headers << d.userquerymodel.headerData(i, Qt::Horizontal).toString();
     }
     TableHeadersDlg dlg(fields);
     dlg.setHeaders(headers);
     if (dlg.exec() == QDialog::Accepted) {
         headers = dlg.headers();
         for (int i=0; i < headers.size(); ++i) {
-            userquerymodel.setHeaderData(i, Qt::Horizontal, headers.at(i));
+            d.userquerymodel.setHeaderData(i, Qt::Horizontal, headers.at(i));
         }
     }
 }
@@ -455,9 +454,9 @@ void MainWindow::setupUI()
 {
     statusBar()->hide();
 
-    dblist.loadFromSettings();
+    d.dblist.loadFromSettings();
 
-    ui->treeDbList->setModel(&dblist);
+    ui->treeDbList->setModel(&d.dblist);
 
     ui->treeDbList->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeDbList, &QWidget::customContextMenuRequested,
@@ -470,7 +469,7 @@ void MainWindow::setupUI()
     connect(ui->dataTable->horizontalHeader(), &QHeaderView::sectionDoubleClicked,
             this, &MainWindow::sortDataTable);
 
-    ui->schemaTable->setModel(&schemamodel);
+    ui->schemaTable->setModel(&d.schemamodel);
     ui->schemaTable->verticalHeader()->hide();
 
     // configure query tab
@@ -481,14 +480,14 @@ void MainWindow::setupUI()
     new SQLHighlighter(ui->editQuery->document());
 
     ui->queryTable->hide();
-    ui->queryTable->setModel(&userquerymodel);
+    ui->queryTable->setModel(&d.userquerymodel);
 
     connect(ui->setHeadersButton, &QToolButton::clicked,
             this, &MainWindow::setTableHeaders);
 
     // configure simple report tab
     simpleReportTab = new SimpleReportWidget(this);
-    simpleReportTab->setUserQueryModel(&userquerymodel);
+    simpleReportTab->setUserQueryModel(&d.userquerymodel);
     ui->tabWidget->addTab(simpleReportTab, QIcon::fromTheme("printer"), tr("Simple Report"));
     ui->tabWidget->setTabEnabled(SimpleReportTab, false);
 
@@ -545,7 +544,7 @@ void MainWindow::setupActions()
     connect(ui->action_RemoveConnection, &QAction::triggered,
             this, &MainWindow::removeConnection);
     connect(ui->action_RefreshTablelist, &QAction::triggered, this, [this](){
-        dblist.refresh();
+        d.dblist.refresh();
     });
     connect(ui->action_Exit, &QAction::triggered,
             this, &MainWindow::close);
@@ -561,9 +560,9 @@ void MainWindow::setupActions()
     connect(ui->treeDbList, &QAbstractItemView::clicked,
             this, &MainWindow::changeCurrentTable);
     connect(ui->treeDbList, &QTreeView::expanded,
-            &dblist, &DbListModel::expanding);
+            &d.dblist, &DbListModel::expanding);
     connect(ui->treeDbList, &QTreeView::collapsed,
-            &dblist, &DbListModel::collapsed);
+            &d.dblist, &DbListModel::collapsed);
 
     // *** Data Table Tab ***
     connect(ui->action_AddRow, &QAction::triggered,
@@ -615,12 +614,12 @@ QVariantMap MainWindow::setBindValues(const QStringList &params, DbConnection *d
     }
 
     QueryParamDlg dlg(dbc);
-    dlg.setBindSql(bindRef);
-    dlg.setBindTypes(bindTypes);
+    dlg.setBindSql(d.bindRef);
+    dlg.setBindTypes(d.bindTypes);
     dlg.setupParams(params);
     if (dlg.exec()) {
-        bindTypes = dlg.bindTypes();
-        bindRef = dlg.bindSql();
+        d.bindTypes = dlg.bindTypes();
+        d.bindRef = dlg.bindSql();
         return dlg.bindings(params);
     }
 
