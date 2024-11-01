@@ -10,21 +10,25 @@
 
 #include <QUuid>
 
-#define S_LABEL         "label"
-#define S_HOSTNAME      "hostname"
-#define S_PORT          "port"
-#define S_DRIVER        "driver"
-#define S_USERNAME      "username"
-#define S_PASSWORD      "password"
-#define S_ASKPASSWORD   "askpassword"
-#define S_DATABASE      "database"
-#define S_SHOWSYSTABLES "showsystables"
-
 class DbTable;
 class DbConnection;
 class DbListModel;
 
 typedef QList<DbTable*> tablelist_t;
+
+/******************************************************************/
+
+struct DbParameterSettings {
+    const QString LABEL         = "label";
+    const QString HOSTNAME      = "hostname";
+    const QString PORT          = "port";
+    const QString DRIVER        = "driver";
+    const QString USERNAME      = "username";
+    const QString PASSWORD      = "password";
+    const QString ASKPASSWORD   = "askpassword";
+    const QString DATABASE      = "database";
+    const QString SHOWSYSTABLES = "showsystables";
+};
 
 /******************************************************************/
 
@@ -41,27 +45,29 @@ struct DbParameter
     int		showsystables;
 
     void saveToSettings(QSettings &settings) const {
-        settings.setValue(S_LABEL, label);
-        settings.setValue(S_HOSTNAME, hostname);
-        settings.setValue(S_PORT, port);
-        settings.setValue(S_DRIVER, driver);
-        settings.setValue(S_USERNAME, username);
-        settings.setValue(S_PASSWORD, password);
-        settings.setValue(S_ASKPASSWORD, askpassword);
-        settings.setValue(S_DATABASE, database);
-        settings.setValue(S_SHOWSYSTABLES, showsystables);
+        const DbParameterSettings S;
+        settings.setValue(S.LABEL, label);
+        settings.setValue(S.HOSTNAME, hostname);
+        settings.setValue(S.PORT, port);
+        settings.setValue(S.DRIVER, driver);
+        settings.setValue(S.USERNAME, username);
+        settings.setValue(S.PASSWORD, password);
+        settings.setValue(S.ASKPASSWORD, askpassword);
+        settings.setValue(S.DATABASE, database);
+        settings.setValue(S.SHOWSYSTABLES, showsystables);
     }
 
     void loadFromSettings(QSettings &settings) {
-        label         = settings.value(S_LABEL).toString();
-        hostname      = settings.value(S_HOSTNAME).toString();
-        port          = settings.value(S_PORT, 0).toUInt();
-        driver        = settings.value(S_DRIVER).toString();
-        username      = settings.value(S_USERNAME).toString();
-        password      = settings.value(S_PASSWORD).toString();
-        askpassword   = settings.value(S_ASKPASSWORD, 0).toUInt();
-        database      = settings.value(S_DATABASE).toString();
-        showsystables = settings.value(S_SHOWSYSTABLES, 0).toUInt();
+        const DbParameterSettings S;
+        label         = settings.value(S.LABEL).toString();
+        hostname      = settings.value(S.HOSTNAME).toString();
+        port          = settings.value(S.PORT, 0).toUInt();
+        driver        = settings.value(S.DRIVER).toString();
+        username      = settings.value(S.USERNAME).toString();
+        password      = settings.value(S.PASSWORD).toString();
+        askpassword   = settings.value(S.ASKPASSWORD, 0).toUInt();
+        database      = settings.value(S.DATABASE).toString();
+        showsystables = settings.value(S.SHOWSYSTABLES, 0).toUInt();
     }
 };
 
@@ -101,9 +107,9 @@ class DbError : public QObject, public QSqlError
 
 public:
     /// link to parent connection object
-    class DbConnection *dbconn;
+    DbConnection *dbconn;
 
-    DbError(class DbConnection *_dbconn)
+    DbError(DbConnection *_dbconn)
 	: QObject(), QSqlError(), dbconn(_dbconn)
     {
     }
@@ -127,15 +133,15 @@ class DbConnection : public QObject
 
 public:
     /// parameters of the connection
-    DbParameter		dbparam;
+    DbParameter	dbparam;
 
     /// because qt requires us to use addDatabase with a unique id, we use the
     /// only random function aviablable in qt itself here.
-    QUuid		dbuuid;
+    QUuid dbuuid;
 
-    QSqlDatabase	db;
+    QSqlDatabase db;
 
-    DbError		connecterror;
+    DbError connecterror;
 
     tablelist_t tablelist;
 

@@ -5,8 +5,6 @@
 
 #include <QSqlIndex>
 
-class DbTable;
-
 class DbSchemaModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -30,11 +28,10 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-    void setRecord(DbTable *dbt, QSqlRecord r);
+    void setRecord(const QString &driver, const QSqlRecord &rec, const QSqlIndex &idx);
 
 private:
     QVariant dataValue(int idx, int column) const;
-    void updateIndexFields(const QSqlIndex &pindex);
 
 private:
     DbSchemaModelPrivate d;

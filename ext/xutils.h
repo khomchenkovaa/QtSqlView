@@ -1,8 +1,6 @@
 #ifndef XUTILS_H
 #define XUTILS_H
 
-#include "global.h"
-
 #include <QDateTime>
 #include <QFile>
 #include <QMetaObject>
@@ -12,8 +10,6 @@
 #include <QCryptographicHash>
 
 #include <QDebug>
-
-APP_BEGIN_NAMESPACE
 
 typedef QPair<QString, QVariant> CmbItem;
 typedef QList<CmbItem>           CmbList;
@@ -214,7 +210,5 @@ inline QVariant strToVarReal(const QString &val)
 
 
 } // namespace Utils
-
-APP_END_NAMESPACE
 
 #endif // XUTILS_H

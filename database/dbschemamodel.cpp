@@ -9,7 +9,7 @@
 /******************************************************************/
 
 enum {
-    ConnectionsColumn,
+    NameColumn,
     TypeColumn,
     LengthColumn,
     NullableColumn,
@@ -78,12 +78,15 @@ QVariant DbSchemaModel::data(const QModelIndex &index, int role) const
 
 /******************************************************************/
 
-void DbSchemaModel::setRecord(DbTable *dbt, QSqlRecord r)
+void DbSchemaModel::setRecord(const QString &driver, const QSqlRecord &rec, const QSqlIndex &idx)
 {
     beginResetModel();
-    d.driver = dbt->dbconn->db.driverName();
-    d.sqlRecord  = r;
-    updateIndexFields(dbt->dbconn->db.primaryIndex(dbt->tablename));
+    d.driver = driver;
+    d.sqlRecord  = rec;
+    d.index.clear();
+    for (int i=0; i < idx.count(); ++i) {
+        d.index << idx.field(i).name();
+    }
     endResetModel();
 }
 
@@ -97,7 +100,7 @@ QVariant DbSchemaModel::dataValue(int idx, int column) const
     QSqlField field = d.sqlRecord.field(idx);
 
     switch (column) {
-    case ConnectionsColumn:
+    case NameColumn:
         return field.name();
     case TypeColumn:
         return DbTypes::getName(d.driver, field.typeID());
@@ -139,16 +142,6 @@ QVariant DbSchemaModel::dataValue(int idx, int column) const
     }
 
     return QVariant();
-}
-
-/******************************************************************/
-
-void DbSchemaModel::updateIndexFields(const QSqlIndex &pindex)
-{
-    d.index.clear();
-    for (int i=0; i < pindex.count(); ++i) {
-        d.index << pindex.field(i).name();
-    }
 }
 
 /******************************************************************/

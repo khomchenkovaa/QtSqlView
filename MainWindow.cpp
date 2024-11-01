@@ -161,7 +161,7 @@ void MainWindow::changeCurrentTable(const QModelIndex &index)
     ui->dataTable->resizeColumnsToContents();
     ui->dataTable->resizeRowsToContents();
 
-    d.schemamodel.setRecord(dbt, d.datatablemodel->record());
+    d.schemamodel.setRecord(dbt->dbconn->db.driverName(), d.datatablemodel->record(), d.datatablemodel->primaryKey());
 }
 
 /******************************************************************/

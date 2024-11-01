@@ -1,7 +1,6 @@
 #ifndef XGUIUTILS_H
 #define XGUIUTILS_H
 
-#include "global.h"
 #include "xutils.h"
 
 #include <QTextEdit>
@@ -17,8 +16,6 @@
 #include <QMimeType>
 
 #include <QDebug>
-
-APP_BEGIN_NAMESPACE
 
 namespace Utils {
 
@@ -169,7 +166,5 @@ private:
 /******************************************************************/
 
 } // namespace Utils
-
-APP_END_NAMESPACE
 
 #endif // XGUIUTILS_H
