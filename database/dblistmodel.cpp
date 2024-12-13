@@ -368,18 +368,18 @@ void DbListModel::tablelist_load(DbConnection &dbc)
 
     QList<DbTable*> newtablelist;
 
-    const auto userTables = dbc.db.tables();
+    const auto userTables = dbc.tables();
     for (const auto &table : userTables) {
         newtablelist << new DbTable(&dbc, table, DbTable::UserTable);
     }
 
-    const auto views = dbc.db.tables(QSql::Views);
+    const auto views = dbc.tables(QSql::Views);
     for (const auto &table : views) {
         newtablelist << new DbTable(&dbc, table, DbTable::View);
     }
 
     if (dbc.dbparam.showsystables) {
-        const auto sysTables = dbc.db.tables(QSql::SystemTables);
+        const auto sysTables = dbc.tables(QSql::SystemTables);
         for (const auto &table : sysTables) {
             newtablelist << new DbTable(&dbc, table, DbTable::SystemTable);
         }

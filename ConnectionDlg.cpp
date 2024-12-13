@@ -142,6 +142,14 @@ void ConnectionDlg::updateFields()
         ui->checkAskPassword->setEnabled(false);
         ui->labelDatabase->setText("Filename");
         ui->buttonSelectFile->setEnabled(true);
+    } else if (drv == "QODBC" || drv == "QODBC3") {
+        ui->editHostname->setEnabled(false);
+        ui->spinPort->setEnabled(false);
+        ui->editUsername->setEnabled(false);
+        ui->editPassword->setEnabled(false);
+        ui->checkAskPassword->setEnabled(false);
+        ui->labelDatabase->setText("Connect");
+        ui->buttonSelectFile->setEnabled(false);
     } else {
         ui->editHostname->setEnabled(true);
         ui->spinPort->setEnabled(true);
