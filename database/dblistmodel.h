@@ -66,7 +66,7 @@ public:
 
     void tablelist_clear(class DbConnection &dbc);
 
-    void tablelist_load(class DbConnection &dbc);
+    bool tablelist_load(class DbConnection &dbc);
 
     void tablelist_seterror(class DbConnection &dbc, QSqlError e);
 

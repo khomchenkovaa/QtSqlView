@@ -360,11 +360,11 @@ void DbListModel::tablelist_clear(DbConnection &dbc)
 
 /******************************************************************/
 
-void DbListModel::tablelist_load(DbConnection &dbc)
+bool DbListModel::tablelist_load(DbConnection &dbc)
 {
     tablelist_clear(dbc);
 
-    if (!dbc.db.isOpen()) return;
+    if (!dbc.db.isOpen()) return false;
 
     QList<DbTable*> newtablelist;
 
@@ -388,6 +388,7 @@ void DbListModel::tablelist_load(DbConnection &dbc)
     beginInsertRows(createIndex(d.list.indexOf(&dbc), 0, &dbc), 0, newtablelist.size()-1);
     dbc.tablelist = newtablelist;
     endInsertRows();
+    return true;
 }
 
 /******************************************************************/

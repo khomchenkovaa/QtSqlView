@@ -25,10 +25,10 @@ private slots:
 private:
     void setupConnections();
     void fetchDbParameter();
-    void updateFields();
+    void updateFields(const QString &drv);
 
 private:
-    static QString getDescription(const QString &drv);
+    static QString getDriverDescription(const QString &drv);
 
 public:
     DbParameter	dbp;

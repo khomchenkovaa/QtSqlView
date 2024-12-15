@@ -19,8 +19,8 @@ ConnectionDlg::ConnectionDlg(QWidget *parent, const DbParameter &dbParameter)
 
     const auto drivers = QSqlDatabase::drivers();
     for (const auto &drv : drivers) {
-        const QString desc = getDescription(drv);
-        if (desc.isNull()) {
+        const QString desc = getDriverDescription(drv);
+        if (desc.isEmpty()) {
             ui->comboType->addItem(drv, drv);
         } else {
             ui->comboType->addItem(QString("%1 (%2)").arg(desc, drv), drv);
@@ -29,7 +29,8 @@ ConnectionDlg::ConnectionDlg(QWidget *parent, const DbParameter &dbParameter)
 
     if (!dbp.label.isEmpty()) {
         ui->editLabel->setText(dbp.label);
-        ui->comboType->setCurrentIndex( ui->comboType->findData(dbp.driver) );
+        int drvTypeIdx = ui->comboType->findData(dbp.driver);
+        ui->comboType->setCurrentIndex(drvTypeIdx);
         ui->editHostname->setText(dbp.hostname);
         ui->spinPort->setValue(dbp.port);
         ui->editUsername->setText(dbp.username);
@@ -102,8 +103,8 @@ void ConnectionDlg::setupConnections()
     connect(ui->checkAskPassword, &QAbstractButton::clicked,
             this, &ConnectionDlg::updatePasswordStatus);
     connect(ui->comboType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index){
-        dbp.driver = ui->comboType->itemData(index).toString();
-        updateFields();
+        const QString drv = ui->comboType->itemData(index).toString();
+        updateFields(drv);
     });
     connect(ui->buttonSelectFile, &QAbstractButton::clicked,
             this, &ConnectionDlg::chooseSQLiteDbFile);
@@ -114,7 +115,8 @@ void ConnectionDlg::setupConnections()
 void ConnectionDlg::fetchDbParameter()
 {
     dbp.label         = ui->editLabel->text();
-    dbp.driver        = ui->comboType->itemData( ui->comboType->currentIndex() ).toString();
+    int drvTypeIdx    = ui->comboType->currentIndex();
+    dbp.driver        = ui->comboType->itemData( drvTypeIdx ).toString();
     dbp.hostname      = ui->editHostname->text();
     dbp.port          = ui->spinPort->value();
     dbp.username      = ui->editUsername->text();
@@ -130,10 +132,8 @@ void ConnectionDlg::fetchDbParameter()
 
 /******************************************************************/
 
-void ConnectionDlg::updateFields()
+void ConnectionDlg::updateFields(const QString &drv)
 {
-    const QString drv = dbp.driver;
-
     if (drv == "QSQLITE" || drv == "QSQLITE2") {
         ui->editHostname->setEnabled(false);
         ui->spinPort->setEnabled(false);
@@ -163,7 +163,7 @@ void ConnectionDlg::updateFields()
 
 /******************************************************************/
 
-QString ConnectionDlg::getDescription(const QString &drv)
+QString ConnectionDlg::getDriverDescription(const QString &drv)
 {
     if (0) return "";
     else if (drv == "QDB2")		return "IBM DB2";

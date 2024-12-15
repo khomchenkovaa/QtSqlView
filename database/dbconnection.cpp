@@ -20,10 +20,10 @@ QSqlError DbConnection::connect(DbListModel *dblist)
 
     db = QSqlDatabase::addDatabase(dbparam.driver, dbuuid.toString());
 
-    db.setHostName(dbparam.hostname);
+    if (!dbparam.hostname.isEmpty()) db.setHostName(dbparam.hostname);
     if (dbparam.port > 0) db.setPort(dbparam.port);
     db.setDatabaseName(dbparam.database);
-    db.setUserName(dbparam.username);
+    if (!dbparam.username.isEmpty()) db.setUserName(dbparam.username);
 
     if (dbparam.askpassword) {
         bool ok;
@@ -40,7 +40,7 @@ QSqlError DbConnection::connect(DbListModel *dblist)
         }
         db.setPassword(passwd);
     } else {
-        db.setPassword(dbparam.password);
+        if (!dbparam.password.isEmpty()) db.setPassword(dbparam.password);
     }
 
     if (!db.open()) {
@@ -51,7 +51,13 @@ QSqlError DbConnection::connect(DbListModel *dblist)
         return e;
     }
 
-    dblist->tablelist_load(*this);
+    if (!dblist->tablelist_load(*this)) {
+        QSqlError e = QSqlError("Could not load tables",
+                    "Load table list failed.",
+                    QSqlError::ConnectionError);
+        dblist->tablelist_seterror(*this, e);
+        return e;
+    }
 
     return QSqlError();
 }
