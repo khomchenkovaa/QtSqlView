@@ -20,7 +20,7 @@ public:
 private slots:
     void updatePasswordStatus();
     void testConnection();
-    void chooseSQLiteDbFile();
+    void chooseSqlDbFile();
 
 private:
     void setupConnections();

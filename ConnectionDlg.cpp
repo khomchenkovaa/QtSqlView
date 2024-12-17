@@ -81,11 +81,11 @@ void ConnectionDlg::testConnection()
 
 /******************************************************************/
 
-void ConnectionDlg::chooseSQLiteDbFile()
+void ConnectionDlg::chooseSqlDbFile()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Choose a SQLite database file",
+    QString filename = QFileDialog::getOpenFileName(this, "Choose a database file",
                                                     QString(),
-                                                    "SQLite databases (*.db);;All Files (*.*)");
+                                                    "SQLite databases (*.db);;MS Access databases (*.mdb);;All Files (*.*)");
     if (filename.isEmpty()) return;
     ui->editDatabase->setText(filename);
 }
@@ -107,7 +107,7 @@ void ConnectionDlg::setupConnections()
         updateFields(drv);
     });
     connect(ui->buttonSelectFile, &QAbstractButton::clicked,
-            this, &ConnectionDlg::chooseSQLiteDbFile);
+            this, &ConnectionDlg::chooseSqlDbFile);
 }
 
 /******************************************************************/
@@ -134,7 +134,7 @@ void ConnectionDlg::fetchDbParameter()
 
 void ConnectionDlg::updateFields(const QString &drv)
 {
-    if (drv == "QSQLITE" || drv == "QSQLITE2") {
+    if (drv == "QSQLITE" || drv == "QSQLITE2" || drv == "QMDBTOOLS" ) {
         ui->editHostname->setEnabled(false);
         ui->spinPort->setEnabled(false);
         ui->editUsername->setEnabled(false);
@@ -166,18 +166,19 @@ void ConnectionDlg::updateFields(const QString &drv)
 QString ConnectionDlg::getDriverDescription(const QString &drv)
 {
     if (0) return "";
-    else if (drv == "QDB2")		return "IBM DB2";
-    else if (drv == "QIBASE")	return "Borland InterBase";
-    else if (drv == "QOCI")		return "Oracle Call Interface";
-    else if (drv == "QODBC")	return "ODBC";
-    else if (drv == "QODBC3")	return "ODBC";
-    else if (drv == "QTDS")		return "Sybase Adaptive Server";
-    else if (drv == "QMYSQL")	return "MySQL 4.x";
-    else if (drv == "QMYSQL3")	return "MySQL 3.x";
-    else if (drv == "QPSQL")	return "PostgreSQL 8.x";
-    else if (drv == "QPSQL7")	return "PostgreSQL 7.x";
-    else if (drv == "QSQLITE")	return "SQLite 3.x";
-    else if (drv == "QSQLITE2")	return "SQLite 2.x";
+    else if (drv == "QDB2")		 return "IBM DB2";
+    else if (drv == "QIBASE")	 return "Borland InterBase";
+    else if (drv == "QOCI")		 return "Oracle Call Interface";
+    else if (drv == "QODBC")	 return "ODBC";
+    else if (drv == "QODBC3")	 return "ODBC";
+    else if (drv == "QTDS")		 return "Sybase Adaptive Server";
+    else if (drv == "QMYSQL")	 return "MySQL 4.x";
+    else if (drv == "QMYSQL3")	 return "MySQL 3.x";
+    else if (drv == "QPSQL")	 return "PostgreSQL 8.x";
+    else if (drv == "QPSQL7")	 return "PostgreSQL 7.x";
+    else if (drv == "QSQLITE")	 return "SQLite 3.x";
+    else if (drv == "QSQLITE2")	 return "SQLite 2.x";
+    else if (drv == "QMDBTOOLS") return "Mdb Tools";
     else return QString();
 }
 
