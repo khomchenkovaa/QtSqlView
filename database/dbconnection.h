@@ -160,22 +160,6 @@ public:
     void disconnect(DbListModel *dblist);
 
     QStringList tables(QSql::TableType type = QSql::Tables) const {
-        // MS Access stub
-        // Driver=libmdbodbc.so;DSN=SpectraDB;
-//        if (dbparam.database.contains("libmdbodbc")) {
-//            QStringList result;
-//            const QString sql ="SELECT Name FROM MSysObjects WHERE Type=1 AND Flags=0";
-//            QSqlQuery query(db);
-//            query.setForwardOnly(true);
-//            if (query.exec(sql)) {
-//                while (query.next()) {
-//                    result << query.value(0).toString();
-//                }
-//            } else {
-//                qDebug() << query.lastError().text();
-//            }
-//            return result;
-//        }
         return db.tables(type);
     }
 
