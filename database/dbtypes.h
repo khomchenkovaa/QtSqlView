@@ -29,6 +29,36 @@ class DbTypes
         PG_OID         = 2278
     };
 
+    enum { // ODBC types
+        SQL_UNKNOWN_TYPE   = 0,
+        SQL_CHAR           = 1,
+        SQL_NUMERIC        = 2,
+        SQL_DECIMAL        = 3,
+        SQL_INTEGER        = 4,
+        SQL_SMALLINT       = 5,
+        SQL_FLOAT          = 6,
+        SQL_REAL           = 7,
+        SQL_DOUBLE         = 8,
+        SQL_DATETIME       = 9,
+        SQL_TIME           = 10,
+        SQL_TIMESTAMP      = 11,
+        SQL_VARCHAR        = 12,
+        SQL_TYPE_DATE      = 91,
+        SQL_TYPE_TIME      = 92,
+        SQL_TYPE_TIMESTAMP = 93,
+        SQL_LONGVARCHAR    = -1,
+        SQL_BINARY         = -2,
+        SQL_VARBINARY      = -3,
+        SQL_LONGVARBINARY  = -4,
+        SQL_BIGINT         = -5,
+        SQL_TINYINT        = -6,
+        SQL_BIT            = -7,
+        SQL_WCHAR		   = -8,
+        SQL_WVARCHAR	   = -9,
+        SQL_WLONGVARCHAR   = -10,
+        SQL_GUID		   = -11
+    };
+
     enum { // QMDBTOOLS types
         MDB_BOOL     = 0x01,
         MDB_BYTE     = 0x02,
@@ -61,6 +91,9 @@ public:
         if (driver  == "QOCI" || driver == "QOCI8") {
             return getNameOracle(t);
         }       
+        if (driver  == "QODBC" || driver == "QODBC3") {
+            return getNameOdbc(t);
+        }
         if (driver  == "QMDBTOOLS") {
             return getNameMdbTools(t);
         }
@@ -296,6 +329,38 @@ protected:
         case 252: return "BOL"; // pl/sql 'boolean'
         }
         return QString("ociType %1").arg(ociType);
+    }
+
+    static inline QString getNameOdbc(int sqlType) {
+        switch (sqlType) {
+        case SQL_CHAR:           return QLatin1String("char");
+        case SQL_NUMERIC:        return QLatin1String("numeric");
+        case SQL_DECIMAL:        return QLatin1String("decimal");
+        case SQL_INTEGER:        return QLatin1String("int");
+        case SQL_SMALLINT:       return QLatin1String("smallint");
+        case SQL_FLOAT:          return QLatin1String("float");
+        case SQL_REAL:           return QLatin1String("real");
+        case SQL_DOUBLE:         return QLatin1String("double");
+        case SQL_DATETIME:       return QLatin1String("datetime");
+        case SQL_TIME:           return QLatin1String("time");
+        case SQL_TIMESTAMP:      return QLatin1String("timestamp");
+        case SQL_VARCHAR:        return QLatin1String("varchar");
+        case SQL_TYPE_DATE:      return QLatin1String("date_t");
+        case SQL_TYPE_TIME:      return QLatin1String("time_t");
+        case SQL_TYPE_TIMESTAMP: return QLatin1String("timestamp_t");
+        case SQL_LONGVARCHAR:    return QLatin1String("longvarchar");
+        case SQL_BINARY:         return QLatin1String("binary");
+        case SQL_VARBINARY:      return QLatin1String("varbinary");
+        case SQL_LONGVARBINARY:  return QLatin1String("longvarbinary");
+        case SQL_BIGINT:         return QLatin1String("bigint");
+        case SQL_TINYINT:        return QLatin1String("tinyint");
+        case SQL_BIT:            return QLatin1String("bit");
+        case SQL_WCHAR:          return QLatin1String("wchar");
+        case SQL_WVARCHAR:       return QLatin1String("wvarchar");
+        case SQL_WLONGVARCHAR:   return QLatin1String("wlongvarchar");
+        case SQL_GUID:           return QLatin1String("guid");
+        }
+        return QString("sqlType %1").arg(sqlType);
     }
 
     static inline QString getNameMdbTools(int mdbType) {
