@@ -1,8 +1,6 @@
 #ifndef DBCONNECTION_H
 #define DBCONNECTION_H
 
-#include "dbtypes.h"
-
 #include <QSettings>
 
 #include <QSqlDatabase>

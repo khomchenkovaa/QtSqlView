@@ -1,5 +1,6 @@
 #include "dbschemamodel.h"
 
+#include "dbtypes.h"
 #include "dbconnection.h"
 
 #include <QSqlField>
@@ -103,7 +104,7 @@ QVariant DbSchemaModel::dataValue(int idx, int column) const
     case NameColumn:
         return field.name();
     case TypeColumn:
-        return DbTypes::getName(d.driver, field.typeID());
+        return Db::typeNameById(d.driver, field.typeID());
     case LengthColumn: {
         int length = field.length();
         int precision = field.precision();
