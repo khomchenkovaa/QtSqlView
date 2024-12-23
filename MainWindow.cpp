@@ -150,18 +150,17 @@ void MainWindow::changeCurrentTable(const QModelIndex &index)
     }
 
     d.datatablemodel = new QSqlTableModel(this, dbt->dbconn->db);
-    ui->dataTable->setModel(d.datatablemodel);
-
     d.datatablemodel->setTable(dbt->tablename);
-    d.datatablemodel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 
+    ui->dataTable->setModel(d.datatablemodel);
+    d.schemamodel.setRecord(dbt->dbconn->db.driverName(), d.datatablemodel->record(), d.datatablemodel->primaryKey());
+
+    d.datatablemodel->setEditStrategy(QSqlTableModel::OnManualSubmit);
     d.datatablemodel->select();
     d.datatablemodel_lastsort = -1;
 
     ui->dataTable->resizeColumnsToContents();
     ui->dataTable->resizeRowsToContents();
-
-    d.schemamodel.setRecord(dbt->dbconn->db.driverName(), d.datatablemodel->record(), d.datatablemodel->primaryKey());
 }
 
 /******************************************************************/
