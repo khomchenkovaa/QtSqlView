@@ -9,7 +9,7 @@
 
 /******************************************************************/
 
-ConnectionDlg::ConnectionDlg(QWidget *parent, const DbParameter &dbParameter)
+ConnectionDlg::ConnectionDlg(QWidget *parent, PDbParam dbParameter)
     : QDialog(parent)
     , dbp(dbParameter)
     , ui(new Ui::ConnectionDlg)
@@ -27,17 +27,17 @@ ConnectionDlg::ConnectionDlg(QWidget *parent, const DbParameter &dbParameter)
         }
     }
 
-    if (!dbp.label.isEmpty()) {
-        ui->editLabel->setText(dbp.label);
-        int drvTypeIdx = ui->comboType->findData(dbp.driver);
+    if (!dbp->connLabel.isEmpty()) {
+        ui->editLabel->setText(dbp->connLabel);
+        int drvTypeIdx = ui->comboType->findData(dbp->driver());
         ui->comboType->setCurrentIndex(drvTypeIdx);
-        ui->editHostname->setText(dbp.hostname);
-        ui->spinPort->setValue(dbp.port);
-        ui->editUsername->setText(dbp.username);
-        ui->editPassword->setText(dbp.password);
-        ui->checkAskPassword->setChecked(dbp.askpassword);
-        ui->editDatabase->setText(dbp.database);
-        ui->checkSysTables->setChecked(dbp.showsystables);
+        ui->editHostname->setText(dbp->hostname());
+        ui->spinPort->setValue(dbp->port());
+        ui->editUsername->setText(dbp->username());
+        ui->editPassword->setText(dbp->password());
+        ui->checkAskPassword->setChecked(dbp->connAskPassword);
+        ui->editDatabase->setText(dbp->database());
+        ui->checkSysTables->setChecked(dbp->connShowSystables);
     }
 
     updatePasswordStatus();
@@ -114,19 +114,19 @@ void ConnectionDlg::setupConnections()
 
 void ConnectionDlg::fetchDbParameter()
 {
-    dbp.label         = ui->editLabel->text();
+    dbp->connLabel         = ui->editLabel->text();
     int drvTypeIdx    = ui->comboType->currentIndex();
-    dbp.driver        = ui->comboType->itemData( drvTypeIdx ).toString();
-    dbp.hostname      = ui->editHostname->text();
-    dbp.port          = ui->spinPort->value();
-    dbp.username      = ui->editUsername->text();
-    dbp.password      = ui->editPassword->text();
-    dbp.askpassword   = ui->checkAskPassword->isChecked();
-    dbp.database      = ui->editDatabase->text();
-    dbp.showsystables = ui->checkSysTables->isChecked();
+    dbp->connDriver        = ui->comboType->itemData( drvTypeIdx ).toString();
+    dbp->connHostname      = ui->editHostname->text();
+    dbp->connPort          = ui->spinPort->value();
+    dbp->connUsername      = ui->editUsername->text();
+    dbp->connPassword      = ui->editPassword->text();
+    dbp->connAskPassword   = ui->checkAskPassword->isChecked();
+    dbp->connDatabase      = ui->editDatabase->text();
+    dbp->connShowSystables = ui->checkSysTables->isChecked();
 
-    if (dbp.askpassword) {
-        dbp.password.clear();
+    if (dbp->connAskPassword) {
+        dbp->connPassword.clear();
     }
 }
 

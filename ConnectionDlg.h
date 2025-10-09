@@ -14,7 +14,7 @@ class ConnectionDlg : public QDialog
     Q_OBJECT
 
 public:
-    explicit ConnectionDlg(QWidget *parent = nullptr, const DbParameter &dbParameter = DbParameter());
+    explicit ConnectionDlg(QWidget *parent = nullptr, PDbParam dbParameter = PDbParam::create());
     ~ConnectionDlg();
 
 private slots:
@@ -31,7 +31,7 @@ private:
     static QString getDriverDescription(const QString &drv);
 
 public:
-    DbParameter	dbp;
+    PDbParam dbp;
 
 private:
     Ui::ConnectionDlg *ui;

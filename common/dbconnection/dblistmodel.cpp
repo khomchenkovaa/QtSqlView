@@ -124,10 +124,10 @@ QVariant DbListModel::data(const QModelIndex &index, int role) const
 
     if (const DbConnection *dbc = qobject_cast<const DbConnection*>(obj)) {
         if (role == Qt::DisplayRole) {
-            if (dbc->dbparam.label.isEmpty()) {
+            if (dbc->dbparam->connLabel.isEmpty()) {
                 return "<no label>";
             }
-            return dbc->dbparam.label;
+            return dbc->dbparam->connLabel;
         } else if (role == Qt::DecorationRole) {
             static QIcon dbicon(":/img/database.png");
             return dbicon;
@@ -180,22 +180,40 @@ void DbListModel::clear()
 
 /******************************************************************/
 
-void DbListModel::addDbConnection(const DbParameter &dbp)
+void DbListModel::addDbConnection(PDbParam dbp)
 {
     beginInsertRows(QModelIndex(), d.list.size(), d.list.size());
-    d.list << new DbConnection(dbp);
+    auto connection = new DbConnection(dbp);
+    d.list << connection;
     endInsertRows();
+
+#ifdef USE_QUERY_DB
+    QString err;
+    connection->dbparam->saveToDb(&err);
+    if (!err.isEmpty()) {
+        qWarning() << err;
+    }
+#endif
 }
 
 /******************************************************************/
 
-void DbListModel::editDbConnection(int num, DbParameter &dbp)
+void DbListModel::editDbConnection(int num, PDbParam dbp)
 {
     if (0 > num || num >= d.list.size()) return;
 
+    auto connection = d.list.at(num);
     // close old connection and change parameters
-    d.list[num]->disconnect(this);
-    d.list[num]->dbparam = dbp;
+    connection->disconnect(this);
+    connection->dbparam = dbp;
+
+#ifdef USE_QUERY_DB
+    QString err;
+    connection->dbparam->saveToDb(&err);
+    if (!err.isEmpty()) {
+        qWarning() << err;
+    }
+#endif
 
     emit dataChanged(createIndex(num, 0, d.list[num]),
                      createIndex(num, 0, d.list[num]));
@@ -208,47 +226,57 @@ void DbListModel::delDbConnection(int num)
     if (0 > num || num >= d.list.size()) return;
 
     beginRemoveRows(QModelIndex(), num, num);
-
-    d.list[num]->disconnect(this);
-    delete d.list[num];
-
-    d.list.removeAt(num);
-
+    auto connection = d.list.takeAt(num);
+    connection->disconnect(this);
+#ifdef USE_QUERY_DB
+    QString err;
+    connection->dbparam->deleteFromDb(&err);
+    if (!err.isEmpty()) {
+        qDebug() << err;
+    }
+#endif
+    connection->deleteLater();
     endRemoveRows();
 }
 
 /******************************************************************/
 
-void DbListModel::saveToSettings()
+void DbListModel::saveAll()
 {
+#ifndef USE_QUERY_DB
     QSettings settings;
-
     settings.beginWriteArray("connections");
     int i = 0;
     for(auto dbc : qAsConst(d.list)) {
         settings.setArrayIndex(i++);
-        dbc->dbparam.saveToSettings(settings);
+        dbc->dbparam->saveToSettings(settings);
     }
     settings.endArray();
+#endif
 }
 
 /******************************************************************/
 
-void DbListModel::loadFromSettings()
+void DbListModel::loadAll()
 {
-    QSettings settings;
-
     clear();
-
+#ifdef USE_QUERY_DB
+    const auto connList = Db::DbView::findAll<Db::Query::TQueConnection>();
+    for (const auto &params : connList) {
+        addDbConnection(params);
+    }
+#else
+    QSettings settings;
     int connnum = settings.beginReadArray("connections");
     for (int i = 0; i < connnum; ++i) {
         settings.setArrayIndex(i);
 
-        DbParameter dbp;
-        dbp.loadFromSettings(settings);
+        auto dbp =  PDbParam::create();
+        dbp->loadFromSettings(settings);
         addDbConnection(dbp);
     }
     settings.endArray();
+#endif
 }
 
 /******************************************************************/
@@ -378,7 +406,7 @@ bool DbListModel::tablelist_load(DbConnection &dbc)
         newtablelist << new DbTable(&dbc, table, DbTable::View);
     }
 
-    if (dbc.dbparam.showsystables) {
+    if (dbc.dbparam->connShowSystables) {
         const auto sysTables = dbc.tables(QSql::SystemTables);
         for (const auto &table : sysTables) {
             newtablelist << new DbTable(&dbc, table, DbTable::SystemTable);

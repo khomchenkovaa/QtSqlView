@@ -57,7 +57,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *)
 {
-    d.dblist.saveToSettings();
+    d.dblist.saveAll();
 }
 
 /******************************************************************/
@@ -453,7 +453,7 @@ void MainWindow::setupUI()
 {
     statusBar()->hide();
 
-    d.dblist.loadFromSettings();
+    d.dblist.loadAll();
 
     ui->treeDbList->setModel(&d.dblist);
 

@@ -38,19 +38,19 @@ public:
     void clear();
 
     /// add a new dbconnection
-    void addDbConnection(const DbParameter &dbp);
+    void addDbConnection(PDbParam dbp);
 
     /// change a dbconnection
-    void editDbConnection(int num, DbParameter &dbp);
+    void editDbConnection(int num, PDbParam dbp);
 
     /// remove a dbconnection
     void delDbConnection(int num);
 
-    /// save all database parameters to settings
-    void saveToSettings();
+    /// save all database parameters
+    void saveAll();
 
-    /// load all database parameters from settings
-    void loadFromSettings();
+    /// load all database parameters
+    void loadAll();
 
     int getDbConnectionNum(const QModelIndex &index) const;
 

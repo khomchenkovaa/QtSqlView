@@ -10,25 +10,25 @@ QSqlError DbConnection::connect(DbListModel *dblist)
 {
     assert(!dbuuid.isNull());
 
-    if (!QSqlDatabase::isDriverAvailable(dbparam.driver)) {
+    if (!QSqlDatabase::isDriverAvailable(dbparam->driver())) {
         QSqlError e = QSqlError("Could not connect to database",
-                    QString("Database driver %1 is not available.").arg(dbparam.driver),
+                    QString("Database driver %1 is not available.").arg(dbparam->driver()),
                     QSqlError::ConnectionError);
         dblist->tablelist_seterror(*this, e);
         return e;
     }
 
-    db = QSqlDatabase::addDatabase(dbparam.driver, dbuuid.toString());
+    db = QSqlDatabase::addDatabase(dbparam->driver(), dbuuid.toString());
 
-    if (!dbparam.hostname.isEmpty()) db.setHostName(dbparam.hostname);
-    if (dbparam.port > 0) db.setPort(dbparam.port);
-    db.setDatabaseName(dbparam.database);
-    if (!dbparam.username.isEmpty()) db.setUserName(dbparam.username);
+    if (!dbparam->hostname().isEmpty()) db.setHostName(dbparam->hostname());
+    if (dbparam->port() > 0) db.setPort(dbparam->port());
+    db.setDatabaseName(dbparam->database());
+    if (!dbparam->username().isEmpty()) db.setUserName(dbparam->username());
 
-    if (dbparam.askpassword) {
+    if (dbparam->connAskPassword) {
         bool ok;
         QString passwd = QInputDialog::getText(NULL, "QtSqlView Password Prompt",
-                               QString("Enter password for '%1':").arg(dbparam.label),
+                               QString("Enter password for '%1':").arg(dbparam->connLabel),
                                QLineEdit::Password, QString(), &ok);
 
         if (!ok) {
@@ -40,7 +40,7 @@ QSqlError DbConnection::connect(DbListModel *dblist)
         }
         db.setPassword(passwd);
     } else {
-        if (!dbparam.password.isEmpty()) db.setPassword(dbparam.password);
+        if (!dbparam->password().isEmpty()) db.setPassword(dbparam->password());
     }
 
     if (!db.open()) {

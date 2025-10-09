@@ -3,21 +3,12 @@
 
 #include <QSettings>
 
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QSqlError>
+#ifdef USE_QUERY_DB
 
-#include <QUuid>
+#include "t_rep_connection.h"
+typedef Db::Query::PQueConnection PDbParam;
 
-#include <QDebug>
-
-class DbTable;
-class DbConnection;
-class DbListModel;
-
-typedef QList<DbTable*> tablelist_t;
-
-/******************************************************************/
+#else
 
 struct DbParameterSettings {
     const QString LABEL         = "label";
@@ -31,46 +22,86 @@ struct DbParameterSettings {
     const QString SHOWSYSTABLES = "showsystables";
 };
 
-/******************************************************************/
-
 struct DbParameter
 {
-    QString	label;
-    QString	hostname;
-    int		port;
-    QString	driver;
-    QString	username;
-    QString	password;
-    int		askpassword;
-    QString	database;
-    int		showsystables;
+    QString	connLabel;         ///< Connection's name
+    QString	connHostname;      ///< Hostname
+    int		connPort;          ///< Port
+    QString	connDriver;        ///< Driver name
+    QString	connUsername;      ///< User name
+    QString	connPassword;      ///< Password
+    int		connAskPassword;   ///< Ask password on connect
+    QString	connDatabase;      ///< Database
+    int		connShowSystables; ///< Show system tables flag
 
     void saveToSettings(QSettings &settings) const {
         const DbParameterSettings S;
-        settings.setValue(S.LABEL, label);
-        settings.setValue(S.HOSTNAME, hostname);
-        settings.setValue(S.PORT, port);
-        settings.setValue(S.DRIVER, driver);
-        settings.setValue(S.USERNAME, username);
-        settings.setValue(S.PASSWORD, password);
-        settings.setValue(S.ASKPASSWORD, askpassword);
-        settings.setValue(S.DATABASE, database);
-        settings.setValue(S.SHOWSYSTABLES, showsystables);
+        settings.setValue(S.LABEL, connLabel);
+        settings.setValue(S.HOSTNAME, connHostname);
+        settings.setValue(S.PORT, connPort);
+        settings.setValue(S.DRIVER, connDriver);
+        settings.setValue(S.USERNAME, connUsername);
+        settings.setValue(S.PASSWORD, connPassword);
+        settings.setValue(S.ASKPASSWORD, connAskPassword);
+        settings.setValue(S.DATABASE, connDatabase);
+        settings.setValue(S.SHOWSYSTABLES, connShowSystables);
     }
 
     void loadFromSettings(QSettings &settings) {
         const DbParameterSettings S;
-        label         = settings.value(S.LABEL).toString();
-        hostname      = settings.value(S.HOSTNAME).toString();
-        port          = settings.value(S.PORT, 0).toUInt();
-        driver        = settings.value(S.DRIVER).toString();
-        username      = settings.value(S.USERNAME).toString();
-        password      = settings.value(S.PASSWORD).toString();
-        askpassword   = settings.value(S.ASKPASSWORD, 0).toUInt();
-        database      = settings.value(S.DATABASE).toString();
-        showsystables = settings.value(S.SHOWSYSTABLES, 0).toUInt();
+        connLabel         = settings.value(S.LABEL).toString();
+        connHostname      = settings.value(S.HOSTNAME).toString();
+        connPort          = settings.value(S.PORT, 0).toUInt();
+        connDriver        = settings.value(S.DRIVER).toString();
+        connUsername      = settings.value(S.USERNAME).toString();
+        connPassword      = settings.value(S.PASSWORD).toString();
+        connAskPassword   = settings.value(S.ASKPASSWORD, 0).toUInt();
+        connDatabase      = settings.value(S.DATABASE).toString();
+        connShowSystables = settings.value(S.SHOWSYSTABLES, 0).toUInt();
+    }
+
+    QString driver() const {
+        return connDriver;
+    }
+
+    QString hostname() const {
+        return connHostname;
+    }
+
+    int port() const {
+        return connPort;
+    }
+
+    QString username() const {
+        return connUsername;
+    }
+
+    QString password() const {
+        return connPassword;
+    }
+
+    QString database() const {
+        return connDatabase;
     }
 };
+
+typedef QSharedPointer<DbParameter> PDbParam;
+
+#endif
+
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+
+#include <QUuid>
+
+#include <QDebug>
+
+class DbTable;
+class DbConnection;
+class DbListModel;
+
+typedef QList<DbTable*> tablelist_t;
 
 /******************************************************************/
 
@@ -134,7 +165,7 @@ class DbConnection : public QObject
 
 public:
     /// parameters of the connection
-    DbParameter	dbparam;
+    PDbParam dbparam;
 
     /// because qt requires us to use addDatabase with a unique id, we use the
     /// only random function aviablable in qt itself here.
@@ -146,10 +177,17 @@ public:
 
     tablelist_t tablelist;
 
-    DbConnection(const DbParameter &params)
+    DbConnection(PDbParam params)
 	: QObject(), dbparam(params),
 	  dbuuid( QUuid::createUuid() ),
 	  connecterror(this)
+    {
+    }
+
+    DbConnection(PDbParam params, QUuid uuid)
+    : QObject(), dbparam(params),
+      dbuuid(uuid),
+      connecterror(this)
     {
     }
 
