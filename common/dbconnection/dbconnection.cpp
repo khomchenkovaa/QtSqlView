@@ -18,7 +18,11 @@ QSqlError DbConnection::connect(DbListModel *dblist)
         return e;
     }
 
-    db = QSqlDatabase::addDatabase(dbparam->driver(), dbuuid.toString());
+    if (QSqlDatabase::contains(dbuuid.toString())) {
+        db = QSqlDatabase::database(dbuuid.toString());
+    } else {
+        db = QSqlDatabase::addDatabase(dbparam->driver(), dbuuid.toString());
+    }
 
     if (!dbparam->hostname().isEmpty()) db.setHostName(dbparam->hostname());
     if (dbparam->port() > 0) db.setPort(dbparam->port());
