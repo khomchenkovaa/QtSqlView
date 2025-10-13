@@ -260,23 +260,26 @@ void DbListModel::saveAll()
 void DbListModel::loadAll()
 {
     clear();
+    beginResetModel();
 #ifdef USE_QUERY_DB
     const auto connList = Db::DbView::findAll<Db::Query::TQueConnection>();
-    for (const auto &params : connList) {
-        addDbConnection(params);
+    for (const auto &dbp : connList) {
+        auto connection = new DbConnection(dbp);
+        d.list << connection;
     }
 #else
     QSettings settings;
-    int connnum = settings.beginReadArray("connections");
-    for (int i = 0; i < connnum; ++i) {
+    int connNum = settings.beginReadArray("connections");
+    for (int i = 0; i < connNum; ++i) {
         settings.setArrayIndex(i);
-
         auto dbp =  PDbParam::create();
         dbp->loadFromSettings(settings);
-        addDbConnection(dbp);
+        auto connection = new DbConnection(dbp);
+        d.list << connection;
     }
     settings.endArray();
 #endif
+    endResetModel();
 }
 
 /******************************************************************/
