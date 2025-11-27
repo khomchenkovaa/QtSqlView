@@ -48,3 +48,6 @@ RESOURCES += \
     QtSqlView.qrc
 
 RC_FILE = resources.rc
+
+OTHER_FILES += \
+    README.md

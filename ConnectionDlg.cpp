@@ -38,6 +38,7 @@ ConnectionDlg::ConnectionDlg(QWidget *parent, PDbParam dbParameter)
         ui->checkAskPassword->setChecked(dbp->connAskPassword);
         ui->editDatabase->setText(dbp->database());
         ui->checkSysTables->setChecked(dbp->connShowSystables);
+        ui->editOptions->setText(dbp->options());
     }
 
     updatePasswordStatus();
@@ -115,7 +116,7 @@ void ConnectionDlg::setupConnections()
 void ConnectionDlg::fetchDbParameter()
 {
     dbp->connLabel         = ui->editLabel->text();
-    int drvTypeIdx    = ui->comboType->currentIndex();
+    int drvTypeIdx         = ui->comboType->currentIndex();
     dbp->connDriver        = ui->comboType->itemData( drvTypeIdx ).toString();
     dbp->connHostname      = ui->editHostname->text();
     dbp->connPort          = ui->spinPort->value();
@@ -124,6 +125,7 @@ void ConnectionDlg::fetchDbParameter()
     dbp->connAskPassword   = ui->checkAskPassword->isChecked();
     dbp->connDatabase      = ui->editDatabase->text();
     dbp->connShowSystables = ui->checkSysTables->isChecked();
+    dbp->connOptions       = ui->editOptions->text();
 
     if (dbp->connAskPassword) {
         dbp->connPassword.clear();
@@ -140,7 +142,7 @@ void ConnectionDlg::updateFields(const QString &drv)
         ui->editUsername->setEnabled(false);
         ui->editPassword->setEnabled(false);
         ui->checkAskPassword->setEnabled(false);
-        ui->labelDatabase->setText("Filename");
+        ui->lblDatabase->setText("Filename");
         ui->buttonSelectFile->setEnabled(true);
     } else if (drv == "QODBC" || drv == "QODBC3") {
         ui->editHostname->setEnabled(false);
@@ -148,14 +150,14 @@ void ConnectionDlg::updateFields(const QString &drv)
         ui->editUsername->setEnabled(false);
         ui->editPassword->setEnabled(false);
         ui->checkAskPassword->setEnabled(false);
-        ui->labelDatabase->setText("Connect");
+        ui->lblDatabase->setText("Connect");
         ui->buttonSelectFile->setEnabled(false);
     } else {
         ui->editHostname->setEnabled(true);
         ui->spinPort->setEnabled(true);
         ui->editUsername->setEnabled(true);
         ui->checkAskPassword->setEnabled(true);
-        ui->labelDatabase->setText("Database");
+        ui->lblDatabase->setText("Database");
         ui->buttonSelectFile->setEnabled(false);
         updatePasswordStatus();
     }

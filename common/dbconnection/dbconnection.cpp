@@ -28,6 +28,7 @@ QSqlError DbConnection::connect(DbListModel *dblist)
     if (dbparam->port() > 0) db.setPort(dbparam->port());
     db.setDatabaseName(dbparam->database());
     if (!dbparam->username().isEmpty()) db.setUserName(dbparam->username());
+    if (!dbparam->options().isEmpty()) db.setConnectOptions(dbparam->options());
 
     if (dbparam->connAskPassword) {
         bool ok;

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>409</width>
-    <height>411</height>
+    <height>448</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,7 +40,7 @@
      </property>
      <layout class="QFormLayout" name="formLayout">
       <item row="0" column="0">
-       <widget class="QLabel" name="label1">
+       <widget class="QLabel" name="lblLabel">
         <property name="text">
          <string>Label</string>
         </property>
@@ -53,7 +53,7 @@
        <widget class="QLineEdit" name="editLabel"/>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label4">
+       <widget class="QLabel" name="lblServerType">
         <property name="text">
          <string>Server Type</string>
         </property>
@@ -66,7 +66,7 @@
        <widget class="QComboBox" name="comboType"/>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="labelHostname">
+       <widget class="QLabel" name="lblHostname">
         <property name="text">
          <string>Hostname</string>
         </property>
@@ -79,7 +79,7 @@
        <widget class="QLineEdit" name="editHostname"/>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label3">
+       <widget class="QLabel" name="lblPort">
         <property name="text">
          <string>Port</string>
         </property>
@@ -108,7 +108,7 @@
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="label5">
+       <widget class="QLabel" name="lblUsername">
         <property name="text">
          <string>Username</string>
         </property>
@@ -121,7 +121,7 @@
        <widget class="QLineEdit" name="editUsername"/>
       </item>
       <item row="5" column="0">
-       <widget class="QLabel" name="label6">
+       <widget class="QLabel" name="lblPassword">
         <property name="text">
          <string>Password</string>
         </property>
@@ -145,7 +145,7 @@
        </widget>
       </item>
       <item row="7" column="0">
-       <widget class="QLabel" name="labelDatabase">
+       <widget class="QLabel" name="lblDatabase">
         <property name="text">
          <string>Database</string>
         </property>
@@ -179,6 +179,16 @@
        <widget class="QCheckBox" name="checkSysTables">
         <property name="text">
          <string>Show System Tables</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QLineEdit" name="editOptions"/>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="lblOptions">
+        <property name="text">
+         <string>Options</string>
         </property>
        </widget>
       </item>

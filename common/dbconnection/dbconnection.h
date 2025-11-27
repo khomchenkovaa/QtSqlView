@@ -20,6 +20,7 @@ struct DbParameterSettings {
     const QString ASKPASSWORD   = "askpassword";
     const QString DATABASE      = "database";
     const QString SHOWSYSTABLES = "showsystables";
+    const QString CONNOPTIONS   = "connoptions";
 };
 
 struct DbParameter
@@ -33,6 +34,7 @@ struct DbParameter
     int		connAskPassword;   ///< Ask password on connect
     QString	connDatabase;      ///< Database
     int		connShowSystables; ///< Show system tables flag
+    QString connOptions;       ///< Connection options (OPT1=value1;OPT2=value2)
 
     void saveToSettings(QSettings &settings) const {
         const DbParameterSettings S;
@@ -45,6 +47,7 @@ struct DbParameter
         settings.setValue(S.ASKPASSWORD, connAskPassword);
         settings.setValue(S.DATABASE, connDatabase);
         settings.setValue(S.SHOWSYSTABLES, connShowSystables);
+        settings.setValue(S.CONNOPTIONS, connOptions);
     }
 
     void loadFromSettings(QSettings &settings) {
@@ -58,6 +61,7 @@ struct DbParameter
         connAskPassword   = settings.value(S.ASKPASSWORD, 0).toUInt();
         connDatabase      = settings.value(S.DATABASE).toString();
         connShowSystables = settings.value(S.SHOWSYSTABLES, 0).toUInt();
+        connOptions       = settings.value(S.CONNOPTIONS).toString();
     }
 
     QString driver() const {
@@ -82,6 +86,10 @@ struct DbParameter
 
     QString database() const {
         return connDatabase;
+    }
+
+    QString options() const {
+        return connOptions;
     }
 };
 
