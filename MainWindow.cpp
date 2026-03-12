@@ -290,8 +290,7 @@ void MainWindow::sortDataTable(int logicalIndex)
 
 void MainWindow::runQuery()
 {
-    // clear all
-    d.userquerymodel.clear();
+    // clear result
     ui->queryResultText->clear();
 
     // check connections
@@ -313,6 +312,9 @@ void MainWindow::runQuery()
                                           .arg(ce.driverText(), ce.databaseText()));
             return;
         }
+    } else {
+        QSqlQuery query(dbc->db);
+        d.userquerymodel.setQuery(query);
     }
 
     // prepare for bindings

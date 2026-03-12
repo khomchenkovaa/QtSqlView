@@ -204,7 +204,8 @@ public:
     void disconnect(DbListModel *dblist);
 
     QStringList tables(QSql::TableType type = QSql::Tables) const {
-        return db.tables(type);
+        if (db.isOpen()) return db.tables(type);
+        return QStringList();
     }
 
     inline int numChildren() const {
